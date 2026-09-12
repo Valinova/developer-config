@@ -137,7 +137,7 @@ write_post_run_summary() {
     echo "- log: $LOG_PATH"
     echo "- session_id: $SESSION_ID"
     echo ""
-    echo "## Staged (\`git diff --cached --stat\`) — should be EMPTY (pi must not stage)"
+    echo "## Staged (\`git diff --cached --stat\`)"
     echo '```'
     ( cd "$repo_root" && git diff --cached --stat 2>/dev/null ) || echo "(no repo / git unavailable)"
     echo '```'

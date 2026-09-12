@@ -12,7 +12,7 @@
 # Verdicts (first line of output) and exit codes:
 #   0  CLOSED    — current run reached "status":"closed"; post-run summary ready.
 #   3  RUNNING   — no terminal event and the log is actively being written.
-#   4  FAILED    — current run reached "status":"error" or "stalled".
+#   4  FAILED    — current run reached "status":"error", "stalled", or "failed".
 #   5  STALE     — no terminal event and the log has been quiet past the
 #                  threshold. Either a slow reasoning stretch or an orphaned
 #                  run — inspect the log tail before assuming either.
@@ -94,8 +94,8 @@ if printf '%s\n' "$RUN" | grep -E '"status":"closed"' >/dev/null 2>&1; then
   exit 0
 fi
 
-if printf '%s\n' "$RUN" | grep -E '"status":"(error|stalled)"' >/dev/null 2>&1; then
-  echo "FAILED — task '$TASK' hit a failure terminal (error/stalled) at $(last_ts)"
+if printf '%s\n' "$RUN" | grep -E '"status":"(error|stalled|failed)"' >/dev/null 2>&1; then
+  echo "FAILED — task '$TASK' hit a failure terminal (error/stalled/failed) at $(last_ts)"
   echo "log: $LOG_PATH"
   exit 4
 fi

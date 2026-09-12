@@ -151,9 +151,7 @@ register_close() {
 }
 
 # Post-run diff summary — staged vs. unstaged kept separate, mirroring
-# codex-exec.sh. With the no-git-writes brief policy the staged section
-# should read empty after a compliant run; anything there is a policy
-# violation worth flagging.
+# codex-exec.sh. Compare staged state with the pre-dispatch snapshot.
 write_post_run_summary() {
   local status="$1"
   local post_run_path="/tmp/pi-${TASK}.post-run.md"
@@ -167,7 +165,7 @@ write_post_run_summary() {
     echo "- log: $LOG_PATH"
     echo "- session_id: $(extract_session_id)"
     echo ""
-    echo "## Staged (\`git diff --cached --stat\`) — should be EMPTY (pi must not stage)"
+    echo "## Staged (\`git diff --cached --stat\`)"
     echo '```'
     ( cd "$repo_root" && git diff --cached --stat 2>/dev/null ) || echo "(no repo / git unavailable)"
     echo '```'

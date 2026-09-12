@@ -169,5 +169,21 @@ grep -q '(none)' "$SUMMARY.clean" || fail "clean repo should report (none), not 
 if grep -q '(no repo / git unavailable)' "$SUMMARY.clean"; then fail "clean repo misreported as git failure"; fi
 pass "summary carries all four sections, title, optional note, and honest empties"
 
+# ─── 7: a failed fresh run is terminal for both shell consumers ───
+echo "test: failed fresh-run consumers"
+python3 "$PY_LIB" append --source claude-code task failed-fresh event start status running
+python3 "$PY_LIB" append --source claude-code task failed-fresh event close status failed exit_code 1
+for consumer in codex-wait.sh codex-status.sh; do
+  status=0
+  if [[ "$consumer" == codex-wait.sh ]]; then
+    bash "$LIB_DIR/../$consumer" failed-fresh 1 > "$TMP_ROOT/$consumer.out" 2>&1 || status=$?
+  else
+    bash "$LIB_DIR/../$consumer" failed-fresh > "$TMP_ROOT/$consumer.out" 2>&1 || status=$?
+    grep -q '^FAILED' "$TMP_ROOT/$consumer.out" || fail "status did not report FAILED"
+  fi
+  assert_eq "$status" "4" "$consumer must recognize a failed fresh run"
+done
+pass "wait exits on failure and status reports FAILED"
+
 echo ""
 echo "All codex_registry tests passed."

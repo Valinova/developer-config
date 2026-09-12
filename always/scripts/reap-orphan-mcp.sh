@@ -1,7 +1,7 @@
 #!/bin/bash
-# Kill orphaned MCP/codex processes (PPID=1) older than 2h.
-# PPID=1 means the parent Claude session died — stdio pipes are dead, so
-# the process can no longer communicate with anyone. Safe to reap.
+# Reap orphaned Playwright MCP servers (PPID=1) older than 2h.
+# Codex workers detach via setsid, so PPID=1 is normal for live Codex runs;
+# their lifecycle is outside this MCP reaper.
 #
 # macOS-portable: BSD `ps` exposes `etime` ([[DD-]hh:]mm:ss) not the GNU
 # `etimes` (seconds). We parse etime in awk. BSD `ps` has no --no-headers
@@ -23,7 +23,7 @@ PIDS="$(ps -eo pid,ppid,etime,command | awk '
   NR == 1 { next }   # skip BSD ps header
   $2 == 1 {
     if (etime_to_seconds($3) > 7200 &&
-        ($0 ~ /playwright-mcp/ || $0 ~ /@openai\/codex/ || $0 ~ /codex exec/)) {
+        $0 ~ /playwright-mcp/) {
       print $1
     }
   }

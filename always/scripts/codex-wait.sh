@@ -21,6 +21,7 @@
 #   - Exit 1: usage error.
 #   - Exit 2: registry file missing.
 #   - Exit 3: timeout reached without a close event.
+#   - Exit 4: failure terminal observed.
 #
 # The exit code is the entire signal — no stdout. Read the post-run summary
 # at /tmp/codex-<task>.post-run.md separately when this returns 0.
@@ -51,14 +52,14 @@ fi
 
 # Both wrappers write a normalized "status" on every line: codex-exec.sh and
 # (since the resume status-field fix) codex-resume.sh emit "status":"closed" on
-# success and "status":"error" on failure.
+# success and "status":"failed" (exec) or "status":"error" (resume) on failure.
 #
 # The registry is append-only and DURABLE ACROSS SESSIONS, so a task name reused
 # in a later session still has the *previous* run's terminal line on disk. Matching
 # the whole file would return on that stale close (false positive). `current_run_lines`
 # (shared lib) emits only the lines after this task's most recent start event.
 CLOSED_STATUS="\"status\":\"closed\""
-FAILED_STATUS="\"status\":\"(error|stalled)\""
+FAILED_STATUS="\"status\":\"(error|stalled|failed)\""
 
 start=$(date +%s)
 while true; do
@@ -69,7 +70,7 @@ while true; do
   # Don't sit through the full timeout on a failed/stalled run or resume — break
   # immediately with a distinct exit code so the caller can inspect the log.
   if printf '%s\n' "$run" | grep -E "$FAILED_STATUS" >/dev/null 2>&1; then
-    echo "codex-wait.sh: task '$TASK' reached a failure terminal (error/stalled). See /tmp/codex-${TASK}.log" >&2
+    echo "codex-wait.sh: task '$TASK' reached a failure terminal (error/stalled/failed). See /tmp/codex-${TASK}.log" >&2
     exit 4
   fi
   if [[ "$TIMEOUT" -gt 0 ]]; then
