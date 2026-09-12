@@ -82,7 +82,7 @@ When the user is in an interactive Claude Code session (terminal or IDE), Claude
 **How it works:**
 1. The user asks Claude Code to do something
 2. Claude Code plans the approach
-3. Claude Code calls `~/.claude/scripts/codex-exec.sh` — a standalone shell wrapper that invokes `codex exec --full-auto --json` directly (it does NOT call `codex_delegate.py`; it shares the registry library, `always/scripts/lib/codex_registry.py`, with the Hermes helpers — see `codex-delegation.md`)
+3. Claude Code calls `~/.claude/scripts/codex-exec.sh` — a standalone shell wrapper that invokes `codex exec --sandbox workspace-write --json` directly (it does NOT call `codex_delegate.py`; it shares the registry library, `always/scripts/lib/codex_registry.py`, with the Hermes helpers — see `codex-delegation.md`)
 4. Codex CLI executes the task, returns result to Claude Code
 5. Claude Code continues the session
 

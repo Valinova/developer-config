@@ -239,7 +239,7 @@ workflow was invoked (why: rationale.md#pipeline-proportionality):
 
 | Change | Rev depth |
 |---|---|
-| Complex or cross-cutting | Full rev: code-simplifier, judgment lenses where they earn fan-out, other-family validation per "Cross-family adversarial check" |
+| Complex or cross-cutting | Full rev: code-simplifier, judgment lenses where they earn fan-out, other-family validation per "External calls" |
 | Contained, well-specified | One cross-family pass at the implementer's rung; no lens fan-out |
 | Mini PR, or a fix-verify iteration loop | A light cross-family validation of the fix and its test; no simplifier or lenses |
 

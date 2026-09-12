@@ -71,7 +71,7 @@ every remaining turn:
 Fable (metered) earns the seat only for judgment-dense complex plans. If per-run cost
 still hurts after levers 1-5, demote run orchestration to `claude -p` Fable — one-line
 job-config change; runbooks are orchestrator-agnostic (also stated in
-repo-review-pipeline skill).
+[Hermes longrun skill](../hermes/skills/longrun/SKILL.md)).
 
 ## Config/source anchors (verified 2026-07-17)
 

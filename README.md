@@ -41,7 +41,7 @@ instructions/               The doctrine. One owner per fact.
   worktrees.md              Durable worktree layout, naming, reuse. Reference, not auto-loaded.
   agent-guidance.md         How to optimize AGENTS.md/CLAUDE.md and routed guidance.
                             Reference, not auto-loaded.
-  opus5-quirks.md           Legacy Opus 5 reference, not auto-loaded.
+  opus5-quirks.md           Opus 5 prompting reference, not auto-loaded.
   rationale.md              Incident and reasoning archive, not auto-loaded.
   token-efficiency.md       Metered-orchestrator context discipline. Reference, not auto-loaded.
 claude-root.md              Becomes ~/.claude/CLAUDE.md via symlink. Pure @imports —
@@ -284,7 +284,7 @@ The life of an edit (e.g. tweak a codex wrapper):
 ## New machine
 
 ```bash
-git clone git@github.com:Valinova/developer-config.git ~/Development/developer-config
+git clone https://github.com/Valinova/developer-config.git ~/Development/developer-config
 ```
 
 Then open Claude Code and ask it to apply `SETUP.md`. It wires the symlinks,
@@ -314,3 +314,5 @@ This is the user-global `~/.claude/settings.json` — Bash allow/deny lists,
 plugin toggles, behavior flags. Because it's a symlink, edits made via
 `/config` or by Claude Code itself flow back to git. Volatile keys may show up
 as occasional diffs; commit or `git restore` them.
+
+License: [MIT](LICENSE).

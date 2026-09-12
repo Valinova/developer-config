@@ -281,11 +281,11 @@ stopped kills its process group too — if the dispatching shell is still
 alive because a wait is chained after the dispatch, the detached worker dies
 as that group's descendant (2026-07-27: a stopped
 `codex-exec.sh && codex-wait.sh` background task killed a Pass-mid run ~18min
-in). There is deliberately NO wrapper-side backstop: a `set -m`
+in). Codex workers now detach via `setsid`. The earlier `set -m`
 own-process-group attempt killed the job and hung the wrapper on first field
 use (2026-07-16) and was reverted. The PreToolUse hook
 `always/scripts/foreground-dispatch-guard.py` (added 2026-07-22, extended
-2026-07-27) enforces both rules deterministically in every permission mode
+2026-07-27) enforces dispatch shape deterministically in every permission mode
 including bypass.
 
 ### pattern-kill
