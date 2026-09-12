@@ -1,5 +1,5 @@
 name: browser-walker
-description: Subagent that walks a Playwright MCP browser session against localhost, keeping the heavy snapshot evidence out of the orchestrator's context.
+description: Opus exploration subagent that walks a caller-supplied dev URL and flow with minimal browser snapshots.
 source: internal (Valinova/developer-config)
 version: 2026-04-17
 agents:
