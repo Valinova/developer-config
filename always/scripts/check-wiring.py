@@ -58,6 +58,10 @@ LINKS = {
     },
 }
 
+# Repo-maintenance scripts run from the checkout (by hand or CI), never linked
+# into a harness.
+REPO_ONLY_SCRIPTS = {Path(__file__).name, "check-private-terms.sh"}
+
 DIRECTORIES = {
     "Claude": (
         ("skills", "always/skills"),
@@ -113,7 +117,7 @@ def expected_links(harness, root, repo, settings):
         excluded = hook_scripts(settings)
         for child in sorted((repo / "always/scripts").iterdir()):
             if (child.is_file() and not child.match("test_*.py")
-                    and child.name != Path(__file__).name
+                    and child.name not in REPO_ONLY_SCRIPTS
                     and child.name not in excluded):
                 expected[root / "scripts" / child.name] = child
     return expected, managed

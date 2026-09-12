@@ -15,10 +15,10 @@ assert.equal(
 assert.equal(analyze(`rm -rf ${tmpdir()}`).length, 1, "temp root itself must stay guarded");
 assert.equal(analyze(`rm -rf ${tmpdir()}/*`).length, 1, "temp globs must stay guarded");
 assert.equal(analyze("rm -rf $TMPDIR/example").length, 1, "unresolved variables must stay guarded");
-assert.equal(analyze(`rm -rf ${tempTarget} /home/example`).length, 1, "mixed targets must stay guarded");
+assert.equal(analyze(`rm -rf ${tempTarget} /srv/example`).length, 1, "mixed targets must stay guarded");
 assert.equal(analyze(`rm -rf ${tempTarget} -- -real-directory`).length, 1, "dash-prefixed targets after -- must stay guarded");
 assert.equal(analyze(`sudo rm -rf ${tempTarget}`).length, 1, "privileged temp removal must stay guarded");
-assert.equal(analyze("rm -rf /home/example").length, 1, "non-temp removal must stay guarded");
+assert.equal(analyze("rm -rf /srv/example").length, 1, "non-temp removal must stay guarded");
 assert.equal(analyze(`rm -rf ${tempTarget}/../other`).length, 1, "parent traversal must stay guarded");
 
 for (const command of ["git push --force", "git push -vf", "git push origin +main:main", "git -C /repo push -f"]) {

@@ -20,9 +20,9 @@ CASES = [
     ("bypassPermissions", "git -C /repo push --force origin main", "deny"),
     ("bypassPermissions", "git -c core.quotePath=false push -vf origin main", "deny"),
     ("acceptEdits", "git -C /repo restore src/a.ts", "ask"),
-    ("acceptEdits", "/bin/rm -rf /home/example", "ask"),
-    ("acceptEdits", "rm -R /home/example", "ask"),
-    ("acceptEdits", "rm -rf /tmp/../home/example", "ask"),
+    ("acceptEdits", "/bin/rm -rf /srv/example", "ask"),
+    ("acceptEdits", "rm -R /srv/example", "ask"),
+    ("acceptEdits", "rm -rf /tmp/../srv/example", "ask"),
     ("acceptEdits", "rm -rf /tmp/*", "ask"),
     ("acceptEdits", "rm -rf /tmp/claude-probe -- -real-directory", "ask"),
     ("acceptEdits", "git clean --force", "ask"),
@@ -45,7 +45,7 @@ CASES = [
     ("acceptEdits", "git checkout -- src/a.ts", "ask"),
     ("acceptEdits", "git clean -fx", "ask"),
     ("acceptEdits", "git worktree remove ../wt", "ask"),
-    ("acceptEdits", "rm -rf /Users/someone/Development/foo", "ask"),
+    ("acceptEdits", "rm -rf /srv/example/Development/foo", "ask"),
     ("acceptEdits", "rm -rf $TARGET", "ask"),
     ("acceptEdits", "rm -r ../build", "ask"),
     # --- scratch roots exempt (the false positive we measured) ---
@@ -54,7 +54,7 @@ CASES = [
     ("acceptEdits", "rm -f /tmp/thing", "allow"),  # not recursive
     # --- ask tier is inert in bypass ---
     ("bypassPermissions", "git stash", "allow"),
-    ("bypassPermissions", "rm -rf /Users/someone/Development/foo", "allow"),
+    ("bypassPermissions", "rm -rf /srv/example/Development/foo", "allow"),
     # --- trimmed 2026-07-28: must be silent now ---
     ("acceptEdits", "git checkout main", "allow"),
     ("acceptEdits", "git switch -c feat/x", "allow"),

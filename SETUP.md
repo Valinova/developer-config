@@ -63,8 +63,8 @@ linked into `~/.claude/scripts/`: the `PreToolUse` hooks in `always/settings.jso
 invoke them by absolute repo path, so per-file links would be dead weight.
 `always/scripts/lib/` — the shared `codex_registry` and `claude-registry`
 owners — is likewise not linked; the wrappers source it by repo path at
-runtime. `check-wiring.py` is likewise unlinked — the Verification section
-invokes it by repo path. Every other file directly in `always/scripts/`,
+runtime. `check-wiring.py` and `check-private-terms.sh` are likewise unlinked —
+the Verification section and CI invoke them by repo path. Every other file directly in `always/scripts/`,
 excluding all `test_*.py` files and scripts referenced by the settings `hooks`
 block, is linked into `~/.claude/scripts/` for invocation on `PATH`.
 
@@ -319,12 +319,12 @@ The rule, for every MCP server on every machine:
    running session cannot switch between headed and headless.
 
 To bring a machine onto this: `claude mcp remove playwright -s user` if the
-entry exists, create the two symlinks from the table, add the alias, and open
+entry exists, create the three symlinks from the table, add the alias, and open
 one `claude-pw` session so the MCP downloads its Chromium into
 `~/.cache/ms-playwright`. Zed's Claude agent takes the same
 `--mcp-config ~/.claude/mcp/playwright.json` in its launch args on machines
 where a browser from Zed is wanted; that setting is machine-local.
-`always/scripts/reap-orphan-mcp.sh` still reaps servers whose session died.
+`always/scripts/reap-orphan-mcp.sh` reaps orphaned Playwright MCP servers older than two hours; Codex workers are excluded.
 
 ### Skills — the shared workflow primitive
 
@@ -399,7 +399,7 @@ instructions/codex-delegation.md    orchestrators only (Claude / Hermes / Grok B
                                     Grok reads it on dispatch (not linked)
 instructions/coding-orchestration.md Hermes farm doctrine — linked, not auto-loaded
 instructions/worktrees.md            reference, not auto-loaded
-instructions/opus5-quirks.md         legacy Opus 5 reference, not auto-loaded
+instructions/opus5-quirks.md         Opus 5 prompting reference, not auto-loaded
 instructions/token-efficiency.md     reference, not auto-loaded
 ```
 
