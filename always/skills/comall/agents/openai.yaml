@@ -1,0 +1,7 @@
+interface:
+  display_name: "Commit All Worktree Changes"
+  short_description: "Commit all current changes in coherent groups"
+  default_prompt: "Use $comall to commit everything in the worktree in coherent groupings."
+
+policy:
+  allow_implicit_invocation: false

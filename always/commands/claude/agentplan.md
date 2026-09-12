@@ -1,0 +1,1 @@
+../../../claude/skills/agentplan/SKILL.md

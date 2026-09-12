@@ -1,0 +1,7 @@
+interface:
+  display_name: "Documentation Review"
+  short_description: "Consolidate and update branch documentation"
+  default_prompt: "Use $docs to review and consolidate this branch documentation."
+
+policy:
+  allow_implicit_invocation: false

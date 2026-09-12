@@ -1,0 +1,7 @@
+interface:
+  display_name: "Adversarial Review"
+  short_description: "Run one cross-family review and commit the agreed fixes"
+  default_prompt: "Use $rev to review and improve the current branch."
+
+policy:
+  allow_implicit_invocation: false

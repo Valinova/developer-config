@@ -1,0 +1,1 @@
+../../skills/no-use-effect/SKILL.md

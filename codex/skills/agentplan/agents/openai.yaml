@@ -1,0 +1,7 @@
+interface:
+  display_name: "Agent Plan"
+  short_description: "Create an adversarially reviewed implementation plan"
+  default_prompt: "Use $agentplan to create and review a phased implementation plan."
+
+policy:
+  allow_implicit_invocation: false

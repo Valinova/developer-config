@@ -1,0 +1,7 @@
+interface:
+  display_name: "Long Run"
+  short_description: "Run the full autonomous delivery pipeline"
+  default_prompt: "Use $longrun to plan, implement, review, open a pull request, and babysit it to merge-ready."
+
+policy:
+  allow_implicit_invocation: false

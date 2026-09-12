@@ -1,0 +1,7 @@
+interface:
+  display_name: "Full Documentation Review"
+  short_description: "Run a deep multi-agent documentation audit"
+  default_prompt: "Use $full-docs to perform a deep documentation audit of this branch."
+
+policy:
+  allow_implicit_invocation: false

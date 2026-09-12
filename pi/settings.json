@@ -1,0 +1,14 @@
+{
+  "lastChangelogVersion": "0.84.1",
+  "theme": "dark",
+  "defaultProvider": "xai",
+  "defaultModel": "grok-4.6",
+  "defaultThinkingLevel": "high",
+  "packages": [
+    "npm:pi-mcp-adapter",
+    "npm:@tintinweb/pi-subagents",
+    "npm:pi-service-tier",
+    "git:github.com/algal/pi-openai-server-compaction",
+    "npm:pi-web-access"
+  ]
+}

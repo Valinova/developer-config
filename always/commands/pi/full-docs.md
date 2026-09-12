@@ -1,0 +1,1 @@
+../../../pi/skills/full-docs/SKILL.md

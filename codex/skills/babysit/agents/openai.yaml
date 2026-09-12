@@ -1,0 +1,7 @@
+interface:
+  display_name: "Babysit"
+  short_description: "Settle CI and CodeRabbit on the open PR until merge-ready"
+  default_prompt: "Use $babysit to refine the current pull request to merge-ready."
+
+policy:
+  allow_implicit_invocation: false

@@ -1,0 +1,7 @@
+interface:
+  display_name: "Codex Functionality Review"
+  short_description: "Review a repository subsystem end to end and make clear fixes"
+  default_prompt: "Use $codex-functionality-review to review the named functionality end to end and make clear fixes."
+
+policy:
+  allow_implicit_invocation: false

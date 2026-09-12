@@ -1,0 +1,7 @@
+interface:
+  display_name: "Codex Clear"
+  short_description: "Thorough branch cleanup with clear fixes"
+  default_prompt: "Use $codexclear to review this branch and implement clear improvements."
+
+policy:
+  allow_implicit_invocation: false

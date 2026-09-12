@@ -1,0 +1,1 @@
+../../skills/docs/SKILL.md

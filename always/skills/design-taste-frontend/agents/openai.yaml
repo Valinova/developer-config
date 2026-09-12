@@ -1,0 +1,7 @@
+interface:
+  display_name: "Design Taste — Frontend"
+  short_description: "Anti-slop frontend design workflow"
+  default_prompt: "Use $design-taste-frontend for this frontend design task."
+
+policy:
+  allow_implicit_invocation: false

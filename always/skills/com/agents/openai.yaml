@@ -1,0 +1,7 @@
+interface:
+  display_name: "Commit Staged Changes"
+  short_description: "Commit staged changes with a clear message"
+  default_prompt: "Use $com to commit the currently staged changes."
+
+policy:
+  allow_implicit_invocation: false

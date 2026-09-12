@@ -1,0 +1,7 @@
+interface:
+  display_name: "Codex Branch Review"
+  short_description: "Review a branch or recent merged changes and make clear fixes"
+  default_prompt: "Use $codex-branch-review to review this branch (or a stated recent range) and make clear fixes."
+
+policy:
+  allow_implicit_invocation: false

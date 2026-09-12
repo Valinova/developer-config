@@ -1,0 +1,1 @@
+../../../pi/skills/agentplan/SKILL.md

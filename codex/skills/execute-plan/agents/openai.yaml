@@ -1,0 +1,7 @@
+interface:
+  display_name: "Execute Plan"
+  short_description: "Implement an approved plan in coherent commits"
+  default_prompt: "Use $execute-plan to implement the approved plan."
+
+policy:
+  allow_implicit_invocation: false

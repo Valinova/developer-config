@@ -1,0 +1,10 @@
+name: browser-walker
+description: Subagent that walks a Playwright MCP browser session against localhost, keeping the heavy snapshot evidence out of the orchestrator's context.
+source: internal (Valinova/developer-config)
+version: 2026-04-17
+agents:
+  - browser-walker
+recommended_for:
+  - repos running a local dev server that benefits from automated browser walks
+requires:
+  - playwright MCP server configured

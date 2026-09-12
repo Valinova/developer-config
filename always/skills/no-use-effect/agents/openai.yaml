@@ -1,0 +1,4 @@
+interface:
+  display_name: "No useEffect"
+  short_description: "Audit React code for avoidable effects"
+  default_prompt: "Use $no-use-effect to audit this React change for avoidable effects."
