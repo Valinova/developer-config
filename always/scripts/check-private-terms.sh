@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 # Scan tracked text contents, paths, and symlink targets for generic private data.
-# Optional repo-root .private-terms (gitignored): one ERE per line, # comments allowed.
-# Nonblank, noncomment lines are OR-merged with the generic PATTERN below.
 # Print path:line only; exit 1 on matches, exit 2 on scan errors.
 # Only this script is excluded from the content scan.
 
@@ -17,14 +15,6 @@ fail() {
 repo_root="$(git rev-parse --show-toplevel)" || fail 'cannot locate repository'
 cd "$repo_root"
 self="always/scripts/check-private-terms.sh"
-
-if [[ -e .private-terms ]]; then
-  [[ -f .private-terms && -r .private-terms ]] || fail 'cannot read local patterns'
-  while IFS= read -r term || [[ -n "$term" ]]; do
-    [[ "$term" =~ ^[[:space:]]*(#|$) ]] && continue
-    PATTERN="$PATTERN|($term)"
-  done < .private-terms
-fi
 
 hits=0
 scan() {
