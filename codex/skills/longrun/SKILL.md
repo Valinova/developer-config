@@ -36,7 +36,7 @@ State that invalidation before repeating work. An existing reviewed
 plan satisfies the planning review; if it is valid but uncommitted, continue
 from the plan-commit portion of step 2 instead of rerunning `$agentplan`.
 
-1. Verify the branch and follow principles §7. Work on the current branch,
+1. Verify the branch and follow `git-operations.md`. Work on the current branch,
    honoring explicit default-branch direction. If the requested PR requires a
    different branch, use existing explicit direction or obtain approval for
    its name before creating or switching; workflow invocation alone does not

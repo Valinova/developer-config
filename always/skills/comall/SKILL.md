@@ -11,7 +11,7 @@ unrelated parallel WIP — before including it, instead of committing blindly.
 
 1. Inspect the full picture first: staged, unstaged, and untracked.
 2. Split the changes into coherent groupings — one logical change per commit,
-   by concern, at file level (principles §7). Never lump unrelated changes
+   by concern, at file level (`git-operations.md`). Never lump unrelated changes
    into one commit, and never `git add -A`: stage each group as an explicit
    file list. Split at file level only — no hunk-level splitting; when one
    file mixes concerns, put it in the most fitting commit and move on.

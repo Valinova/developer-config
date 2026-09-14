@@ -34,6 +34,7 @@ The repo is cloned at `~/Development/developer-config` on every machine
 | `~/.pi/agent/skills/<shared>` | symlink each | `always/skills/<shared>` |
 | `~/.pi/agent/skills/<pi>` | symlink each | `pi/skills/<pi>` |
 | `~/.grok/rules/00-principles.md` | symlink | `instructions/principles.md` |
+| `~/.grok/rules/10-git-operations.md` | symlink | `instructions/git-operations.md` |
 | `~/.grok/rules/05-dispatch-bootstrap.md` | symlink | `instructions/dispatch-bootstrap.md` (model-selection and codex-delegation are read on dispatch, not linked) |
 | `~/.grok/rules/30-model-defaults.md` | symlink | `grok/model-defaults.md` |
 | `~/.grok/skills/<shared>` | symlink each | `always/skills/<shared>` |
@@ -377,6 +378,11 @@ claude-root.md                      the ~/.claude/CLAUDE.md loader — pure @imp
 instructions/principles.md          every agent, every repo  (Claude via claude-root import;
                                     Codex via ~/.codex/AGENTS.md; Grok via ~/.grok/rules/00-principles.md;
                                     Hermes references it directly)
+instructions/git-operations.md      git, branch, worktree, and commit operations — permissions,
+                                    backstop tiers, commit hygiene, rebase policy, durable worktrees
+                                    (Claude via claude-root import; Grok via
+                                    ~/.grok/rules/10-git-operations.md; Codex, Pi, and Hermes
+                                    reach it through the principles §7 pointer)
 instructions/claude-conventions.md  Claude Code only
 instructions/dispatch-bootstrap.md  Claude Code + Grok Build always-loaded: hard delegation
                                     triggers, the read-on-dispatch rule,
@@ -398,7 +404,6 @@ instructions/codex-delegation.md    orchestrators only (Claude / Hermes / Grok B
                                     Claude Code reads it on dispatch (not auto-loaded);
                                     Grok reads it on dispatch (not linked)
 instructions/coding-orchestration.md Hermes farm doctrine — linked, not auto-loaded
-instructions/worktrees.md            reference, not auto-loaded
 instructions/opus5-quirks.md         Opus 5 prompting reference, not auto-loaded
 instructions/token-efficiency.md     reference, not auto-loaded
 ```
@@ -420,7 +425,7 @@ a second owner; a deliberate override must be labeled as one).
 - [ ] *If Grok Build is installed:* `grok --version` and `grok models` succeed under the machine-local Grok login.
 - [ ] *If Pi is installed:* `~/.pi/agent/AGENTS.md` starts with `# Engineering principles`; role profiles under `~/.pi/agent/agents/` have no pinned model/thinking.
 - [ ] *If Grok Build is installed:* `~/.grok/config.toml` retains all machine-owned settings after merging.
-- [ ] *If Grok Build is installed:* a fresh `grok inspect` lists `00-principles.md`, `05-dispatch-bootstrap.md`, and `30-model-defaults.md` as loaded project instructions. `~/.claude/CLAUDE.md` if listed is tagged `[disabled]` (unexpanded `@import` stub).
+- [ ] *If Grok Build is installed:* a fresh `grok inspect` lists `00-principles.md`, `05-dispatch-bootstrap.md`, `10-git-operations.md`, and `30-model-defaults.md` as loaded project instructions. `~/.claude/CLAUDE.md` if listed is tagged `[disabled]` (unexpanded `@import` stub).
 - [ ] *If Grok Build is installed:* `grok inspect` labels the delivery six `user` from `~/.grok/skills`, not `user [claude]`, and lists an MCP server named `convex` from `~/.grok/config.toml`.
 - [ ] A fresh `claude` session sees principles §1–§12, the Artifacts rule, AND the
       dispatch-bootstrap hard delegation triggers; `model-selection.md` and

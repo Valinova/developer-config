@@ -48,6 +48,7 @@ LINKS = {
     },
     "Grok": {
         "rules/00-principles.md": "instructions/principles.md",
+        "rules/10-git-operations.md": "instructions/git-operations.md",
         "rules/05-dispatch-bootstrap.md": "instructions/dispatch-bootstrap.md",
         "rules/30-model-defaults.md": "grok/model-defaults.md",
         "skills/convex-mcp": "pi/skills/convex-mcp",

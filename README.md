@@ -38,7 +38,9 @@ instructions/               The doctrine. One owner per fact.
   codex-delegation.md       How any caller (Hermes, Claude Code, Grok Build) dispatches
                             codex exec: brief grammar, SUMMARY contract, per-caller
                             wrappers, registry. Claude Code reads it on dispatch.
-  worktrees.md              Durable worktree layout, naming, reuse. Reference, not auto-loaded.
+  git-operations.md         Git, branch, worktree, and commit operations: permissions,
+                            backstop tiers, commit hygiene, rebase policy, durable worktrees.
+                            Always-loaded in Claude Code and Grok Build; principles §7 points here.
   agent-guidance.md         How to optimize AGENTS.md/CLAUDE.md and routed guidance.
                             Reference, not auto-loaded.
   opus5-quirks.md           Opus 5 prompting reference, not auto-loaded.

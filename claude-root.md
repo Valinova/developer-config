@@ -7,5 +7,6 @@ imported below. Edit those files, not this one. `model-selection.md` and
 says when to read them.
 
 @~/Development/developer-config/instructions/principles.md
+@~/Development/developer-config/instructions/git-operations.md
 @~/Development/developer-config/instructions/claude-conventions.md
 @~/Development/developer-config/instructions/dispatch-bootstrap.md

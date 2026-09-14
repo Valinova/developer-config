@@ -31,7 +31,7 @@ as one signal and combines any needed changes into at most one push.
    orchestrator's call under the principles §4 escalation bar. There is no
    count threshold: "minimal" means nothing is left that the orchestrator
    would accept. If the branch is behind or conflicting, verify the PR's
-   actual base branch and remote, then rebase onto it (the principles §7
+   actual base branch and remote, then rebase onto it (the `git-operations.md`
    stacked-branch exception still applies). Merge order across PRs is the
    user's call.
 3. **Fix.** Accepted findings and CI fixes go to ONE implementer pass; seat

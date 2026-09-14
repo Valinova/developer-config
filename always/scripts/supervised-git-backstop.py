@@ -7,7 +7,7 @@ Two tiers, because they answer different questions:
       Bare force-push. A hook `deny` is a *block*, not a prompt, and
       bypassPermissions only skips prompts — so this is the one rule here
       that still bites in the mode long autonomous runs use.
-      `--force-with-lease` passes: it is the form principles.md § 7
+      `--force-with-lease` passes: it is the form git-operations.md
       mandates, and settings `deny` rules can't express "--force but not
       --force-with-lease" (deny rules carry no allowlist exceptions).
 
@@ -20,7 +20,7 @@ add / pull / merge / rebase / cherry-pick / reset / commit --amend /
 branch -d / -m, and plain push. All are reflog-recoverable or already on
 the `permissions.deny` floor, and all are things the user routinely directs —
 prompting on them taxed directed work without protecting anything. The
-governing rule is principles.md § 7: explicit direction IS the approval,
+governing rule is git-operations.md: explicit direction IS the approval,
 so this hook covers only what stays dangerous even when directed.
 
 Matching is a regex over the raw command string — cruder than the native
@@ -187,7 +187,7 @@ def main() -> None:
         respond(
             "deny",
             "Bare force-push is never allowed: it can clobber a parallel "
-            "session's push. Use --force-with-lease (principles.md § 7).",
+            "session's push. Use --force-with-lease (git-operations.md).",
             grok=grok,
         )
 

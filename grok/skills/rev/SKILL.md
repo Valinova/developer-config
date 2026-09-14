@@ -27,7 +27,7 @@ preamble").
 ## Sequence
 
 Verify the branch before modifying files.
-Follow principles §7: honor the user's branch direction, including work on
+Follow `git-operations.md`: honor the user's branch direction, including work on
 the default branch; do not create or switch branches or worktrees without
 existing authorization. Work on the current branch otherwise.
 

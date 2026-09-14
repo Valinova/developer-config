@@ -25,7 +25,7 @@ locally, full pre-commit gate included (`model-selection.md` "External calls").
 ## Start
 
 1. Verify the current branch and the user's branch instructions.
-2. Follow principles §7: work on the current branch, including an explicitly
+2. Follow `git-operations.md`: work on the current branch, including an explicitly
    directed default-branch change. Obtain approval before any branch or
    worktree creation or switch the user has not already directed.
 

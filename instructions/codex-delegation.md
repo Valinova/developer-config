@@ -59,7 +59,7 @@ decides the rung per diff. **Nobody pushes under a live editing lane:** a courie
 2. Review `git diff --cached` (staged), `git diff` (unstaged), and untracked files separately. The child must not change the index; a non-empty staged section alone is not a violation if it predates dispatch.
 3. Run the declared success criteria **and the project's full pre-commit gate in your own shell, reading the exit code**, before committing. A leaf's report that the gate is green is a claim, never evidence: on 2026-09-06 a phase was committed and reported green on such a claim while the branch tip failed an architecture check the leaf had not run.
 4. If fixes are needed, write a follow-up brief and either resume the codex session (preserves context) or dispatch a new one.
-5. Git is the invoker's alone, following principles §7 and only as the user or workflow authorized: stage exactly the files Codex changed (`git diff-index` against a pre-Codex tree snapshot identifies them), commit on Codex's behalf, push, and handle checkout/stash/branch creation before and after the run.
+5. Git is the invoker's alone, following `git-operations.md` and only as the user or workflow authorized: stage exactly the files Codex changed (`git diff-index` against a pre-Codex tree snapshot identifies them), commit on Codex's behalf, push, and handle checkout/stash/branch creation before and after the run.
 
 ## Session registry (all callers)
 
