@@ -17,11 +17,10 @@ import re
 from pathlib import Path
 
 SOUL = Path.home() / ".hermes" / "SOUL.md"
-PRINCIPLES = (
-    Path(__file__).resolve().parent.parent.parent
-    / "instructions"
-    / "principles.md"
-)
+INSTRUCTIONS = Path(__file__).resolve().parent.parent.parent / "instructions"
+# Embedded in this order: principles first, then the git-operations file it
+# points at, so Hermes carries the full rule set rather than the §7 stub.
+SOURCES = [INSTRUCTIONS / "principles.md", INSTRUCTIONS / "git-operations.md"]
 BEGIN = "<!-- PRINCIPLES:BEGIN -->"
 END = "<!-- PRINCIPLES:END -->"
 
@@ -38,21 +37,27 @@ def nest_headings(md: str, bump: int = 1) -> str:
 
 
 def main() -> None:
-    if not PRINCIPLES.is_file():
-        raise SystemExit(f"missing principles: {PRINCIPLES}")
+    for src in SOURCES:
+        if not src.is_file():
+            raise SystemExit(f"missing source: {src}")
     if not SOUL.is_file():
         raise SystemExit(f"missing SOUL: {SOUL}")
 
-    principles = PRINCIPLES.read_text().rstrip() + "\n"
-    if principles.startswith("# Engineering principles\n"):
-        body = principles[len("# Engineering principles\n") :].lstrip("\n")
-    else:
-        body = principles
-    body = nest_headings(body, bump=1)
+    body = ""
+    for src in SOURCES:
+        text = src.read_text().rstrip() + "\n"
+        # principles.md drops its H1 (the SOUL section is the heading) and its
+        # §N sections bump to H3; git-operations.md keeps its H1 and bumps by 2
+        # so it sits at H3 beside them, not beside the SOUL section.
+        if text.startswith("# Engineering principles\n"):
+            text = text[len("# Engineering principles\n") :].lstrip("\n")
+            body += nest_headings(text, bump=1) + "\n"
+        else:
+            body += nest_headings(text, bump=2) + "\n"
 
     block = (
         f"{BEGIN}\n"
-        f"_Synced from `{PRINCIPLES}` via "
+        f"_Synced from `{'`, `'.join(str(s) for s in SOURCES)}` via "
         f"`~/.hermes/scripts/sync-soul-principles.py`. "
         f"Edit the source, then re-run the script — do not hand-edit this "
         f"block._\n\n"
