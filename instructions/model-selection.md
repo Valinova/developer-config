@@ -22,6 +22,15 @@ auth doctrine) live in `coding-orchestration.md` and the harness projections:
 Interactive Claude Code and `claude -p` ride the Anthropic subscription.
 Native Anthropic on Pi or inside Hermes bills the API (extra usage).
 
+The same subscription-over-metered rule seals **provider routing** on the
+harnesses sharing Pi's provider store (Pi, Hermes, Grok Build): a model goes
+through the provider that owns it — **DeepSeek only through `deepseek`, OpenAI
+models only through the `openai-codex` subscription** — unless the user
+explicitly names another route for that dispatch. A `provider/id` pair naming
+the model's vendor rather than an authenticated provider does not error; it
+falls through to OpenRouter and bills the metered key. Pi's exact IDs and the
+pre-dispatch resolution check live in `pi/model-defaults.md`.
+
 | Harness | Orchestrator | Implement default | Implement override | Reviewer transport |
 |---------|--------------|-------------------|--------------------|----------------------|
 | **Claude Code** | Fable 5.1 (Anthropic sub) | Codex Astra via wrappers (ChatGPT sub) | Fable via `claude-exec.sh --effort` (fresh window, chosen rung); native Fable subagents (inherit); Opus for mechanical passes (Roster); Grok via `pi-exec.sh` | Grok via `pi-exec.sh`; native Claude; Codex wrappers |

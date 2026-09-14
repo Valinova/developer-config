@@ -39,13 +39,34 @@ versioned slugs:
 | Family | Pi ID |
 |--------|-------|
 | **Grok 4.6** | `xai/grok-4.6` |
-| **Codex** | `openai/gpt-6-astra` |
+| **Codex** | `openai-codex/gpt-6-astra` |
 | **Fable 5.1** | `anthropic/claude-fable-5-1` |
-| **DeepSeek V4 Flash** | `deepseek/deepseek-v4-flash` |
+| **DeepSeek V4 Flash** | `deepseek/deepseek-flash` |
 
 This is an ID map, not a roster or authorization to use a seat. For an
 explicitly authorized model absent here, resolve its exact ID in Pi's
 authenticated `/model` list before dispatch; do not guess a versioned slug.
+
+### Provider routing is sealed
+
+The provider prefix names an **authenticated Pi provider**, not the model's
+vendor. Two prohibitions, neither a preference:
+
+- **DeepSeek only through `deepseek`.**
+- **OpenAI models only through the `openai-codex` subscription** — never
+  `openrouter` or the metered `openai` API, unless the user explicitly
+  instructs that route for that dispatch.
+
+Stated as prohibitions because Pi does not error on an unknown provider/model
+pair: it falls through to OpenRouter and bills the metered key. A
+vendor-prefixed or stale ID therefore fails **silently onto a paid route** —
+a mid-run 402, not a dispatch error. The worked example: `openai/gpt-6-astra`
+is OpenRouter's slug, while the subscription route is
+`openai-codex/gpt-6-astra`; and `deepseek-v4-flash` does not exist in the
+`deepseek` provider, whose model is `deepseek-flash`. If a needed ID is absent
+from the table above, confirm the pair resolves inside the provider these
+rules name — Pi's authenticated `/model` list or
+`~/.pi/agent/models-store.json` — before dispatch.
 
 **Hard constraints, restated because a prohibition must not depend on a
 lookup:** never Haiku, never Sonnet, and Pi does not farm `claude -p`.
