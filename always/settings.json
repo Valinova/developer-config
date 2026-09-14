@@ -164,12 +164,8 @@
       "Bash(git push --force origin master:*)",
       "Bash(git push -f origin main:*)",
       "Bash(git push -f origin master:*)",
-      "Bash(git reset --hard:*)",
-      "Bash(git clean -fdx:*)",
-      "Bash(git clean -fd:*)",
-      "Bash(git branch -D:*)",
-      "Bash(git checkout .)",
-      "Bash(git restore .)"
+      "Bash(git push --delete origin main:*)",
+      "Bash(git push --delete origin master:*)"
     ],
     "ask": [],
     "defaultMode": "acceptEdits",
