@@ -173,7 +173,6 @@
       "/tmp"
     ]
   },
-  "model": "fable[1m]",
   "hooks": {
     "PreToolUse": [
       {
@@ -217,6 +216,9 @@
       "effortLevel": "high"
     },
     "claude-fable-5-1": {
+      "effortLevel": "medium"
+    },
+    "claude-opus-5": {
       "effortLevel": "medium"
     }
   },
