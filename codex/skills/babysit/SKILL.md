@@ -22,8 +22,12 @@ as one signal and combines any needed changes into at most one push.
 
 ## Round
 
-1. **Wait until both have settled**: every check concluded and the CodeRabbit
-   review posted. Poll read-only with `gh` (`gh pr checks`, `gh api`).
+1. **Wait until both have settled**: every check concluded, including
+   CodeRabbit's own status check. Do not wait for a review object —
+   CodeRabbit posts one only when it has findings; a pass with no review is a
+   settled, clean round. Poll read-only with `gh` (`gh pr checks`, `gh api`);
+   a poll that keys on a review object appearing on the new head never
+   satisfies after a clean push.
    A wait past an hour keeps polling (`gh pr checks --watch`,
    `gh api`); do not report while either is still pending.
 2. **Triage.** Red checks get fixed. Every CodeRabbit finding is accepted,

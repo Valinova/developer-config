@@ -186,6 +186,12 @@ re-triggers a review before the pending one is even read; it stops after
 round 2 because two rounds cover nearly every PR, and any count threshold on
 remaining findings turns into a quota.
 
+A round settles on CodeRabbit's status check, not on a review object: it
+posts a review only when it has findings, so a push that resolves them
+flips the check to pass and resolves the threads with nothing new posted.
+On 2026-09-09 an agent polling for a review on the new head waited
+indefinitely on an already-clean round.
+
 ### opus-browser-walks
 
 Opus quota is normally available, so there is no reason to drop below it
