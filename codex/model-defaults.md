@@ -39,8 +39,10 @@ orchestrator or native Astra seat:
   CLI environment and never reads, copies, or logs auth files or tokens.
 - The wrapper runs `grok agent stdio` with ACP, `--no-subagents`, an OS-level
   sandbox, all Git CLI calls disabled, and Claude/Cursor MCP discovery off for
-  that subprocess. Grok leaves changes unstaged; Codex owns scope review,
-  verification, and every Git operation.
+  that subprocess. `--no-subagents` is this ACP leaf only — not a Fable
+  `claude -p` review rule (`codex-delegation.md` "Nested delegation"). Grok
+  leaves changes unstaged; Codex owns scope review, verification, and every
+  Git operation.
 - Use `workspace` to implement and `read-only` to investigate or review.
   `strict` is available for untrusted repositories. The sandbox still allows
   Grok's own session state and temporary files as documented by Grok Build.
