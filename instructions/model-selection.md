@@ -33,8 +33,8 @@ pre-dispatch resolution check live in `pi/model-defaults.md`.
 
 | Harness | Orchestrator | Implement default | Implement override | Reviewer transport |
 |---------|--------------|-------------------|--------------------|----------------------|
-| **Claude Code** | Fable 5.1 (Anthropic sub) | Codex Astra via wrappers (ChatGPT sub) | Fable via `claude-exec.sh --effort` (fresh window, chosen rung); native Fable subagents (inherit); Opus for mechanical passes (Roster); Grok via `pi-exec.sh` | Grok via `pi-exec.sh`; native Claude; Codex wrappers |
-| **Codex** | GPT-6 Astra | Astra native | `claude -p --model fable --effort <chosen>` (`--model opus` for mechanical passes); Grok Build over ACP | Grok Build over ACP; `claude -p`; native Astra |
+| **Claude Code** | Fable 5.1 (Anthropic sub) | Codex Astra via wrappers (ChatGPT sub) | Opus via `claude-exec.sh --model opus` or native `Agent` (default); Fable via `claude-exec.sh --effort` only when complex (Roster); Grok via `pi-exec.sh` | Grok via `pi-exec.sh`; native Claude; Codex wrappers |
+| **Codex** | GPT-6 Astra | Astra native | `claude -p --model opus` (default) or `--model fable --effort <chosen>` when complex (Roster); Grok Build over ACP | Grok Build over ACP; `claude -p`; native Astra |
 | **Pi**, **Hermes**, **Grok Build** | rows live in their projection files (above); same column grammar | | | |
 
 Reviewer need and model follow "External calls"; this table only selects
@@ -46,14 +46,14 @@ Only these families are in play. Haiku is never used. Sonnet is out of the
 default roster — admissible only as an explicit override for a remedial
 browser walk (see "Subagent fan-out"), never chosen on an agent's own judgment.
 
-**Claude delegation:** Fable leads complex reasoning and review; use nested
-Opus subagents for discovery and other noncritical work. Opus does not lead
-or serve as the final adversarial reviewer (why: rationale.md#opus-quota-seat).
+**Claude seats:** prefer Fable for genuinely complex work, Opus for
+mechanical and default work. Never spawn Fable for something that isn't
+difficult; when unsure, take Opus (why: rationale.md#fable-bar).
 
-| Claude subagent task shape | Seat |
+| Seat | Dispatch |
 |---|---|
-| Judgment: review lens, arbitration, plan, investigation, any implement whose brief admits unknowns | Fable 5.1 (native `Agent`, or `claude-exec.sh --effort` for a chosen rung) |
-| Mechanical: retrieval / recon, bounded well-briefed edit with a fixed allowlist, courier, smoke checks, the `docs` stage (folding a plan into its canonical homes, roadmap rows, runbook edits under a distilled brief) | Opus 5 (native `Agent` with `model: "opus"`, or `claude -p --model opus` / `claude-exec.sh --model opus`) |
+| Opus 5 | native `Agent` with `model: "opus"`, or `claude -p --model opus` / `claude-exec.sh --model opus` |
+| Fable 5.1 | native `Agent`, or `claude-exec.sh --effort` for a chosen rung |
 
 **Operational risk never raises the seat.** A deletion, a migration, or a
 production-adjacent module is not Fable work because it is dangerous; risk
@@ -68,8 +68,8 @@ Build); Pi is API-billed and does not use it.
 
 | Family | Default role | Also fine when chosen |
 |--------|--------------|------------------------|
-| **Fable 5.1** | Complex plans, critical reasoning and review; leads Opus discovery subagents | — |
-| **Opus 5** | Discovery and noncritical Claude subagent work (table above) | Never orchestrator, reviewer, or adversary |
+| **Fable 5.1** | Complex work (see "Claude seats") | — |
+| **Opus 5** | Mechanical and default subagent work, including contained review | — |
 | **Codex (GPT-6 Astra)** | Implement; deep investigate | Explore / plan when you want depth or another family |
 | **Grok 4.6** | Lighter adversarial review; Pi unspecified `Agent`; Hermes orch; Grok Build native | Explore / plan / implement elsewhere when chosen; strong on UI-ish |
 | **DeepSeek V4 Flash** | — (opt-in peer, same shelf as Grok) | Explore / plan / implement — third-family opinions |
@@ -95,7 +95,7 @@ The harness table decides who actually sits in a lane.
 
 | Lane | Default | Opt-in / override |
 |------|---------|-------------------|
-| **Explore / plan / UI-ish** | Native seat of the harness (Claude Code → the Claude seat per "Roster": Opus 5 discovery, Fable 5.1 plan; Pi / Hermes / Grok Build → Grok) | Other in-roster families when chosen; Hermes/Codex/Grok Build may `claude -p` |
+| **Explore / plan / UI-ish** | Native seat of the harness (Claude Code → the Claude seat per "Roster": Opus 5 unless complex; Pi / Hermes / Grok Build → Grok) | Other in-roster families when chosen; Hermes/Codex/Grok Build may `claude -p` |
 | **Implement** | Codex | Grok or DeepSeek Flash when chosen |
 | **Review** | Per "External calls" | Honor harness access restrictions |
 
@@ -178,11 +178,16 @@ cross-family review at the weight the complexity warrants (why:
 rationale.md#cross-family-review).
 
 - **Cross-family is the constraint:** never the author's own family.
-- **Complexity picks the weight:** moderate → Grok 4.6; complex or
-  cross-cutting → the other family's heavyweight, with Opus discovery
-  subagents as useful. Rung per "Effort", at the upper rung of the family's
-  band: a reviewer is the check on everything below it. So Claude-authored
-  complex work goes to Astra; Codex-authored, to Fable.
+- **Two families by default:** the other family's heavyweight reviews —
+  Claude-authored work goes to Astra; Codex-authored, to Fable — with Opus
+  discovery subagents as useful. Complexity picks the rung per "Effort": the
+  upper rung of the band for complex or cross-cutting work (a reviewer is
+  the check on everything below it), the lower rung for contained work.
+- **Cheap alternatives, not a third default:** on less complex work Grok
+  (its own subscription) or Opus (the cheaper Claude pool; reviewing
+  Codex-authored work keeps it cross-family) may take the adversarial review
+  or an implement pass to save cost. Take the saving when it is real; never
+  add a family for its own sake.
 
 If that seat is unavailable under the harness's access rules, take an
 eligible seat of another family and say why. Reuse valid findings; ordinary
@@ -199,7 +204,7 @@ missing test — but over-builds: extra files, types, tests, and research the
 brief did not ask for. So, as author, compensate for your own family's
 tendency and say so in the summary (Fable: the callers and tests it covered;
 Astra: what it added beyond the brief and why each item stays). As reviewer
-(including Grok at the moderate weight), lead with the author's tendency:
+(including Grok on a cheap pass), lead with the author's tendency:
 reviewing Fable, hunt what is missing; reviewing Astra, hunt what to delete.
 Read the whole diff either way; this is where to look first, not a checklist.
 

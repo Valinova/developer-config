@@ -141,6 +141,14 @@ about half the allowance is usable through Fable — so an Opus pass on
 mechanical work costs no Fable quota. That is the whole reason the Opus seat
 exists.
 
+### fable-bar
+
+On 2026-09-17 a static brochure-site rebuild went to Fable at `high` because
+the Roster listed "any implement whose brief admits unknowns" as a Fable
+trigger and its design direction was "unknown". Taste is not complexity.
+The rule is now one line; the intent is cost — never spawn Fable for work
+that isn't difficult.
+
 ### effort-ceilings
 
 Escalation is not free quality. Anthropic's extended-thinking research
