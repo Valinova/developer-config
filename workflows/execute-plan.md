@@ -2,7 +2,8 @@
 
 Shared body for every harness's `execute-plan` skill. Seats, lanes, and the reviewer
 come from `model-selection.md` "Harness seats"; IDs, wrappers, and sandbox
-limits from the harness's model card.
+limits come from the harness's model card (`<harness>/model-defaults.md`;
+Claude Code: `instructions/codex-delegation.md`).
 
 Implement the approved plan only. Plan generation, the final review, push, and
 PR creation belong to their own workflows.

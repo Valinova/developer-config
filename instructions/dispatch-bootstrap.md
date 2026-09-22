@@ -23,7 +23,7 @@ workflow skill (`agentplan`, `execute-plan`, `rev`, `docs`, `full-docs`,
 `babysit`, `longrun`), read
 `~/Development/developer-config/instructions/model-selection.md` and
 `~/Development/developer-config/instructions/codex-delegation.md` in full. Every brief that lets a leaf delegate further must require the same
-read plus the leaf's harness model card; ambient principles never supply
+read plus the leaf's harness model card (Claude Code: `codex-delegation.md`); ambient principles never supply
 seats, effort, or brief grammar.
 
 **External calls** (a plan or diff review, `rev`, any cross-family opinion):

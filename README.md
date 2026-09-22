@@ -43,7 +43,7 @@ always/
                   no-use-effect.
   mcp/            On-demand MCP server definitions (Playwright).
   settings.json   User-global ~/.claude/settings.json.
-claude/skills/    Claude stubs over workflows/ (harness facts only).
+claude/skills/    Claude stubs over workflows/.
 codex/            model-defaults.md (Codex dispatch card); skills/: stubs over
                   workflows/ plus Codex-only skills.
 grok/             model-defaults.md (Grok Build card); skills/: stubs over workflows/.
@@ -155,8 +155,8 @@ the standing drift audit.
 Edit the canonical owner: shared doctrine under `instructions/`, delivery
 workflow bodies under `workflows/`, shared skills under `always/skills/`.
 Harness stubs under `claude/skills/`, `codex/skills/`, `pi/skills/`,
-`grok/skills/`, and `hermes/skills/` carry only harness facts (model card,
-lanes, long-wait mechanism). Other machines receive committed changes through
+`grok/skills/`, and `hermes/skills/` have identical bodies below their
+frontmatter and point to `workflows/<name>.md`. Other machines receive committed changes through
 `git pull`; their live paths already point at these owners. When the wiring
 contract or Codex's or Grok Build's mechanical subagent defaults change, run
 the `SETUP.md` compliance check on each machine as well.

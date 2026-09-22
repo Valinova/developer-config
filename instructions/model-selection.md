@@ -122,7 +122,8 @@ rationale.md#cross-family-review).
   implementer override, the reviewer follows the actual author's family.
 - **Rung per "Effort":** the family default for contained work, its step-up
   for complex or cross-cutting work (a reviewer is the check on everything
-  below it).
+  below it). Astra reviews at `high`; `xhigh` only when the user approves the
+  suggested stretch.
 - **No third family** unless the user names one.
 
 Pi, Hermes, and Grok Build follow the same two-family rule. If the seat is

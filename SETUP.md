@@ -189,8 +189,9 @@ whole-directory links — Codex owns `.system/` inside its skill root).
 The delivery set (`agentplan`, `execute-plan`, `full-docs`, `longrun`, `rev`,
 `babysit`; Hermes has no `full-docs`) has one body per workflow at
 `workflows/<name>.md`, outside every skills directory so nothing indexes or
-links it. Each linked `<harness>/skills/<name>/SKILL.md` is a stub over that
-body carrying only harness facts.
+links it. Each linked `<harness>/skills/<name>/SKILL.md` is a stub whose body below
+its frontmatter is identical across harnesses and points to
+`workflows/<name>.md`.
 
 `codex-branch-review` (which also covers a stated recent range, e.g. the last
 48 hours), `codex-functionality-review`, and `codexclear` are Codex-only.

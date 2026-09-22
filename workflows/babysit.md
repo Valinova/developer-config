@@ -2,7 +2,8 @@
 
 Shared body for every harness's `babysit` skill. Seats, lanes, and the reviewer
 come from `model-selection.md` "Harness seats"; IDs, wrappers, and sandbox
-limits from the harness's model card.
+limits come from the harness's model card (`<harness>/model-defaults.md`;
+Claude Code: `instructions/codex-delegation.md`).
 
 Refine the current branch's open pull request until it is merge-ready. This
 workflow is independently runnable and is also the final stage composed by

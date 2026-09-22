@@ -2,7 +2,8 @@
 
 Shared body for every harness's `rev` skill. Seats, lanes, and the reviewer
 come from `model-selection.md` "Harness seats"; IDs, wrappers, and sandbox
-limits from the harness's model card.
+limits come from the harness's model card (`<harness>/model-defaults.md`;
+Claude Code: `instructions/codex-delegation.md`).
 
 Review the committed branch. This workflow IS the diff review
 (`model-selection.md` "External calls"), independently runnable and also the
@@ -20,7 +21,7 @@ per "Announce-then-proceed preamble":
   `code-simplifier` skill and the principles audit; judgment lenses only where
   they earn fan-out ("Subagent fan-out").
 - **Contained, well-specified:** one cross-family principles-audit pass at the
-  reviewer family's lower rung ("Effort"); no simplifier, no lens fan-out.
+  reviewer family's default rung ("Effort"); no simplifier, no lens fan-out.
 - **Mini PR or fix-verify iteration:** a light cross-family validation of the
   fix and its test; no simplifier or lenses.
 
