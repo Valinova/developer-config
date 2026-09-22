@@ -64,16 +64,17 @@ Briefing Grok and routing an implement to a Grok leaf:
 
 ## Effort
 
-`medium` or `high` for everything; `xhigh` only suggested (a Fable or Astra
-stretch); never `max`. Step up one rung only for long multistep
-terminal/agent work or a brief with open unknowns. On the Codex side, when Sol
-at `high` isn't enough, switch to Astra rather than raising Sol's rung.
+`medium` or `high` for everything: **`high` is the ceiling** — `xhigh` only
+when the user names it, never `max`. Step up one rung only for long multistep
+terminal/agent work or a brief with open unknowns. The Codex ladder is Sol
+`high` → Astra `medium` → Astra `high`: when Sol at `high` isn't enough,
+switch to Astra rather than raising Sol's rung.
 
 | Family | Default | Step up |
 |---|---|---|
 | Opus 5.5 | `medium` | `high` |
-| GPT-6 Sol | `high` | → Astra |
-| GPT-6 Astra | `high` | `xhigh` (suggest only) |
+| GPT-6 Sol | `high` | → Astra `medium` |
+| GPT-6 Astra | `medium` | `high` |
 | Fable 5.1 | `medium` | `high` |
 
 (why: rationale.md#effort)
@@ -122,8 +123,7 @@ rationale.md#cross-family-review).
   implementer override, the reviewer follows the actual author's family.
 - **Rung per "Effort":** the family default for contained work, its step-up
   for complex or cross-cutting work (a reviewer is the check on everything
-  below it). Astra reviews at `high`; `xhigh` only when the user approves the
-  suggested stretch.
+  below it).
 - **No third family** unless the user names one.
 
 Pi, Hermes, and Grok Build follow the same two-family rule. If the seat is

@@ -4,8 +4,8 @@ Data behind the effort rule in `model-selection.md` "Effort". Not loaded;
 read it when re-tuning the rule, and append new benchmarks as rows.
 
 **Knees:** Opus 5.5 at `medium` (repo code) and `high` (agentic/terminal);
-Sol at `high`; Astra is mixed past `medium` (flat on DeepSWE, still rising on FrontierCode), so it runs at `high` as the escalation seat; Fable gains little past
-`high`. Past the knee each rung costs 1.5–4x for ≤3 points.
+Sol at `high`; Astra gains from `medium` to `high` and nothing past it; Fable
+gains little past `high`. No family earns `xhigh`: `high` is the ceiling.
 
 **Caveats.** Mostly vendor charts. Costs are API list prices per task, not
 subscription quota, so read them as relative only. Effort labels are
@@ -107,3 +107,19 @@ cost is AA's weighted cost per index task.
 
 Opus 5.5 sits on AA's cost/score Pareto line from ≈ $1.2 per task upward;
 Astra does not.
+
+## Steps past `high` (derived from the tables above)
+
+| Step | FC Main | FC Ext. | Terminal-Bench | CursorBench | DeepSWE |
+|---|---|---|---|---|---|
+| Astra high → xhigh | −0.4 | −1.0 | −0.4 | – | +0.5 |
+| Opus 5.5 high → xhigh | −2.6 | −1.6 | +2.2 (≈1.9x) | 0.0 | – |
+| Fable 5.1 high → xhigh | −1.7 | – | +1.9 (≈1.5x) | +2.4 (≈1.4x) | – |
+| Sol high → xhigh | – | −0.5 | – | – | +1.0 (+$0.40) |
+| Sol high → max | – | +1.1 (+$0.78) | – | – | +4.0 (+$2.00) |
+| Sol high → Astra medium | – | +0.6 (+$1.23) | – | – | +7.5 (+$2.70) |
+| Luna xhigh → max | – | – | – | – | +5.0 (+$0.09) |
+
+Sol and Luna gain a little above `high` at small absolute cost — the one
+caveat to the `high` ceiling. It isn't a rule: escalating to Astra `medium`
+matches or beats Sol `max` for a little more, and Luna is override-only.

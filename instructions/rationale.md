@@ -127,11 +127,13 @@ resolution cost and keeps history linear and free of update-merge bubbles.
 
 The data log is `instructions/benchmarks.md`. Knees: Opus 5.5 at `medium` on
 repo code and `high` on long agentic/terminal work; Sol at `high`; Astra
-gains little past `medium`, Fable little past `high`. Past the knee
-each rung costs 1.5–4x for ≤3 points, and on merge-readiness evals the top
-rungs score lower (out-of-scope changes grow with effort) — so nothing earns
-`max`, `xhigh` stays a suggested stretch, and a Sol pass that is not enough
-at `high` goes to Astra instead of a higher Sol rung.
+gains on every benchmark from `medium` to `high` and nothing past it; Fable
+gains little past `high` (and `xhigh` has not held up in use). No family
+shows a notable `xhigh` gain — at best ≈+2 on agentic evals for 1.4–1.9x, and
+lower on merge-readiness evals, where out-of-scope changes grow with effort —
+so `high` is the ceiling. Sol above `high` is cheap and gains a little (max
+≈ Astra `medium` on FrontierCode Extended, 3.5 below it on DeepSWE), which
+is why the Codex step is Sol `high` → Astra `medium`, not a higher Sol rung.
 
 ### session-effort
 
