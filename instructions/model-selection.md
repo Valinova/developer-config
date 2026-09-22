@@ -4,20 +4,19 @@ Profiles, not rules — general criteria for what each model tends to be best
 at. They fill in a default when a dispatch doesn't specify one; the user
 overrides any of them where they see fit, for the unit they named, and the
 next unit derives its own. Hard model-specific constraints below still apply.
-Reasoning behind the rules: `rationale.md` (not loaded). Claude Code reads
-this file on dispatch, not every turn — `dispatch-bootstrap.md` owns the read
-rule for Claude Code and Grok Build alike.
+Reasoning behind the rules: `rationale.md` (not loaded).
 
-**Harness seats**: the shared policy (roster, effort, reviewer selection) is
-canonical here; each harness's own seat row is canonical in its card below. Farm-out mechanics (`claude -p` / `codex exec` lifecycle, Hermes paths,
-auth doctrine) live in `coding-orchestration.md` and the harness projections:
+## Harness seats
+
+The shared policy (roster, effort, reviewer selection) is canonical here; each
+harness's own seat row is canonical in its card. Farm-out mechanics
+(`claude -p` / `codex exec` lifecycle, Hermes paths, auth doctrine) live in
+`coding-orchestration.md` and the harness projections:
 
 - Pi seat, slugs, `Agent` dispatch, delegated `pi -p` runs: `pi/model-defaults.md`
 - Codex native / `claude -p` / Grok ACP process lifecycle: `codex/model-defaults.md`
 - Grok Build seat, native / wrappers / `claude -p`, Grok as a leaf: `grok/model-defaults.md`
 - Hermes seat + machine-local vs owned: `hermes/model-defaults.md`
-
-## Harness seats
 
 Interactive Claude Code and `claude -p` ride the Anthropic subscription.
 Native Anthropic on Pi or inside Hermes bills the API (extra usage).
@@ -55,11 +54,6 @@ reviews at the key gates ("External calls").
 Opus 5.5 for contained work, Fable 5.1 with nested Opus discovery subagents
 for complex or cross-cutting work.
 
-| Seat | Dispatch |
-|---|---|
-| Opus 5.5 | native `Agent` with `model: "opus"`, or `claude -p --model opus` / `claude-exec.sh --model opus` |
-| Fable 5.1 | the Claude Code session itself; as a Codex-side complex reviewer, `claude -p --model fable` |
-
 The Opus seat applies from every harness that farms `claude -p` on the
 subscription (Claude Code, Codex, Hermes, Grok Build); Pi is API-billed and
 does not use it.
@@ -80,16 +74,6 @@ names them for that dispatch** — never a default seat, a cost saving, or an
 extra opinion an agent adds on its own judgment. When named, do not copy
 Claude-specific prompting or effort habits onto them. Briefing Grok and
 routing an implement to a Grok leaf: `grok/model-defaults.md` "Grok as a leaf".
-
-## Lane defaults
-
-The harness table decides who actually sits in a lane.
-
-| Lane | Default | Override (user-named only) |
-|------|---------|----------------------------|
-| **Explore / plan / UI-ish** | Claude Code → Opus 5.5; Codex → Astra; Pi / Hermes / Grok Build → Grok | The other family; Grok or DeepSeek Flash |
-| **Implement** | Claude Code → Opus 5.5; Codex → Astra; others → projection files | The other family; Grok or DeepSeek Flash |
-| **Review** | Per "External calls" | Honor harness access restrictions |
 
 ## Effort
 
@@ -122,47 +106,33 @@ delegate-for-you rung) is out entirely — delegation is the orchestrator's job,
 not something a leaf improvises. The wrappers pass `--effort` through
 verbatim, so both are closed by doctrine, not by tooling.
 
-**The interactive session effort is not doctrine.** The value in
-`always/settings.json` (`modelSettings.*.effortLevel`) and whatever a session
-happens to be running at are transient TUI state — never read them as the
-intended baseline, never reconcile them to this table, never flag the drift
-(why: rationale.md#session-effort). The rules here govern dispatches where
-effort is a flag.
+**The interactive session effort is not doctrine.** The
+`always/settings.json` `effortLevel` and a session's running rung are
+transient TUI state: never read them as the baseline, reconcile them to this
+table, or flag the drift (why: rationale.md#session-effort).
 
-**The lane follows the effort.** Native Claude `Agent` subagents inherit the
-session's rung with no override, so whenever a task's rung differs from the
-session's, use a dispatch that takes effort as a flag — `claude-exec.sh
---model opus --effort` for Opus rather than a native `Agent`, the Codex
-wrappers or `spawn_agent(reasoning_effort=…)` for Astra. When the session
-context itself is the input (a review lens over what was just discussed,
-recon the orchestrator will read), the native Opus `Agent` at the inherited
-rung is right. The orchestrator decides rung and lane per task, states them
-and why in the preamble (or the report, when non-interactive), and
-continues.
+**The lane follows the effort**: a task whose rung differs from the session's
+needs a lane that takes effort as a flag — "Fresh window or inherited context"
+below.
 
 ## External calls
 
 An external call dispatches another model for independent judgment — a plan
-or diff review, `rev`, an escalation, any cross-family opinion. **Who is in
-the loop decides whether one happens** (the interactive / granted-autonomy
-split of `principles.md` §4, not the name of a skill). Local checks, tests,
-and the pre-commit gate are not external calls and always run.
+or diff review, `rev`, an escalation, any cross-family opinion. Local checks,
+tests, and the pre-commit gate are not external calls and always run.
 
-- **Interactive, directed work:** never dispatch one unprompted. Suggest one
-  if you think it is needed and wait for confirmation; the user asking is
-  itself the confirmation. A critical issue you cannot resolve is a question
-  for the user, not a reason to spend a model on it.
-- **Granted autonomy** (a running plan, a delivery workflow, any "go build it
-  and open a PR"): judge it yourself and state what you are doing and why, so
-  the default can be refined over time. Scoping stages state "no call, still
-  scoping" — that is the rule working, not an exception to it.
+- **Interactive / iterative work with the user:** no external call unless the
+  user asks. Suggest one when the risk warrants it; the user's yes is the go.
+- **A workflow skill carries its own gates, and invoking it is the
+  approval:** `agentplan` → plan/scope review; `execute-plan` → only the seam
+  review, when a later phase tears out what an earlier one built; `rev` → the
+  diff review; `longrun` → plan review + final `rev` (+ the seam review).
+- **Granted autonomy without a skill** ("go build it and open a PR"): judge
+  it, and state what was chosen and why.
 
-Nothing converts "available" into "required": not a subagent's existence,
-not a repo-level `AGENTS.md` command. A downstream repo command supplies
-scope, never the whether, and neither a workflow name nor a fresh session
-resets a scope carried in the brief. `rev` is itself the call: invoking it
-(directly, or through `longrun`) is the whether, and this section decides only
-who and at what weight (why: rationale.md#pipeline-proportionality).
+Nothing else converts "available" into "required" — not a subagent's
+existence, not a repo-level `AGENTS.md` command (why:
+rationale.md#pipeline-proportionality).
 
 **Who: one rule.** Plan review and diff review are the same thing — a
 cross-family review at the weight the complexity warrants (why:
@@ -176,8 +146,10 @@ rationale.md#cross-family-review).
   lower rung for contained work.
 - **No third family** unless the user names one.
 
-If that seat is unavailable under the harness's access rules, stop and say
-so; the user decides the substitute. Reuse valid findings; ordinary
+This mapping applies to Claude Code and Codex; if its seat is unavailable
+under the harness's access rules, stop and say so; the user decides the
+substitute. Pi, Hermes, and Grok Build use the reviewer pairing in their
+projection file. Reuse valid findings; ordinary
 fixes get regression checks, not another pass. The final report states what
 each pass changed; a pass that changed nothing is reported as such, never
 hidden — that is the signal to lower the default next time.
@@ -199,9 +171,8 @@ Read the whole diff either way; this is where to look first, not a checklist.
 
 These modes describe an invoked delivery workflow, not every task.
 `agentplan`, `execute-plan`, `rev`, `docs`, `babysit`, and `longrun` compose
-these stages. `rev` is the cross-family review; the caller decides whether it
-runs (`longrun` always; otherwise only when the user invokes it) and "External
-calls" decides who and at what weight:
+these stages; which gates each carries, and who reviews at what weight, is
+"External calls":
 
 ```
 Full       agentplan(scope + phases) → execute-plan → rev → docs → PR → babysit
@@ -209,10 +180,9 @@ Discover   agentplan(scope only) → probe → agentplan(phases) → execute-pla
 Iterative  scope note → implement with the user → rev → docs → PR → babysit
 ```
 
-- **Two cross-family gates always:** one on scope/plan before code lands, one
-  on code at rev. The first gate scales from a full adversarial plan review
-  (Full) to a scope-only review (Discover, Iterative). Rev is never skipped;
-  its depth scales (below).
+- **Gates:** the plan gate before code lands is a full adversarial plan review
+  in Full and a scope-only review in Discover and Iterative; the rev gate's
+  depth scales (below).
 - **One seam review before a tear-out.** When a plan's later phases delete
   or re-key what its earlier phases built, run one cross-family review of
   the built seam at that boundary, before the tear-out phase, and scope the
@@ -221,20 +191,14 @@ Iterative  scope note → implement with the user → rev → docs → PR → ba
   the boundary it costs one fix pass rev would have demanded anyway. This is
   the only interim adversarial run; phases never each get one.
 - **Discover** is chosen when the plan would have to guess at facts only a
-  probe can settle (database shape, a spike, a failing test). agentplan runs
-  contextualization + the cross-family scope review, writes the scope section
-  of the plan file with the open questions and what must be probed to close
-  them, and stops before phases. After iteration, invoking agentplan again
-  resumes at phases via the existing resume contract.
-- **Iterative** is for work whose shape is not known up front and the user is
-  steering live: no phased plan artifact; a short scope note still goes
-  to the other family ("does this direction make sense, what does it
-  break") before code lands.
+  probe can settle (database shape, a spike, a failing test).
+- **Iterative** is chosen when the work's shape is not known up front and the
+  user is steering live; there is no phased plan artifact.
 - The orchestrator picks the mode and states it in the preamble. Default is
   Full.
 
 **Review depth scales with the change.** The pipeline is for non-trivial work
-(`dispatch-bootstrap.md` owns what skips it); within it, the rev gate is
+(whether a review runs at all is "External calls"); within it, the rev gate is
 always present but its depth follows the change, never the fact that a
 workflow was invoked (why: rationale.md#pipeline-proportionality):
 
@@ -276,9 +240,10 @@ gate is unmet (why: rationale.md#coderabbit).
 ## Subagent fan-out
 
 When independent review is warranted, start with one reviewer. Add lenses
-only for separable questions; a Fable reviewer nests Opus for discovery and
-noncritical work, retaining critical judgment itself. A broad repo alone does not
-justify fan-out.
+only for separable questions. A broad repo alone does not justify fan-out.
+An Opus contained reviewer or a Fable complex reviewer may nest Opus discovery
+subagents unless the brief forbids it; the reviewer keeps the judgment.
+Discovery subagents are not extra review lenses.
 
 Outside those gates, spawn only the number of subagents the situation actually
 needs — never a fleet for its own sake. Soft ceiling: **eight at a time**;
@@ -293,26 +258,19 @@ native seat (`pi/model-defaults.md`). The per-call economy rule in
 
 ## Orchestrator context discipline
 
-Everything in the orchestrator's window is re-sent every turn and degrades
-its reasoning as it grows (see "Fresh window or inherited context" below).
-The orchestrator's own tool calls are limited to: writing briefs,
+On Claude Code, everything in the orchestrator's window is re-sent every turn
+and degrades its reasoning as it grows (see "Fresh window or inherited
+context" below). The Claude Code orchestrator's own tool calls are limited to:
+writing briefs,
 dispatching, reading verdicts and post-run summaries, reading the diff it is
 about to commit, small decision-critical artifacts, authorized local
 verification (including the full pre-commit gate), and git. Everything else
-is farmed out to Opus per "Roster".
+is farmed out to Opus per "Roster"; when to delegate at all is
+`dispatch-bootstrap.md`.
 
-The hard triggers — when to delegate at all, and the extract → delegate /
-judge → read heuristic — are always-loaded in `dispatch-bootstrap.md`, their
-one owner; they are not restated here.
-
-Bulk fact-gathering never enters the orchestrator raw:
-
-- Research on Claude Code uses a native Opus subagent, or
-  `claude -p --model opus` on Hermes/Codex/Grok Build. It returns a
-  distilled brief (≤ ~3K tokens) with file:line pointers.
-  Pi, Grok Build, and Hermes recon seats: their projection files.
-- Orchestrator reads directly only: verdicts of delegated work, diffs it is
-  about to commit, small decision-critical artifacts.
+Research on Claude Code uses a native Opus subagent, or
+`claude -p --model opus` on Hermes/Grok Build; research on Codex uses Astra.
+Pi, Grok Build, and Hermes recon seats: their projection files.
 
 ### Leaf fan-out: a judgment core and a mechanical tail
 
@@ -330,13 +288,19 @@ combined-diff provenance check.
 Only context degradation drives this decision, never cache cost
 (why: rationale.md#context-degradation).
 
-- A **native Claude subagent** inherits the session window and is right when
-  the session context *is* the input: a review lens over what was just
-  discussed, a retrieval pass the orchestrator will read.
+- A **native Claude subagent** inherits the session window and rung, with no
+  effort override. It is right when the session context *is* the input: a
+  review lens over what was just discussed, a retrieval pass the orchestrator
+  will read.
 - A **`claude -p` process** (`claude-exec.sh`) starts from zero plus the brief
-  and is right when a brief *can* be the input: any bounded, well-specified
-  pass, concentrated implementation above all. Its cold-start floor means it
-  never pays off for minute-scale tasks.
+  and takes `--effort` as a flag. It is right when a brief *can* be the input
+  — any bounded, well-specified pass, concentrated implementation above all —
+  and whenever the task's rung differs from the session's (for Astra, the
+  Codex wrappers or `spawn_agent(reasoning_effort=…)`). Its cold-start floor
+  means it never pays off for minute-scale tasks.
 - The orchestrator's window size is the tiebreaker. The larger it grows, the
   more every bounded task belongs in a fresh process with the distilled brief,
   and the orchestrator keeps its window for what only it can do: review.
+
+The orchestrator decides rung and lane per task, states them and why in the
+preamble (or the report, when non-interactive), and continues.

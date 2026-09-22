@@ -13,10 +13,9 @@ first. `model-selection.md` (seats, effort, review, pipeline) and
 - **Any edit touching more than a couple of files**, or any implement pass
   with a brief → the implementer lane (`claude-exec.sh` or a native Opus
   `Agent`; Codex wrappers when Astra implements), never the orchestrator editing file by file in its own window.
-- **Any tool result you expect to exceed ~2K tokens** whose purpose is
-  extracting facts, not judging them → delegate and read the verdict.
-- Heuristic: extracting facts → delegate; judging content → read. Verify by
-  spot-checking pointers, not re-reading the corpus.
+- Heuristic: extracting facts → delegate (above all any tool result you expect
+  to exceed ~2K tokens); judging content → read. Verify by spot-checking
+  pointers, not re-reading the corpus.
 
 **Read before you dispatch.** Before any dispatch (`Agent` tool, Grok
 `spawn_subagent`, `claude-exec.sh`, `codex-exec.sh`, `pi-exec.sh`) or any
@@ -27,9 +26,12 @@ workflow skill (`agentplan`, `execute-plan`, `rev`, `docs`, `full-docs`,
 read plus the leaf's harness model card; ambient principles never supply
 seats, effort, or brief grammar.
 
-**External calls** (a plan or diff review, `rev`, any cross-family opinion)
-default to none. Whether one happens, who takes it, and its rung are decided
-only in `model-selection.md` "External calls"; state the decision first, per
+**External calls** (a plan or diff review, `rev`, any cross-family opinion):
+in interactive work, none unless the user asks — suggest one when the risk
+warrants it. A workflow skill carries its own gates, and invoking it is the
+approval. Under granted autonomy without a skill, judge it and state the
+choice. Which gates each skill carries, who reviews, and at what rung:
+`model-selection.md` "External calls"; state the decision per
 "Announce-then-proceed preamble", then continue.
 
 **One heavy verification per machine at a time.** A full gate (typecheck

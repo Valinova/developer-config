@@ -29,3 +29,8 @@ history (`model-selection.md` and the row above). Only machine facts —
 install paths, auth files, which host actually runs Hermes — belong in the
 gitignored `~/.hermes/`. Hermes skills that restate doctrine instead of
 pointing at it are drift (see SETUP.md).
+
+## Cache and compression config
+
+`~/.hermes/config.yaml` sets `prompt_caching.cache_ttl: 1h` (valid: `5m` | `1h`)
+and `compression.threshold: 0.35`; compact only at boundaries, never mid-flow.

@@ -88,46 +88,17 @@ When the user is in an interactive Claude Code session (terminal or IDE), Claude
 
 **Why this exists:** Claude-authored work needs a reviewer outside its own family (why: rationale.md#cross-family-review). This path is orthogonal to Hermes orchestration — it's the user's direct coding workflow.
 
-## Path 4: Crons → Codex CLI (automated/headless) — HISTORICAL, decommissioned
+## Path 4: Crons → Codex CLI — decommissioned
 
-> **Decommissioned (noted 2026-07-30).** No live cron routes *directly* to
-> `codex_exec.sh` as its primary engine any more. The actual live pattern is:
-> **cron job → `~/.hermes/scripts/agent-run.sh` running `claude -p`**, with
-> Codex invoked *inside* that run as the cross-family reviewer rather than as
-> the router. Sentry work follows the same shape via `scripts/sentry_cycle.py`.
-> The description below is kept for historical context — do not build new crons
-> on it.
+Live crons run `~/.hermes/scripts/agent-run.sh` with `claude -p`, invoking Codex inside that run as the cross-family reviewer; do not build crons on `codex_exec.sh` directly.
 
-Scheduled jobs (daily reviews, focus reviews) route directly to Codex CLI. Hermes is NOT in the review decision loop — it only receives the result for delivery.
+## What is NOT used
 
-**When:** Automated code reviews, focus reviews, any scheduled coding task.
+Native HTTP delegation would give Hermes a second token store competing with the CLI's for the same OAuth refresh token (`refresh_token_reused`), so CLI subprocesses stay the single auth consumer.
 
-**How it works:**
-1. Cron pre-run script collects repo context (git log, AGENTS.md, focus.md, REVIEW.md)
-2. Script output injects into the Codex prompt deterministically
-3. `codex_exec.sh` runs Codex with the review brief, handles full git lifecycle (stash → branch → tree-snapshot → Codex → stage → commit → push → restore WIP)
-4. Result gets written to `~/.hermes/cron/output/<job_id>/`
-5. Hermes delivers the output; it does not judge or modify the review
-
-**Why direct:** Removed the Hermes-in-the-middle bottleneck. The script was the deterministic router for the subscription CLI path.
-
-## What is NOT used (and why)
-
-### `delegate_task` with `acp_command="codex"`
-
-**Dead.** Codex CLI has no `--acp` flag. The `acp_command` parameter forces `copilot-acp` provider, which tries to spawn `codex --acp --stdio` as a subprocess. Codex doesn't support ACP — this path fails immediately. All references removed from docs and skills.
-
-### `delegate_task` with `delegation.provider: openai-codex` (native HTTP)
-
-**Not viable due to OAuth conflict.** Hermes would store its own Codex OAuth tokens in `~/.hermes/auth.json`, competing with Codex CLI's `~/.codex/auth.json` for the same refresh token. Since the user uses Codex CLI interactively, both consumers would invalidate each other's tokens. The subprocess approach (Path 1) avoids this entirely by using Codex CLI as the single auth consumer.
-
-### `delegate_task` with `acp_command="claude"`
-
-**Dead.** Claude Code has no `--acp` flag (verified v2.1.185, June 2026). Was never functional.
-
-### `delegate_task` native batch (Hermes subagents)
-
-**Niche/lightweight only.** Native Hermes subagents are acceptable for Hermes-specific tools, summaries, extraction, and mechanical batches such as `simplify-code`. They must not be the serious-code implementer; use the CLI path for that. They may use DeepSeek for trivial retrieval/summaries only (a Hermes contract). This uses Hermes's own model, not Codex or Claude OAuth. No conflict.
+- `delegate_task` with `acp_command="codex"` or `"claude"`: dead — neither CLI has `--acp`.
+- `delegate_task` with `delegation.provider: openai-codex`: not viable — the OAuth conflict above.
+- `delegate_task` native batch: niche/lightweight only — Hermes-specific tools, summaries, extraction, mechanical batches (`simplify-code`); never the serious-code implementer; DeepSeek only for trivial retrieval/summaries.
 
 ## Execution paths (preference order)
 
@@ -149,10 +120,9 @@ Claude subagents inherit the session's effort. The orchestrator
 partitions, validates, deduplicates, audits, and synthesizes; the subagents own
 deep code review.
 
-Direct fixes run through the existing machine-wide Claude→Codex wrapper in
-sequential implementation passes. Select model and effort under
-`model-selection.md`, and audit one pass before starting the next. Service
-tier follows the wrapper flags contract in `codex-delegation.md`.
+Direct fixes are sequential Opus 5.5 implementation passes; Astra implements
+only when the user names it. Select effort under `model-selection.md`, and
+audit one pass before starting the next.
 
 The same orchestrator session writes the concise PR-scoped `REVIEW.md`, including
 coverage, implementation efforts, rejected findings, nuanced discussion items,
@@ -164,10 +134,6 @@ strategic-analysis session is launched.
 
 Decision briefs are an approved subscription-OAuth Claude use for grounded,
 genuinely nuanced forks in Sentry triage and PR burndown.
-
-(2026-07-30: the v1 Sentry triage cron is retired/disabled; its replacement,
-sentry-cycle v2, mechanizes this escalation as a `FORK` draft PR; its spec
-lives with the Hermes deployment, outside this repo.)
 
 The Claude seat (Opus 5.5; Fable as arbiter on a complex fork) chairs and synthesizes; the cross-family challenger
 selected under `model-selection.md` takes an independent, read-only blind
@@ -184,27 +150,22 @@ The consumer selects each model's reasoning effort under `model-selection.md`
 
 - **Effort:** apply `model-selection.md` "Effort" to the actual task.
 - **Detection before a review gate:** re-run a *specific finding* through the other family only at action boundaries: about to auto-PR, no-go-adjacent finding, or a charter contradiction. Whether a review call happens at all is `model-selection.md` "External calls".
-- **Scan vs synthesis split for exploratory work:** cheap models in parallel for coverage, ONE expensive model for the judgment artifact. Never the reverse.
 - **Never two models on detection output that a downstream filter/reviewer already de-risks.**
 - Quota headroom is the real currency; if one subscription runs hot, rebalance the defaults, not per-callsite.
 
 ## Subagent dispatch discipline
 
-Every subagent dispatch, from any orchestrator, carries the same rigor as a Codex brief:
+All dispatches follow `codex-delegation.md` for briefs, provenance, verification, and git ownership.
 
-- Every dispatch prompt names: scope, explicit file allowlist, Do-NOTs, success criteria with verification commands, and a required report format. An agent needing an out-of-allowlist file stops and reports; the orchestrator re-scopes — agents never expand their own scope.
-- Provenance snapshot before dispatch (see "Parallel work in the worktree" in `principles.md`); after each pass, diff against snapshot + allowlist before proceeding.
-- Implementation agents leave changes unstaged; the orchestrator owns staging and commits.
-- Local verification follows `codex-delegation.md` "Post-run discipline": the implementer runs its scoped checks and the invoker runs the full pre-commit gate. Independent judgment is a separate review decision under `model-selection.md` "External calls", not a required extra agent for verification.
 - Concurrency: follow `model-selection.md` "Subagent fan-out". Hard rules on top: parallel WRITERS must have disjoint file allowlists and be told about each other (foreign typecheck errors = environmental, report don't fix); sequential whenever a verification gate needs clean failure attribution. Codex keeps its own limit (see `codex-delegation.md`) — that one is real process contention.
 
-## Background dispatch loop guard (hard — 2026-07-29 incident)
+## Background dispatch loop guard
 
-A Hermes session degenerated into a loop: it re-issued an identical background `claude -p --resume` dispatch **~440 times over 59m43s** (one every 6–10s, all resuming the same Fable session) instead of waiting for the first run, which had already written its answer to disk in 7 minutes — each new spawn then truncated that output. Cost: ~3.4M output tokens plus ~275M cached input tokens, 4 spawns hitting the monthly spend limit, concurrent resumes clobbering one session's context, and an hour of user silence. A `/steer` was delivered and ignored; only the user's `/stop` ended it. A behavioral note alone would not have stopped it — enforcement is mechanical:
+Enforcement is mechanical (why: rationale.md#dispatch-loop):
 
 - **Mechanical enforcement (authoritative): a `pre_tool_call` hook** — `~/.hermes/scripts/dispatch_guard_hook.py`, registered via a `hooks:` block in `~/.hermes/config.yaml`. It blocks a duplicate dispatch against an in-flight `--resume` session, normalized-argv duplicates, >10 LLM-CLI dispatches per rolling 10 minutes, >4 concurrent, and a hard ceiling of 60/day. Decisions logged to `~/.hermes/logs/dispatch-guard-audit.jsonl`. `max_turns` stays at 1000 deliberately — rate, not turn count, is the guarded axis. A guard denial means stop and report; never retry or route around it.
 - **All background LLM CLI invocations (`claude -p`, `codex exec`) from Hermes go through `~/.hermes/scripts/llm_dispatch.sh`.** Semantics: signature lock per normalized command + session-ID lock for `--resume`; a duplicate dispatch while running waits on / reads the original's output instead of spawning; a completed result is returned from disk; >3 attempts per signature per day trips a loud circuit breaker. See `~/.hermes/scripts/README-dispatch-guard.md`. This is the idempotency primitive, not the enforcement layer — it only helps when the caller routes through it.
-- No `approvals.deny` backstop, and none is possible: deny matching is fnmatch globs on the full command string and structurally cannot distinguish background from foreground, so a deny glob would block legitimate interactive use too (verified against `hermes-agent/tools/approval.py` + `terminal_tool.py`, 2026-07-29; re-confirmed 2026-07-30). Any doc claiming a deny backstop is wrong.
+- No `approvals.deny` backstop, and none is possible: its globs cannot distinguish background from foreground. Any doc claiming a deny backstop is wrong.
 - Agent rule on top: after dispatching a background process, the next action is poll/wait/report — never re-dispatch an identical command. If a re-dispatch seems necessary, read the output file and `process list` first; identical-command re-issue is the loop signal.
 
 ## Auth doctrine (hard rules)
@@ -213,7 +174,3 @@ A Hermes session degenerated into a loop: it re-issued an identical background `
 - Claude seating: `model-selection.md` "Harness seats" and "Roster".
 - `claude -p` waiting, diagnostics, and termination follow the process lifecycle in `codex/model-defaults.md`.
 - `claude -p` reported `total_cost_usd` is API-equivalent accounting against quota, not real billing.
-
-## Refinement
-
-This is v2 (June 2026). Replaces the v1 two-track model that incorrectly referenced ACP transports. As patterns emerge, update this doc.

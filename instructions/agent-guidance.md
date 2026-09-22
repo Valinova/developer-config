@@ -34,5 +34,3 @@ or auditing guidance.
 ## Sources and further reading
 
 - Kun Chen, [Your AGENTS.md Is a Neural Net](https://blog.kunchenguid.com/p/your-agentsmd-is-a-neural-net)
-- Add future studies, evaluations, and contrary evidence here as the practice
-  evolves.

@@ -39,12 +39,13 @@ instructions/               The doctrine. One owner per fact.
                             codex exec: brief grammar, SUMMARY contract, per-caller
                             wrappers, registry. Claude Code reads it on dispatch.
   git-operations.md         Git, branch, worktree, and commit operations: permissions,
-                            backstop tiers, commit hygiene, rebase policy, durable worktrees.
+                            backstop tiers, commit hygiene, rebase policy.
                             Always-loaded in Claude Code and Grok Build; principles §7 points here.
   agent-guidance.md         How to optimize AGENTS.md/CLAUDE.md and routed guidance.
                             Reference, not auto-loaded.
   rationale.md              Incident and reasoning archive, not auto-loaded.
-  token-efficiency.md       Metered-orchestrator context discipline. Reference, not auto-loaded.
+  durable-worktrees.md      Layout, naming, and reuse of durable git worktrees.
+                            Reference, read before creating or repurposing one.
 claude-root.md              Becomes ~/.claude/CLAUDE.md via symlink. Pure @imports —
                             holds no rules of its own.
 SETUP.md                    The wiring contract + verification checklist. An agent on

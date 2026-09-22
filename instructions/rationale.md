@@ -1,8 +1,7 @@
 # Rationale and incident archive
 
 Not loaded into any session. Each entry is the story behind a rule that lives
-in `principles.md`, `model-selection.md`, `codex-delegation.md`, or
-`claude-conventions.md`; the loaded rule points here as
+in the instruction file named by its section heading; the rule points here as
 `(why: rationale.md#<heading>)`. Headings are stable anchors — rename one only
 together with its pointers. Entries hold stories, dates, and
 measurements; a one-clause reason that clarifies scope or failure mode stays
@@ -18,11 +17,6 @@ apply while writing rather than in a later cleanup. Splitting one hard
 function into pass-through wrappers lowers the line count and the lint score
 while making the code worse. A senior engineer's "overcomplicated" is the
 smell test because it is the review that actually happens.
-
-### surgical-changes
-
-Indices diverge silently when lists are sorted, filtered, or paginated; only
-IDs survive that, which is why records are matched by ID.
 
 ### parallel-worktree-wip
 
@@ -42,11 +36,6 @@ to tell them apart. Proposals go in a labeled slot — `OUT_OF_SCOPE_FINDINGS`,
 or a patch file named there — and land only when the user applies them. The
 blast-radius trigger keeps the loop useful; without it the slot fills with
 idle-pass noise nobody reads.
-
-### success-criteria
-
-Strong success criteria let an agent iterate independently. Weak ones ("make
-it work") force constant check-ins.
 
 ### pre-commit-gate
 
@@ -80,30 +69,6 @@ regression is just more code to maintain.
 An obvious failure surfaced at dev time is cheaper than a silent wrong answer
 observed in production days later.
 
-### branch-switches
-
-The user works across branches and worktrees in parallel. An agent switched
-branch without asking and changed the directory under the user's feet mid-work.
-Hence: ask first, every time, for any branch or worktree the agent chose.
-
-### worktree-identity
-
-Worktrees share the main repo's `.git/config`. An agent ran
-`git config user.*` inside a throwaway worktree and silently clobbered the
-real identity for every checkout of that repo. Hence per-invocation `-c`
-scoping only, and a `git config user.email` check after removing a scratch
-worktree.
-
-### remote-ops
-
-Remotes may be authenticated, so a remote write will actually go through;
-there is no sandbox catching a wrong push.
-
-### rebase-over-merge
-
-We are a small team with minimal conflicts, so rebasing carries little
-resolution cost and keeps history linear and free of update-merge bubbles.
-
 ### idle-pass
 
 Doing work "just to do stuff" burns tokens and review attention. Idle-pass
@@ -129,6 +94,32 @@ which is why a repeatedly violated UI rule graduates into a mechanical check
 (§11). `<details>` is not where unjustifiable content hides. A raw UUID means
 nothing to a user. A second route or `-v2` component rendering the same data
 is a fork that rots both halves.
+
+## git-operations.md
+
+### branch-switches
+
+The user works across branches and worktrees in parallel. An agent switched
+branch without asking and changed the directory under the user's feet mid-work.
+Hence: ask first, every time, for any branch or worktree the agent chose.
+
+### worktree-identity
+
+Worktrees share the main repo's `.git/config`. An agent ran
+`git config user.*` inside a throwaway worktree and silently clobbered the
+real identity for every checkout of that repo. Hence per-invocation `-c`
+scoping only, and a `git config user.email` check after removing a scratch
+worktree.
+
+### remote-ops
+
+Remotes may be authenticated, so a remote write will actually go through;
+there is no sandbox catching a wrong push.
+
+### rebase-over-merge
+
+We are a small team with minimal conflicts, so rebasing carries little
+resolution cost and keeps history linear and free of update-merge bubbles.
 
 ## model-selection.md
 
@@ -297,6 +288,14 @@ use (2026-07-16) and was reverted. The PreToolUse hook
 2026-07-27) enforces dispatch shape deterministically in every permission mode
 including bypass.
 
+### leaf-side-effects
+
+2026-09-06: a phase 2 implementer pushed a half-built schema to a shared dev
+slot with a codegen command no brief had forbidden. A leaf that is not told
+which commands deploy, migrate, or write a shared environment discovers the
+side effect by causing it — hence the brief's Do NOT list names them, sourced
+from the repo's own environment docs.
+
 ### pattern-kill
 
 2026-07-14: a `pkill -f "codex exec"` took down an unrelated session's task.
@@ -339,6 +338,24 @@ not "kill it".
 `claude-exec.sh` is deliberately simpler than the Codex wrappers: `claude -p`
 has no stdin hang, no sandbox, and can write `.git/`, so the wrapper needs no
 stdin redirect and no sandbox flag — only the same git policy by brief.
+
+## coding-orchestration.md
+
+### dispatch-loop
+
+2026-07-29: a Hermes session re-issued an identical background
+`claude -p --resume` dispatch ~440 times over 59m43s (one every 6–10s, all
+resuming the same Fable session) instead of waiting for the first run, which
+had written its answer to disk in 7 minutes — each new spawn truncated that
+output. Cost: ~3.4M output tokens plus ~275M cached input tokens, 4 spawns
+hitting the monthly spend limit, concurrent resumes clobbering one session's
+context, and an hour of user silence. A `/steer` was delivered and ignored;
+only the user's `/stop` ended it. A behavioral note alone would not have
+stopped it, which is why enforcement is a mechanical `pre_tool_call` hook.
+`approvals.deny` cannot serve as a backstop: its fnmatch globs on the full
+command string cannot distinguish background from foreground (verified
+against `hermes-agent/tools/approval.py` + `terminal_tool.py`, 2026-07-29 and
+2026-07-30).
 
 ## claude-conventions.md
 

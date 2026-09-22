@@ -9,11 +9,10 @@ reasoning and incident history behind a rule live in
 
 ## 1. Think before coding
 
-- When the ask is genuinely ambiguous, present the interpretations and ask. Trivial ambiguity gets a stated default, not a question.
+- When the ask is genuinely ambiguous, present the interpretations and ask. Trivial ambiguity gets a stated default, not a question. When one option is clearly right, take it and state it; reserve questions for genuine judgment calls where the trade-off is mine to weigh (the interactive mirror of §4's escalation bar).
 - If a simpler approach exists than the one asked for, say so before implementing.
 - For exploratory questions ("what could we do?"), give 2–3 sentences with a recommendation and the main tradeoff. Don't implement until they agree.
 - **Ideation and planning are visual-first.** When explaining a flow, architecture, or set of options to me, lead with a diagram (ASCII or mermaid, whatever the medium renders) plus concise prose. Decision material is explicit trade-offs, stated objectively, so the judgment is mine. LLM-facing implementation documents use whatever format the consuming agent reads best.
-- **Only escalate real trade-offs.** When one option is clearly right, take it and state it. Reserve questions for genuine judgment calls where the trade-off is mine to weigh (the interactive mirror of §4's escalation bar).
 
 ## 2. Simplicity first
 
@@ -26,21 +25,13 @@ reasoning and incident history behind a rule live in
 
 ### The decision ladder
 
-Run it after you understand the problem, not instead of it. If the behaviour is unnecessary, omit it. Otherwise take the first option that satisfies the required contract; when two do, take the higher one.
-
-1. An existing owner in this codebase — reuse the helper or pattern. Re-implementing what sits a few files over is the most common slop.
-2. Stdlib.
-3. Native platform feature — an HTML element, CSS, a DB constraint — over app code.
-4. An already-installed dependency.
-5. Direct expression: the logic written plainly, no layer around it.
-6. Only then: minimum custom code.
+Once the problem is understood and the behaviour is needed, take the first option that satisfies the contract: an existing owner in this codebase → stdlib → native platform feature (HTML element, CSS, DB constraint) → an already-installed dependency → the logic written plainly → only then minimum custom code.
 
 ## 3. Surgical changes
 
 - Every changed line traces to the user's request. Don't "improve" adjacent code, formatting, or comments.
 - Remove orphans YOUR change created (unused imports, variables). Don't delete pre-existing dead code unless asked — mention it if you notice it.
 - Don't rename, re-export, or add back-compat shims for code you've removed. Just delete it.
-- When crossing arrays, match records by ID, never by index position. (why: rationale.md#surgical-changes)
 
 ### Parallel work in the worktree
 
@@ -54,9 +45,8 @@ I often work in parallel in the same worktree. Uncommitted changes that don't tr
 
 ## 4. Goal-driven execution
 
-- Turn imperative tasks into verifiable goals: "fix the bug" → a test that reproduces it, then make it pass; "add validation" → tests for invalid inputs, then make them pass; "refactor X" → tests green before and after.
-- For multi-step work, state a brief plan with a verification check per step, then loop against it. Success criteria must be strong enough to iterate against without check-ins. (why: rationale.md#success-criteria)
-- **Escalation bar (autonomous workflows):** under granted autonomy (execute-plan, rev, longrun, delegated runs), escalate to me only decisions that cannot be established from the request, the code, or the plan AND would be costly to undo if wrong — and lead with a recommendation and the key tradeoff. Everything else: take the best-supported default and record it in the final report. A decision both reviewers agree on is made, not deferred. (§1's ask-first stance governs interactive work; this bar governs granted autonomy.)
+- For multi-step work, state a brief plan with a verification check per step, then loop against it. Success criteria must be strong enough to iterate against without check-ins.
+- **Escalation bar (autonomous workflows):** under granted autonomy (execute-plan, rev, longrun, delegated runs), escalate to me only decisions that cannot be established from the request, the code, or the plan AND would be costly to undo if wrong — and lead with a recommendation and the key tradeoff. Everything else: take the best-supported default and record it in the final report. A decision the cross-family reviewer agrees with is made, not deferred. (§1's ask-first stance governs interactive work; this bar governs granted autonomy.)
 - **Pre-commit gate: run the project's FULL verification battery, not the quick loop.** Before EVERY commit, run the project's full check command (e.g. `pnpm run check` or full `lint`). Quick linters skip the custom/architecture rules; the quick loop is for mid-edit iteration only. (why: rationale.md#pre-commit-gate)
 
 ### Tests: value, not coverage
@@ -73,20 +63,11 @@ I often work in parallel in the same worktree. Uncommitted changes that don't tr
 
 ### Ship gate: beneficial + no open regression (plan and finalize)
 
-Ask at **planning** and again when **finalizing** (ready PR / merge recommendation):
+At **planning** and again when **finalizing** (ready PR / merge recommendation), name the real benefit (not theater or metric cosmetics) and the surfaces it could regress (shared mocks, list universes, sibling callers, public contracts).
 
-1. **Is this change clearly beneficial?** Real harm reduced or capability added — not theater, drive-by cleanup, or metric cosmetics.
-2. **What could it regress?** Shared mocks, search/list universes, projectors, sibling callers, public contracts. Name the surface.
+**Do not ship with a known regression** — close it in the same change, or stop and replan. If residual risk is real and still accepted (rare, explicit), the plan and the PR/brief state **why** it was accepted, **how** it is tested (a browser smoke when the risk is UI-only — §9), and **how** we know nothing regressed (named suite, check command, or smoke path).
 
-**Default:** do not ship with a known regression. Close it in the same change, or stop and replan. "We'll fix it later" is not a finalize answer.
-
-**If residual regression risk is real and still accepted** (rare, explicit), the plan and the PR/brief must state all three:
-
-1. **Why** we accepted it
-2. **How** we are testing it (unit/integration; browser/computer-use smoke when the risk is UI-only — §9)
-3. **How** we know nothing regressed (named suite, check command, or smoke path)
-
-Repo foundation docs (e.g. `docs/architecture/*.md`) define the shape the fix must live in — simplest solution inside that shape, not a shortcut that violates it.
+Repo foundation docs (e.g. `docs/architecture/*.md`) define the shape the fix must live in — simplest solution inside that shape.
 
 ## 5. Canonical sources of truth
 
@@ -103,14 +84,13 @@ Repo foundation docs (e.g. `docs/architecture/*.md`) define the shape the fix mu
 
 ## 7. Branch, worktree & commit management
 
-Git, branch, worktree, and commit operations — permissions, the backstop hook, commit hygiene, rebase policy, durable worktrees — are owned by `instructions/git-operations.md`. Read it before any git write. The invariant that stays here: **explicit direction IS the approval; anything unrecoverable requires my approval.**
+Git, branch, worktree, and commit operations — permissions, the backstop hook, commit hygiene, rebase policy — are owned by `instructions/git-operations.md`; durable worktree layout by `instructions/durable-worktrees.md`. Read it before any git write. The invariant that stays here: **explicit direction IS the approval; anything unrecoverable requires my approval.**
 
 ## 8. High-value bias (80/20)
 
 - If 20% of the effort captures 80% of the value, that is the intended default scope. Go for the full solution only when the foundation genuinely needs it (entropy at scale, canonical-owner consolidation, regression safety on critical paths).
-- Every proposed piece of work names its blast radius — what breaks or degrades if it isn't done. No blast radius, no work item.
+- Every proposed piece of work names its blast radius — what breaks or degrades if it isn't done. No blast radius, no work item. (why: rationale.md#idle-pass)
 - Size a fix to the code's remaining life. A one-shot migration, tear-down, or backfill that runs once and is then deleted gets the smallest shape that completes that run; permanent indexes, general contracts, and proof systems are for code that stays. A subagent's recommendation is input to this sizing, never the plan.
-- Idle-pass output is worse than no output. (why: rationale.md#idle-pass)
 
 ## 9. Verify cheap first — ask before driving a browser
 
@@ -124,7 +104,7 @@ When writing React, don't sync state with `useEffect`. Derive from state/props i
 
 ## 11. Entropy control
 
-Entropy is the accumulation of small "fine for now" compromises. (why: rationale.md#entropy)
+(why: rationale.md#entropy)
 
 - Follow the codebase's existing pattern, even when you'd do it differently. Don't introduce a second competing pattern for something that already has one — if the new way is genuinely better, say so and migrate fully, or don't introduce it. If the task seems to demand a pattern the codebase doesn't have, name it and ask.
 - When your change forces an awkward fit — a hack, a parameter threaded through layers, a special case — name it in your summary instead of burying it.
@@ -147,7 +127,3 @@ The default audience is a non-technical user. (why: rationale.md#ui-drift)
 ## Plugin usage
 
 Use plugins or plugin-provided skills only when I request the plugin or skill by name; default to built-in/local tools and repository context. I often run tools such as CodeRabbit separately.
-
-## Tradeoff note
-
-Bias toward caution over speed on non-trivial work — a sloppy mistake costs more than a slow pass. For trivial tasks (typos, obvious one-liners), use judgment.

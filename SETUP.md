@@ -404,7 +404,7 @@ instructions/codex-delegation.md    orchestrators only (Claude / Hermes / Grok B
                                     Claude Code reads it on dispatch (not auto-loaded);
                                     Grok reads it on dispatch (not linked)
 instructions/coding-orchestration.md Hermes farm doctrine — linked, not auto-loaded
-instructions/token-efficiency.md     reference, not auto-loaded
+instructions/durable-worktrees.md    reference, not auto-loaded
 ```
 
 Repo-level guidance is separate and inherited automatically: each repo keeps

@@ -22,14 +22,9 @@ rationale.md#prompt-cache-heartbeat).
   longer than an hour with no other turn expected — a long Codex/pi/`claude -p`
   run, a slow migration, a live proof. Ordinary waits need nothing: the
   completion notification is itself the next request.
-- **How:** `ScheduleWakeup` with `delaySeconds` of 3000 (50 min, not 59) and
-  `noop: true`. The wake-up prompt does exactly one thing — check the run's
-  status (`codex-status.sh <task>` or the equivalent) — and either reschedules
-  the same heartbeat if still running or **stops the loop**
-  (`ScheduleWakeup stop: true`) and proceeds with the post-run work.
-- **Always remove it.** The heartbeat exists for one named run: stop it in the
-  same turn the run closes, fails, or is abandoned, never reschedule it "in
-  case." Before ending any turn with a heartbeat armed, name the run it waits
-  on; if you cannot, stop the loop.
-- **Never** schedule wakeups to poll work the harness already notifies on, and
-  never at intervals shorter than the run's own horizon.
+- **How:** `ScheduleWakeup`, `delaySeconds: 3000`, `noop: true`. Each wake
+  checks the run's status (`codex-status.sh <task>` or equivalent) and either
+  reschedules or stops the loop (`stop: true`) and proceeds.
+- **Always remove it.** One heartbeat per named run; stop it the turn the run
+  closes, fails, or is abandoned. If you cannot name the run it waits on, stop
+  it. Never poll work the harness already notifies on.
