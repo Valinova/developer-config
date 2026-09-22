@@ -75,6 +75,17 @@ assert_eq "$(python3 "$PY_LIB" thread-id "$TMP_ROOT/missing.log")" "" "missing l
 assert_eq "$(python3 "$PY_LIB" json-events "$TMP_ROOT/missing.log")" "0" "missing log events"
 pass "thread-id, final message and event count read from a realistic stream"
 
+# an escaped quote, a newline and a backslash survive whole (the regex
+# extractor used to stop at the first \")
+ESC_LOG="$TMP_ROOT/escaped.log"
+cat > "$ESC_LOG" <<'LOGEOF'
+{"type":"item.completed","item":{"id":"item_17","type":"agent_message","text":"1. Minimal fix: invokes \"full docs\" or \"full-docs\".\n2. path C:\\tmp\\x end"}}
+LOGEOF
+assert_eq "$(python3 "$PY_LIB" final-message "$ESC_LOG")" \
+  "$(printf '%s\n%s' '1. Minimal fix: invokes "full docs" or "full-docs".' '2. path C:\tmp\x end')" \
+  "final-message keeps escapes"
+pass "final message decoded as JSON, not regex-sliced"
+
 # ─── 3: readers accept legacy log_file lines and never rewrite them ───
 echo "test: legacy line acceptance"
 LEGACY="$TMP_ROOT/legacy.jsonl"

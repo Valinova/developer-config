@@ -10,7 +10,7 @@ Two wrapper families dispatch `codex exec` and write to ONE registry at
               deployed as ~/.claude/scripts/*)
 
 They had drifted on the three things they share: the registry line grammar, the
-thread-id / final-message extraction regexes, and the dispatch-hygiene constants.
+thread-id / final-message extraction, and the dispatch-hygiene constants.
 This module owns all three. It lives in developer-config because that is the
 always-present home — the Claude wrappers must work on a machine with no Hermes
 install, so the dependency points only in this direction (Hermes → here).
@@ -73,9 +73,6 @@ SOURCES = ("hermes", "claude-code")
 # `codex exec resume` expects. Never derive it from "newest rollout file on
 # disk" — that picks the wrong session when runs overlap.
 THREAD_ID_RE = re.compile(r'"thread_id":"([0-9a-f-]{36})"')
-AGENT_MSG_RE = re.compile(
-    r'"type":"item\.completed","item":\{"id":"item_\d+","type":"agent_message","text":"([^"]*)"'
-)
 
 # Registry values that arrive from shell as strings but belong in the JSONL as
 # numbers/bools.
@@ -179,17 +176,24 @@ def extract_session_id(log_path) -> str:
 
 
 def extract_final_message(log_path) -> str:
-    """The last agent_message text in a --json log, with \\n unescaped."""
+    """The last agent_message text in a --json log, JSON-decoded."""
     last = ""
     try:
         with open(log_path) as f:
             for line in f:
-                m = AGENT_MSG_RE.search(line)
-                if m:
-                    last = m.group(1)
+                if '"agent_message"' not in line:
+                    continue
+                try:
+                    event = json.loads(line)
+                except ValueError:
+                    continue
+                item = event.get("item") if isinstance(event, dict) else None
+                if (isinstance(item, dict) and event.get("type") == "item.completed"
+                        and item.get("type") == "agent_message"):
+                    last = item.get("text", "")
     except OSError:
         return ""
-    return last.replace("\\n", "\n")
+    return last
 
 
 def count_json_events(log_path) -> int:
