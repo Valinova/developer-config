@@ -1,7 +1,8 @@
 # Full Documentation Review
 
-Shared body for every harness's `full-docs` skill; the invoking stub names the
-harness's audit and reviewer seats and model card.
+Shared body for every harness's `full-docs` skill. Seats, lanes, and the reviewer
+come from `model-selection.md` "Harness seats"; IDs, wrappers, and sandbox
+limits from the harness's model card.
 
 Run the `docs` skill (`always/skills/docs/SKILL.md`) over every core document
 in the repository — not only the ones the branch touched — then validate the

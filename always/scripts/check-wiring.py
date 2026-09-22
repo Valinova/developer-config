@@ -61,7 +61,7 @@ LINKS = {
 
 # Repo-maintenance scripts run from the checkout (by hand or CI), never linked
 # into a harness.
-REPO_ONLY_SCRIPTS = {Path(__file__).name, "check-private-terms.sh"}
+REPO_ONLY_SCRIPTS = {Path(__file__).name, "check-private-terms.sh", "check-workflow-stubs.py"}
 
 DIRECTORIES = {
     "Claude": (

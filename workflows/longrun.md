@@ -1,7 +1,8 @@
 # Long Run
 
-Shared body for every harness's `longrun` skill; the invoking stub names the
-harness's seats and model card. Each stage runs this harness's own skill of
+Shared body for every harness's `longrun` skill. Seats, lanes, and the reviewer
+come from `model-selection.md` "Harness seats"; IDs, wrappers, and sandbox
+limits from the harness's model card. Each stage runs this harness's own skill of
 that name.
 
 Run the full delivery pipeline autonomously. Invoking this workflow authorizes

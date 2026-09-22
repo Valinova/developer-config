@@ -1,7 +1,8 @@
 # Adversarial Review
 
-Shared body for every harness's `rev` skill; the invoking stub names the
-harness's reviewer and implement seats and model card.
+Shared body for every harness's `rev` skill. Seats, lanes, and the reviewer
+come from `model-selection.md` "Harness seats"; IDs, wrappers, and sandbox
+limits from the harness's model card.
 
 Review the committed branch. This workflow IS the diff review
 (`model-selection.md` "External calls"), independently runnable and also the

@@ -1,7 +1,8 @@
 # Babysit
 
-Shared body for every harness's `babysit` skill; the invoking stub names the
-harness's implement seat, model card, and long-wait mechanism.
+Shared body for every harness's `babysit` skill. Seats, lanes, and the reviewer
+come from `model-selection.md` "Harness seats"; IDs, wrappers, and sandbox
+limits from the harness's model card.
 
 Refine the current branch's open pull request until it is merge-ready. This
 workflow is independently runnable and is also the final stage composed by
@@ -22,8 +23,8 @@ as one signal and combines any needed changes into at most one push.
    CodeRabbit posts one only when it has findings; a pass with no review is a
    settled, clean round. Poll read-only with `gh` (`gh pr checks`, `gh api`);
    a poll that keys on a review object appearing on the new head never
-   satisfies after a clean push. A wait past an hour uses the harness's
-   long-wait mechanism (stub); never report while either is still pending.
+   satisfies after a clean push. Never report while either is still pending.
+   Claude Code: a wait past an hour uses the `ScheduleWakeup` heartbeat (`claude-conventions.md` "Prompt-cache heartbeat during long waits"), stopped the moment the round resumes; elsewhere: keep polling (`gh pr checks --watch`, `gh api`).
 2. **Triage.** Red checks get fixed. Every CodeRabbit finding is accepted,
    declined with a reason, or deferred to the user in the report — the
    orchestrator's call under the principles §4 escalation bar. There is no

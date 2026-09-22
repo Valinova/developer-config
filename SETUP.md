@@ -64,7 +64,7 @@ linked into `~/.claude/scripts/`: the `PreToolUse` hooks in `always/settings.jso
 invoke them by absolute repo path, so per-file links would be dead weight.
 `always/scripts/lib/` — the shared `wrapper-common`, `codex_registry` and `claude-registry`
 owners — is likewise not linked; the wrappers source it by repo path at
-runtime. `check-wiring.py` and `check-private-terms.sh` are likewise unlinked —
+runtime. `check-wiring.py`, `check-private-terms.sh` and `check-workflow-stubs.py` are likewise unlinked —
 the Verification section and CI invoke them by repo path. Every other file directly in `always/scripts/`,
 excluding all `test_*.py` files and scripts referenced by the settings `hooks`
 block, is linked into `~/.claude/scripts/` for invocation on `PATH`.
@@ -353,6 +353,7 @@ a second owner; a deliberate override must be labeled as one).
 - [ ] `python3 always/scripts/check-wiring.py` exits 0.
       On Hermes installs, this includes `agentplan`, `execute-plan`, `rev`,
       `babysit`, `longrun`, and shared `docs` under `skills/software-development/`.
+- [ ] `python3 always/scripts/check-workflow-stubs.py` exits 0 (every delivery-skill stub points at an existing `workflows/*.md`).
 - [ ] `~/.codex/AGENTS.md` resolves to a file whose first line is `# Engineering principles`
 - [ ] `~/.codex/config.toml` retains all machine-owned settings after merging.
 - [ ] *If Grok Build is installed:* `grok --version` and `grok models` succeed under the machine-local Grok login.

@@ -1,7 +1,8 @@
 # Agent Plan
 
-Shared body for every harness's `agentplan` skill; the invoking stub names the
-harness's seats and model card.
+Shared body for every harness's `agentplan` skill. Seats, lanes, and the reviewer
+come from `model-selection.md` "Harness seats"; IDs, wrappers, and sandbox
+limits from the harness's model card.
 
 Produce a phased implementation plan from the agreed direction. Do not
 implement it. This workflow's gate is the plan/scope review

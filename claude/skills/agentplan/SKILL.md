@@ -3,11 +3,11 @@ name: agentplan
 description: Produces and reviews a phased implementation plan without implementing it. Use only when the user explicitly asks for "agentplan", "agent plan", or "agent-plan".
 ---
 
-# Agent Plan — Claude
+# Agent Plan
 
-Read `~/Development/developer-config/workflows/agentplan.md` and follow it.
-This stub carries only the Claude facts that body defers to:
+Read `~/Development/developer-config/workflows/agentplan.md` and follow it. If you
+cannot read that file, stop and say so — do not improvise the workflow.
 
-- Orchestrator: Fable 5.1 (`model-selection.md` "Harness seats", Claude Code row).
-- Implement lane: Opus 5.5 — a native `Agent` (inherits the session rung) or `claude-exec.sh --model opus --effort <rung>` when the rung differs; Astra (Codex wrappers) or Grok (`pi-exec.sh`) only when the user names one.
-- Reviewer seat (default): Astra via the Codex wrappers (`codex-delegation.md`).
+Seats, lanes, and the reviewer come from `model-selection.md` "Harness seats"
+for this harness's family; IDs, wrappers, and sandbox limits come from this
+harness's model card.

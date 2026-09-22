@@ -1,7 +1,8 @@
 # Execute Plan
 
-Shared body for every harness's `execute-plan` skill; the invoking stub names
-the harness's implement lane and model card.
+Shared body for every harness's `execute-plan` skill. Seats, lanes, and the reviewer
+come from `model-selection.md` "Harness seats"; IDs, wrappers, and sandbox
+limits from the harness's model card.
 
 Implement the approved plan only. Plan generation, the final review, push, and
 PR creation belong to their own workflows.
@@ -42,6 +43,7 @@ reviewer by the actual author's family under `model-selection.md` "External
 calls".
 
 Keep writing passes sequential unless their file allowlists are disjoint.
+Pi: genuinely parallel passes use `Agent` worktree isolation.
 Continue through every phase; noncritical choices take defaults recorded in
 the final report (principles §4 "Escalation bar").
 
