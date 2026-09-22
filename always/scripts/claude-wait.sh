@@ -31,34 +31,6 @@ set -euo pipefail
 # shellcheck source=lib/claude-registry.sh
 source "$(python3 -c 'import os,sys; print(os.path.dirname(os.path.realpath(sys.argv[1])))' "${BASH_SOURCE[0]}")/lib/claude-registry.sh"
 
-POLL_INTERVAL=5
-
-if [[ $# -lt 1 || $# -gt 2 ]]; then
-  echo "Usage: claude-wait.sh <task-name> [timeout-seconds]" >&2
-  exit 1
-fi
-
-TASK="$1"
-TIMEOUT="${2:-3600}"
-
-if [[ ! -f "$CLAUDE_REGISTRY" ]]; then
-  echo "claude-wait.sh: registry not found at $CLAUDE_REGISTRY" >&2
-  exit 2
-fi
-
-start=$(date +%s)
-while true; do
-  run="$(current_run_lines "$TASK")"
-  if printf '%s\n' "$run" | grep -q '"status":"closed"'; then
-    exit 0
-  fi
-  if printf '%s\n' "$run" | grep -Eq '"status":"(failed|stalled)"'; then
-    echo "claude-wait.sh: task '$TASK' reached a failure terminal. See /tmp/claude-${TASK}.log" >&2
-    exit 4
-  fi
-  if [[ "$TIMEOUT" -gt 0 ]] && (( $(date +%s) - start >= TIMEOUT )); then
-    echo "claude-wait.sh: timeout after ${TIMEOUT}s waiting for task '$TASK' to close" >&2
-    exit 3
-  fi
-  sleep "$POLL_INTERVAL"
-done
+WRAPPER="claude-wait.sh"
+AGENT="claude"
+wait_main "$CLAUDE_REGISTRY" "failed|stalled" "" "$@"

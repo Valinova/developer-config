@@ -2,27 +2,11 @@
 #
 # codex-exec.sh — standard wrapper for delegating tasks to codex exec.
 #
-# Solves the known failure modes from 2026-04-15 session:
-# - Backgrounded `codex exec` hangs silently waiting for stdin EOF.
-#   Wrapper always redirects stdin from /dev/null.
-# - Registry entries forgotten after completion. Wrapper appends start
-#   and close records to ~/.hermes/state/codex-sessions.jsonl (durable,
-#   shared with Hermes). In background mode, a subshell waits for codex
-#   to exit and writes the close event (with session_id) so resume
-#   lookups by task name work.
-# - Silent stdin hangs went undetected for 46+ minutes. Wrapper runs a
-#   health check: if no JSON events are written within 45s of dispatch,
-#   the run is killed and flagged as "stalled" in the registry.
-#
-# No result-file generation: codex already persists the full session
-# transcript at ~/.codex/sessions/<date>/rollout-<ts>-<uuid>.jsonl, and
-# the per-run log at /tmp/codex-<task>.log contains the same JSON event
-# stream the wrapper reads. Duplicating those into an MD file only adds
-# commit-risk without new information. Use `codex-resume.sh <task>` to
-# follow up; use the log path for debugging.
+# Why the stdin redirect, durable registry and 45s health check:
+# instructions/codex-delegation.md "Caller: Claude Code and Grok Build".
 #
 # Usage:
-#   codex-exec.sh <task-name> <brief-path> [--foreground] [--log <path>] [--service-tier TIER]
+#   codex-exec.sh <task-name> <brief-path> [--foreground] [--model SLUG] [--effort LEVEL] [--service-tier TIER]
 #
 # Defaults:
 #   - Background dispatch (caller is the calling agent / shell).
@@ -35,7 +19,7 @@
 #   3  codex CLI missing
 #   4  health check failed (task killed)
 #
-# Read the companion notes in ~/.claude/CLAUDE.md under "Codex delegation".
+# Read the companion notes in instructions/codex-delegation.md.
 
 set -euo pipefail
 
@@ -44,14 +28,13 @@ set -euo pipefail
 TASK=""
 BRIEF=""
 MODE="background"
-LOG_OVERRIDE=""
 MODEL="gpt-6-astra"
 EFFORT="high"
 SERVICE_TIER="default"
 
 usage() {
   cat >&2 <<EOF
-Usage: codex-exec.sh <task-name> <brief-path> [--foreground] [--model SLUG] [--effort LEVEL] [--service-tier TIER] [--log <path>]
+Usage: codex-exec.sh <task-name> <brief-path> [--foreground] [--model SLUG] [--effort LEVEL] [--service-tier TIER]
 
 Arguments:
   <task-name>     Short identifier, used in the log file name and registry.
@@ -64,8 +47,6 @@ Options:
   --service-tier TIER
                   Service tier for this run. Default: default.
                   Pass "priority" for the Fast (2x) tier.
-  --log PATH      Override default log file.
-                  Default: /tmp/codex-<task-name>.log
 EOF
   exit 1
 }
@@ -76,28 +57,16 @@ BRIEF="$1"; shift
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --foreground) MODE="foreground"; shift ;;
-    --model)
+    --model|--effort|--service-tier)
       if [[ $# -lt 2 || -z "${2:-}" || "${2:-}" == --* ]]; then
-        echo "codex-exec.sh: --model requires a value" >&2
-        usage
+        echo "codex-exec.sh: $1 requires a value" >&2; usage
       fi
-      MODEL="$2"; shift 2
-      ;;
-    --effort)
-      if [[ $# -lt 2 || -z "${2:-}" || "${2:-}" == --* ]]; then
-        echo "codex-exec.sh: --effort requires a value" >&2
-        usage
-      fi
-      EFFORT="$2"; shift 2
-      ;;
-    --log) LOG_OVERRIDE="$2"; shift 2 ;;
-    --service-tier)
-      if [[ $# -lt 2 || -z "${2:-}" || "${2:-}" == --* ]]; then
-        echo "codex-exec.sh: --service-tier requires a value" >&2
-        usage
-      fi
-      SERVICE_TIER="$2"; shift 2
-      ;;
+      case "$1" in
+        --model) MODEL="$2" ;;
+        --effort) EFFORT="$2" ;;
+        --service-tier) SERVICE_TIER="$2" ;;
+      esac
+      shift 2 ;;
     *) echo "Unknown option: $1" >&2; usage ;;
   esac
 done
@@ -128,17 +97,21 @@ if [[ -f "$REPO_ROOT/.git" ]]; then
   echo "codex-exec.sh: NOTE — '$REPO_ROOT' is a git worktree; the index lives outside codex's sandbox. Delegated briefs must not stage in any case."
 fi
 
-DEFAULT_LOG="/tmp/codex-${TASK}.log"
-LOG_PATH="${LOG_OVERRIDE:-$DEFAULT_LOG}"
+WRAPPER="codex-exec.sh"
+LOG_PATH="/tmp/codex-${TASK}.log"
 
 # Shared primitives: registry line grammar, thread-id / agent-message
 # extraction, post-run summary, dispatch-hygiene constants. One owner for both
-# wrapper families — see lib/codex_registry.py.
+# wrapper families — see lib/codex_registry.py. Health-check loop:
+# lib/wrapper-common.sh.
 CODEX_SOURCE="claude-code"
+LIB_DIR="$(python3 -c 'import os,sys; print(os.path.dirname(os.path.realpath(sys.argv[1])))' "${BASH_SOURCE[0]}")/lib"
 # shellcheck source=lib/codex-registry.sh
-source "$(python3 -c 'import os,sys; print(os.path.dirname(os.path.realpath(sys.argv[1])))' "${BASH_SOURCE[0]}")/lib/codex-registry.sh"
+source "$LIB_DIR/codex-registry.sh"
+# shellcheck source=lib/wrapper-common.sh
+source "$LIB_DIR/wrapper-common.sh"
 
-mkdir -p "$(dirname "$LOG_PATH")" "$(dirname "$CODEX_REGISTRY")"
+mkdir -p "$(dirname "$CODEX_REGISTRY")"
 
 # ---- registry helpers ----
 
@@ -262,44 +235,8 @@ fi
 PID="$(dispatch_background)"
 echo "codex-exec.sh: task '$TASK' dispatched in background (pid $PID). Log: $LOG_PATH"
 
-# Health check: wait up to $CODEX_HEALTH_CHECK_SEC for the log to receive at least one
-# JSON event. If not, the run is almost certainly hung on stdin — kill it
-# and flag. The one-line "Reading additional input from stdin..." message
-# counts as 1 line but not as a JSON event.
-
-WAITED=0
-MAX_WAIT="$CODEX_HEALTH_CHECK_SEC"
-SLEEP_INTERVAL=5
-while (( WAITED < MAX_WAIT )); do
-  JSON_COUNT="$(count_json_events "$LOG_PATH")"
-  if (( JSON_COUNT > 0 )); then
-    echo "codex-exec.sh: health check ok — $JSON_COUNT event(s) emitted within ${WAITED}s"
-    register_session_id
-    exit 0
-  fi
-  sleep "$SLEEP_INTERVAL"
-  WAITED=$(( WAITED + SLEEP_INTERVAL ))
-  # Also break early if the process already exited (fast failure).
-  if ! kill -0 "$PID" 2>/dev/null; then
-    # Exited already; not stalled. Check log for hints.
-    JSON_COUNT="$(count_json_events "$LOG_PATH")"
-    if (( JSON_COUNT > 0 )); then
-      register_session_id
-      echo "codex-exec.sh: task finished before health-check window. Log: $LOG_PATH"
-      exit 0
-    fi
-    # Background subshell will also write a close event; this one narrates the
-    # early-exit failure mode so operators see it without hunting the registry.
-    register_close "failed" "exited before first JSON event"
-    echo "codex-exec.sh: task '$TASK' exited without emitting events. See $LOG_PATH" >&2
-    exit 4
-  fi
-done
-
-# Still no JSON events after MAX_WAIT seconds. Consider it stalled.
-# The worker is its own session/group leader (setsid): kill the whole
-# group so the codex child dies with the leader, not just the leader.
-kill -- "-$PID" 2>/dev/null || kill "$PID" 2>/dev/null || true
-register_close "stalled" "no JSON events within ${MAX_WAIT}s (likely stdin hang)"
-echo "codex-exec.sh: task '$TASK' stalled — no JSON events within ${MAX_WAIT}s. Killed pid $PID. See $LOG_PATH" >&2
-exit 4
+# Health check: wait up to $CODEX_HEALTH_CHECK_SEC for the log to receive at
+# least one JSON event. If not, the run is almost certainly hung on stdin —
+# kill it and flag. The one-line "Reading additional input from stdin..."
+# message counts as 1 line but not as a JSON event.
+health_check "$PID" "$CODEX_HEALTH_CHECK_SEC" count_json_events "JSON event" " (likely stdin hang)"

@@ -23,55 +23,15 @@
 
 set -euo pipefail
 
-REGISTRY="$HOME/.hermes/state/pi-sessions.jsonl"
-POLL_INTERVAL=5
-
-if [[ $# -lt 1 || $# -gt 2 ]]; then
-  echo "Usage: pi-wait.sh <task-name> [timeout-seconds]" >&2
-  exit 1
-fi
-
-TASK="$1"
-TIMEOUT="${2:-3600}"
-
-if [[ ! -f "$REGISTRY" ]]; then
-  echo "pi-wait.sh: registry not found at $REGISTRY" >&2
-  exit 2
-fi
-
-# The registry is append-only and durable across sessions, so a reused task
-# name still has a previous run's terminal line on disk. Only consider
-# terminal events after the most recent start/resume_started for this task.
-TASK_FIELD="\"task\":\"${TASK}\""
-CLOSED_STATUS="\"status\":\"closed\""
-FAILED_STATUS="\"status\":\"(error|stalled|failed)\""
+WRAPPER="pi-wait.sh"
+AGENT="pi"
+# Registry path and the shared wait loop; the current run starts at the task's
+# most recent start OR resume_started event (registry_run_lines).
+# shellcheck source=lib/wrapper-common.sh
+source "$(python3 -c 'import os,sys; print(os.path.dirname(os.path.realpath(sys.argv[1])))' "${BASH_SOURCE[0]}")/lib/wrapper-common.sh"
 
 current_run_lines() {
-  awk -v t="$TASK_FIELD" -v s='"event":"start"' -v rs='"event":"resume_started"' '
-    index($0, t) {
-      if (index($0, s) || index($0, rs)) { delete buf; n = 0 }
-      buf[n++] = $0
-    }
-    END { for (i = 0; i < n; i++) print buf[i] }
-  ' "$REGISTRY"
+  registry_run_lines "$PI_REGISTRY" "$1"
 }
 
-start=$(date +%s)
-while true; do
-  run="$(current_run_lines)"
-  if printf '%s\n' "$run" | grep -E "$CLOSED_STATUS" >/dev/null 2>&1; then
-    exit 0
-  fi
-  if printf '%s\n' "$run" | grep -E "$FAILED_STATUS" >/dev/null 2>&1; then
-    echo "pi-wait.sh: task '$TASK' reached a failure terminal (error/stalled). See /tmp/pi-${TASK}.log" >&2
-    exit 4
-  fi
-  if [[ "$TIMEOUT" -gt 0 ]]; then
-    elapsed=$(( $(date +%s) - start ))
-    if [[ "$elapsed" -ge "$TIMEOUT" ]]; then
-      echo "pi-wait.sh: timeout after ${TIMEOUT}s waiting for task '$TASK' to close" >&2
-      exit 3
-    fi
-  fi
-  sleep "$POLL_INTERVAL"
-done
+wait_main "$PI_REGISTRY" "error|stalled|failed" " (error/stalled)" "$@"

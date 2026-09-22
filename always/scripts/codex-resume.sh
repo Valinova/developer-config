@@ -15,13 +15,13 @@
 # codex-exec.sh and is OVERWRITTEN on each run, so after a resume it
 # reflects the RESUME snapshot, not the original codex-exec run. The
 # original run's log remains at /tmp/codex-<task>.log; this resume's log
-# is at /tmp/codex-<task>-resume.log (or --log override). Codex also
+# is at /tmp/codex-<task>-resume.log. Codex also
 # persists the full transcript at
 # ~/.codex/sessions/<date>/rollout-<ts>-<uuid>.jsonl for deep debugging
 # or audit.
 #
 # Usage:
-#   codex-resume.sh <task-name> <follow-up-brief-path> [--foreground] [--log <path>] [--service-tier TIER]
+#   codex-resume.sh <task-name> <follow-up-brief-path> [--foreground] [--model SLUG] [--effort LEVEL] [--service-tier TIER]
 #
 # Defaults:
 #   - Background dispatch.
@@ -39,14 +39,13 @@ set -euo pipefail
 TASK=""
 BRIEF=""
 MODE="background"
-LOG_OVERRIDE=""
 MODEL="gpt-6-astra"
 EFFORT="high"
 SERVICE_TIER="default"
 
 usage() {
   cat >&2 <<EOF
-Usage: codex-resume.sh <task-name> <follow-up-brief-path> [--foreground] [--model SLUG] [--effort LEVEL] [--service-tier TIER] [--log <path>]
+Usage: codex-resume.sh <task-name> <follow-up-brief-path> [--foreground] [--model SLUG] [--effort LEVEL] [--service-tier TIER]
 
 Looks up the most recent session_id for <task-name> in the canonical
 codex session registry at ~/.hermes/state/codex-sessions.jsonl, then
@@ -63,7 +62,6 @@ Options:
   --effort LEVEL            Reasoning effort (none|low|medium|high|xhigh|max). Default: high.
   --service-tier TIER       Service tier for this resumed run. Default: default.
                             Pass "priority" for the Fast (2x) tier.
-  --log PATH                Override default log file.
 EOF
   exit 1
 }
@@ -74,28 +72,16 @@ BRIEF="$1"; shift
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --foreground) MODE="foreground"; shift ;;
-    --model)
+    --model|--effort|--service-tier)
       if [[ $# -lt 2 || -z "${2:-}" || "${2:-}" == --* ]]; then
-        echo "codex-resume.sh: --model requires a value" >&2
-        usage
+        echo "codex-resume.sh: $1 requires a value" >&2; usage
       fi
-      MODEL="$2"; shift 2
-      ;;
-    --effort)
-      if [[ $# -lt 2 || -z "${2:-}" || "${2:-}" == --* ]]; then
-        echo "codex-resume.sh: --effort requires a value" >&2
-        usage
-      fi
-      EFFORT="$2"; shift 2
-      ;;
-    --log) LOG_OVERRIDE="$2"; shift 2 ;;
-    --service-tier)
-      if [[ $# -lt 2 || -z "${2:-}" || "${2:-}" == --* ]]; then
-        echo "codex-resume.sh: --service-tier requires a value" >&2
-        usage
-      fi
-      SERVICE_TIER="$2"; shift 2
-      ;;
+      case "$1" in
+        --model) MODEL="$2" ;;
+        --effort) EFFORT="$2" ;;
+        --service-tier) SERVICE_TIER="$2" ;;
+      esac
+      shift 2 ;;
     *) echo "Unknown option: $1" >&2; usage ;;
   esac
 done
@@ -115,8 +101,11 @@ fi
 # Shared primitives (registry grammar, log extraction, post-run summary,
 # constants) — one owner for both wrapper families. See lib/codex_registry.py.
 CODEX_SOURCE="claude-code"
+LIB_DIR="$(python3 -c 'import os,sys; print(os.path.dirname(os.path.realpath(sys.argv[1])))' "${BASH_SOURCE[0]}")/lib"
 # shellcheck source=lib/codex-registry.sh
-source "$(python3 -c 'import os,sys; print(os.path.dirname(os.path.realpath(sys.argv[1])))' "${BASH_SOURCE[0]}")/lib/codex-registry.sh"
+source "$LIB_DIR/codex-registry.sh"
+# shellcheck source=lib/wrapper-common.sh
+source "$LIB_DIR/wrapper-common.sh"
 
 if [[ ! -f "$CODEX_REGISTRY" ]]; then
   echo "codex-resume.sh: registry not found at $CODEX_REGISTRY" >&2
@@ -138,10 +127,8 @@ fi
 
 # ---- paths ----
 
-DEFAULT_LOG="/tmp/codex-${TASK}-resume.log"
-LOG_PATH="${LOG_OVERRIDE:-$DEFAULT_LOG}"
-
-mkdir -p "$(dirname "$LOG_PATH")"
+WRAPPER="codex-resume.sh"
+LOG_PATH="/tmp/codex-${TASK}-resume.log"
 
 # ---- repo root + post-run helpers ----
 
@@ -173,17 +160,7 @@ write_post_run_summary() {
 register_entry() {
   local event="$1"; local extra="${2:-}"
   local status
-  # Every registry line carries a normalized "status" so status-keyed waiters
-  # (codex-wait.sh, `"status":"closed"` greps) match a *resume* the same way
-  # they match a fresh run. Derive it from the event name so this stays correct
-  # if new events are added. The event name itself is unchanged
-  # (resume_started/resume_closed/resume_failed) for Hermes compat.
-  case "$event" in
-    *_started|started|running) status="running" ;;
-    *_closed|close|closed)     status="closed" ;;
-    *_failed|failed|error|stalled) status="error" ;;
-    *)                          status="running" ;;
-  esac
+  status="$(resume_event_status "$event")"
   # `reason` is always present (empty when there is none) — keeping the key set
   # fixed avoids array-quoting traps in the bash 3.2 background worker.
   registry_append task "$TASK" event "$event" status "$status" \
@@ -217,7 +194,7 @@ dispatch_background() {
   export TASK BRIEF LOG_PATH REPO_ROOT MODEL EFFORT SERVICE_TIER SESSION_ID
   # CODEX_REGISTRY_PATH is already exported by lib/codex-registry.sh.
   export CODEX_REGISTRY_LIB CODEX_SOURCE
-  export -f register_entry registry_append write_post_run_summary \
+  export -f register_entry resume_event_status registry_append write_post_run_summary \
             write_post_run_summary_file extract_session_id
   python3 - <<'PY'
 import os, sys
@@ -269,17 +246,4 @@ fi
 
 PID="$(dispatch_background)"
 echo "codex-resume.sh: task '$TASK' resumed in background (pid $PID, session $SESSION_ID). Log: $LOG_PATH"
-# Quick liveness check (3s) — we assume resume emits events as fast as a fresh run.
-sleep 3
-if ! kill -0 "$PID" 2>/dev/null; then
-  # Process already exited; background subshell already wrote the close event.
-  JSON_COUNT="$(count_json_events "$LOG_PATH")"
-  if (( JSON_COUNT > 0 )); then
-    echo "codex-resume.sh: task completed near-instantly. Log: $LOG_PATH"
-    exit 0
-  fi
-  echo "codex-resume.sh: task '$TASK' resume exited without events. See $LOG_PATH" >&2
-  exit 1
-fi
-echo "codex-resume.sh: process alive, monitor with 'tail -f $LOG_PATH'"
-exit 0
+resume_liveness_check "$PID" count_json_events

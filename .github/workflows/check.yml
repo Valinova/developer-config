@@ -22,3 +22,5 @@ jobs:
       - run: python3 always/scripts/test_supervised_git_backstop.py
       - run: python3 always/scripts/test_grok_acp_exec.py
       - run: bash always/scripts/lib/test-codex-registry.sh
+      - run: bash always/scripts/lib/test-wrappers.sh
+      - run: python3 always/scripts/test_foreground_dispatch_guard.py

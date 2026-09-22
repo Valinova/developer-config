@@ -62,7 +62,7 @@ The hook scripts — `always/scripts/supervised-git-backstop.py` (plus its test,
 `test_supervised_git_backstop.py`) and `foreground-dispatch-guard.py` — are NOT
 linked into `~/.claude/scripts/`: the `PreToolUse` hooks in `always/settings.json`
 invoke them by absolute repo path, so per-file links would be dead weight.
-`always/scripts/lib/` — the shared `codex_registry` and `claude-registry`
+`always/scripts/lib/` — the shared `wrapper-common`, `codex_registry` and `claude-registry`
 owners — is likewise not linked; the wrappers source it by repo path at
 runtime. `check-wiring.py` and `check-private-terms.sh` are likewise unlinked —
 the Verification section and CI invoke them by repo path. Every other file directly in `always/scripts/`,
@@ -380,6 +380,8 @@ python3 always/scripts/test_check_wiring.py
 python3 always/scripts/test_supervised_git_backstop.py
 python3 always/scripts/test_grok_acp_exec.py
 bash always/scripts/lib/test-codex-registry.sh
+bash always/scripts/lib/test-wrappers.sh
+python3 always/scripts/test_foreground_dispatch_guard.py
 bun pi/tests/destructive-guard.test.ts
 bun pi/tests/bash-timeout-guard.test.ts
 ```
