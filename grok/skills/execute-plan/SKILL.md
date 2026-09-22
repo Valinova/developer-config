@@ -16,7 +16,7 @@ push, and PR creation belong to their own workflows.
 The active Grok 4.6 session is the orchestrator; do not pin a different native
 model (`grok/model-defaults.md`). Implementation is Codex CLI `gpt-6-astra`
 via the configured wrappers; Grok Build does not write product code. Overrides:
-Grok `spawn_subagent` or `claude -p --model fable` when the user names one.
+Grok `spawn_subagent` or `claude -p --model opus` when the user names one.
 
 ## Preamble
 

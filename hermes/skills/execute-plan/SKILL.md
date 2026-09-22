@@ -15,7 +15,7 @@ push, and PR creation belong to their own workflows.
 The active Hermes model is the orchestrator — prefer **Grok 4.6** (harness
 seats in `model-selection.md`). Implementation is Codex
 CLI `gpt-6-astra` via the configured wrappers; Hermes does not write product
-code. Override: `claude -p --model fable` when the user names it.
+code. Override: `claude -p --model opus` when the user names it.
 
 ## Preamble
 

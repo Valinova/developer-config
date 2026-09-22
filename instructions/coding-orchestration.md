@@ -75,18 +75,18 @@ Hermes reaches the Claude seat selected under `model-selection.md` via `claude -
 
 ## Path 3: Claude Code → Codex CLI (interactive sessions)
 
-When the user is in an interactive Claude Code session (terminal or IDE), Claude Code can invoke Codex directly for execution horsepower. This is Claude Code's own internal toolchain — Hermes is not involved.
+When the user is in an interactive Claude Code session (terminal or IDE), Claude Code invokes Codex directly for cross-family review. This is Claude Code's own internal toolchain — Hermes is not involved.
 
-**When:** The user is coding interactively in Claude Code and wants to delegate a mechanical task to Codex.
+**When:** A key gate under `model-selection.md` "External calls" (the plan/scope review, the final `rev`), or an Astra implement pass the user named for that dispatch.
 
 **How it works:**
-1. The user asks Claude Code to do something
-2. Claude Code plans the approach
+1. Claude Code (Opus under the Fable orchestrator) produces the plan or diff
+2. Claude Code writes the review or implement brief
 3. Claude Code calls `~/.claude/scripts/codex-exec.sh` — a standalone shell wrapper that invokes `codex exec --sandbox workspace-write --json` directly (it does NOT call `codex_delegate.py`; it shares the registry library, `always/scripts/lib/codex_registry.py`, with the Hermes helpers — see `codex-delegation.md`)
 4. Codex CLI executes the task, returns result to Claude Code
 5. Claude Code continues the session
 
-**Why this exists:** Claude is a strong planner; Codex is a fast executor. For complex interactive work, having Claude plan and Codex execute gives better results than either alone. This path is orthogonal to Hermes orchestration — it's the user's direct coding workflow.
+**Why this exists:** Claude-authored work needs a reviewer outside its own family (why: rationale.md#cross-family-review). This path is orthogonal to Hermes orchestration — it's the user's direct coding workflow.
 
 ## Path 4: Crons → Codex CLI (automated/headless) — HISTORICAL, decommissioned
 
@@ -127,7 +127,7 @@ Scheduled jobs (daily reviews, focus reviews) route directly to Codex CLI. Herme
 
 ### `delegate_task` native batch (Hermes subagents)
 
-**Niche/lightweight only.** Native Hermes subagents are acceptable for Hermes-specific tools, summaries, extraction, and mechanical batches such as `simplify-code`. They must not be the serious-code implementer; use the CLI path for that. Select the family under `model-selection.md` "Harness note — DeepSeek". This uses Hermes's own model, not Codex or Claude OAuth. No conflict.
+**Niche/lightweight only.** Native Hermes subagents are acceptable for Hermes-specific tools, summaries, extraction, and mechanical batches such as `simplify-code`. They must not be the serious-code implementer; use the CLI path for that. They may use DeepSeek for trivial retrieval/summaries only (a Hermes contract). This uses Hermes's own model, not Codex or Claude OAuth. No conflict.
 
 ## Execution paths (preference order)
 
@@ -142,8 +142,8 @@ If routing around path 1 for work that could use it, state why in the dispatch n
 ## Approved PR burndown contract
 
 PR burndown uses one subscription-OAuth `claude -p` orchestrator session.
-Choose the Claude judgment seat, review effort, and fan-out under
-`model-selection.md`. Partition logical review scopes by diff size,
+The Claude seat is Opus 5.5 (Fable only as a complex reviewer or arbiter);
+review effort and fan-out follow `model-selection.md`. Partition logical review scopes by diff size,
 subsystem boundaries, risk, and the value of independent review. Native
 Claude subagents inherit the session's effort. The orchestrator
 partitions, validates, deduplicates, audits, and synthesizes; the subagents own
@@ -169,7 +169,7 @@ genuinely nuanced forks in Sentry triage and PR burndown.
 sentry-cycle v2, mechanizes this escalation as a `FORK` draft PR; its spec
 lives with the Hermes deployment, outside this repo.)
 
-The Claude judgment seat chairs and synthesizes; the cross-family challenger
+The Claude seat (Opus 5.5; Fable as arbiter on a complex fork) chairs and synthesizes; the cross-family challenger
 selected under `model-selection.md` takes an independent, read-only blind
 position. Review subagents do not participate in this decision gate;
 their PR code-review role is unchanged. Both participants must independently agree

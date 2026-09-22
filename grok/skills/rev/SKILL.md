@@ -31,14 +31,15 @@ Follow `git-operations.md`: honor the user's branch direction, including work on
 the default branch; do not create or switch branches or worktrees without
 existing authorization. Work on the current branch otherwise.
 
-1. **Review.** Dispatch one cross-family reviewer — seat per
-   `model-selection.md` "External calls", rung per "Effort"; Fable as the
-   reviewer leads Opus discovery subagents per "Roster". The reviewer runs the
-   shared `code-simplifier` skill and the principles audit over the committed
-   diff (the engineering principles and the repo's `AGENTS.md`/`CLAUDE.md`
-   guidance: correctness and regressions, with emphasis on simplicity,
-   intentionality, canonical ownership, and removal of unnecessary scope) and
-   returns one findings list. The orchestrator never reviews its own diff.
+1. **Review.** Dispatch one cross-family reviewer — seat per `model-
+   selection.md` "External calls", rung per "Effort"; a Claude reviewer is Opus
+   5.5 for contained work, or Fable 5.1 leading nested Opus discovery subagents
+   for complex work. The reviewer runs the shared `code-simplifier` skill and
+   the principles audit over the committed diff (the engineering principles and
+   the repo's `AGENTS.md`/`CLAUDE.md` guidance: correctness and regressions,
+   with emphasis on simplicity, intentionality, canonical ownership, and
+   removal of unnecessary scope) and returns one findings list. The
+   orchestrator never reviews its own diff.
 2. **Agree.** Read the findings once; keep what is valuable and give each
    dropped finding a one-line reason in the final report. No second review, no
    re-triage loop. Escalate only unresolved critical choices under principles

@@ -15,8 +15,9 @@ per-round pushes required by the steps below.
 
 The active Hermes model is the orchestrator — prefer **Grok 4.6** (harness
 seats in `model-selection.md`). Cross-family rigor comes from each stage's
-explicit dispatches (Codex CLI; `claude -p --model fable` as the other-family
-arbiter or implementer override).
+explicit dispatches (Codex CLI; `claude -p --model opus` as the other-family
+reviewer or user-named implementer override, Fable only as the complex
+arbiter).
 
 ## Preamble
 

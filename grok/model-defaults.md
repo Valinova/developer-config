@@ -15,7 +15,7 @@ Canonical seat row for this harness; column grammar and shared policy per model-
 
 | Harness | Orchestrator | Implement default | Implement override | Reviewer transport |
 |---------|--------------|-------------------|--------------------|----------------------|
-| **Grok Build** | Grok 4.6 (xAI sub). Native `spawn_subagent` is Grok 4.6 only — never a silent `grok-4.5`. | Codex via wrappers (ChatGPT sub) | Grok `spawn_subagent`; `claude -p --model fable` (`opus` for mechanical passes). Never Grok-native Anthropic. | Native Grok; `claude -p`; Codex wrappers |
+| **Grok Build** | Grok 4.6 (xAI sub). Native `spawn_subagent` is Grok 4.6 only — never a silent `grok-4.5`. | Codex via wrappers (ChatGPT sub) | Grok `spawn_subagent`; `claude -p --model opus` (Fable only as a complex reviewer/arbiter). Never Grok-native Anthropic. | Native Grok; `claude -p`; Codex wrappers |
 
 ## Native seat
 
@@ -25,8 +25,8 @@ Canonical seat row for this harness; column grammar and shared policy per model-
   user-defined type). It cannot start a Claude or Codex child.
 - Choose native effort under canonical "Effort".
 - Recon and bulk fact-gathering (canonical "Orchestrator context
-  discipline"): `claude -p` on the Claude seat chosen by task shape under
-  "Roster"; native Grok 4.6 `spawn_subagent` is also fine for in-family recon.
+  discipline"): `claude -p` on Opus 5.5 (Fable only as a complex
+  reviewer/arbiter); native Grok 4.6 `spawn_subagent` is also fine for in-family recon.
 
 ## Cross-family dispatch
 
@@ -48,21 +48,16 @@ Follow canonical "Subagent fan-out", including browser-driving seats.
 ## Grok as a leaf
 
 How another orchestrator (Claude Code via `pi-exec.sh`, Codex over ACP,
-Hermes) briefs and routes to a Grok 4.6 leaf. Select Grok under the canonical review or implementation policy.
+Hermes) briefs a Grok 4.6 leaf. Grok is never a default seat: route to it
+only when the user names Grok for that dispatch.
 
 **Grok 4.6 briefing (light):** prefer short briefs with a clear preference and
 hard done criteria; long specs are fine when you already have them. Do not
-import Claude-side briefing habits onto Grok — brief it like a third-family
-peer (why: rationale.md#grok-briefing).
+import Claude-side briefing habits onto Grok — brief it on its own terms
+(why: rationale.md#grok-briefing).
 
-**Grok implementation routing is semantic, not a file-count rule.** Prefer a
-Grok leaf when the canonical owner and local pattern are known, the result is
-locally testable, downstream impact is shallow, and success criteria are
-explicit. Prefer Codex Astra for shared contracts or registries, generated
-artifacts, persistence/auth/pagination/cache behavior, multi-surface changes,
-or an uncertain blast radius. A broad mechanical edit can be a better Grok
-task than a three-file architectural change. Treat roughly 250K input tokens
-as a rough guide to not overloading one pass's context to the point it
-degrades — it is not a figure to compute, track, or enforce; route using
-actual evidence such as elapsed time, accepted-diff percentage,
-missed consumers, and orchestrator corrections.
+**Sizing a user-named Grok pass.** Treat roughly 250K input tokens as a
+rough guide to not overloading one pass's context to the point it degrades —
+it is not a figure to compute, track, or enforce; size using actual evidence
+such as elapsed time, accepted-diff percentage, missed consumers, and
+orchestrator corrections.

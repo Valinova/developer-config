@@ -6,7 +6,7 @@ Before dispatch, read
 "Harness seats", "Roster", "Effort", and "Subagent fan-out". Those sections
 own shared policy; this card is not a substitute for them.
 The `claude -p` and Grok ACP process lifecycles are Codex-specific and are
-owned here. An explicit user or per-dispatch model/reasoning choice always
+owned here; the Grok lane runs only when the user names Grok. An explicit user or per-dispatch model/reasoning choice always
 wins among valid combinations under that policy.
 
 ## Native subagents
@@ -19,12 +19,14 @@ wins among valid combinations under that policy.
   partial-history fork. Machine defaults in `~/.codex/config.toml` are setup
   mechanics; see SETUP.md.
 - When a workflow calls for a cross-family Claude pass, use `claude -p` —
-  never substitute another Codex subagent. Select the seat from the canonical
-  "Harness seats" and "Roster" sections.
+  never substitute another Codex subagent. Review seat: Opus 5.5 for contained
+  work; Fable 5.1 with nested Opus discovery subagents for complex or
+  cross-cutting work. `claude -p --model opus` implements only when the user
+  names it.
 
 ## Cross-family Grok ACP dispatch
 
-When Grok is selected, delegate one leaf task through Grok Build's native
+Only when the user names Grok for a dispatch, delegate one leaf task through Grok Build's native
 ACP server. This is an external Grok process supervised by Codex, not a Codex
 native subagent and not `grok -p` or Pi; it does not change Codex's
 orchestrator or native Astra seat:
@@ -39,7 +41,7 @@ orchestrator or native Astra seat:
   CLI environment and never reads, copies, or logs auth files or tokens.
 - The wrapper runs `grok agent stdio` with ACP, `--no-subagents`, an OS-level
   sandbox, all Git CLI calls disabled, and Claude/Cursor MCP discovery off for
-  that subprocess. `--no-subagents` is this ACP leaf only — not a Fable
+  that subprocess. `--no-subagents` is this ACP leaf only — not a
   `claude -p` review rule (`codex-delegation.md` "Nested delegation"). Grok
   leaves changes unstaged; Codex owns scope review, verification, and every
   Git operation.
@@ -54,8 +56,8 @@ orchestrator or native Astra seat:
   completion. Codex then expands the leaf assignment or moves the remaining
   work to the canonical implementer. Tell Grok to report changed files and
   out-of-scope findings; do not ask it to stage or commit.
-- Choose this lane under "Grok as a leaf" in `grok/model-defaults.md`; the
-  wrapper does not enforce token accounting.
+- Brief it per "Grok as a leaf" in `grok/model-defaults.md`; the wrapper does
+  not enforce token accounting.
 - Run the wrapper in a long-lived exec session. It streams raw ACP traffic to
   `/tmp/grok-acp-<task>.events.jsonl`, Grok stderr to
   `/tmp/grok-acp-<task>.stderr.log`, and the final answer to

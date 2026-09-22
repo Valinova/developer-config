@@ -43,7 +43,6 @@ instructions/               The doctrine. One owner per fact.
                             Always-loaded in Claude Code and Grok Build; principles §7 points here.
   agent-guidance.md         How to optimize AGENTS.md/CLAUDE.md and routed guidance.
                             Reference, not auto-loaded.
-  opus5-quirks.md           Opus 5 prompting reference, not auto-loaded.
   rationale.md              Incident and reasoning archive, not auto-loaded.
   token-efficiency.md       Metered-orchestrator context discipline. Reference, not auto-loaded.
 claude-root.md              Becomes ~/.claude/CLAUDE.md via symlink. Pure @imports —
@@ -75,7 +74,7 @@ always/
                             into all four harnesses.
   settings.json             User-global ~/.claude/settings.json (permissions, plugins, toggles)
 claude/skills/              Claude-owned orchestration workflows. Fable 5.1 orchestrates
-                            Codex GPT-6 Astra wrapper passes and runs Claude-native review.
+                            Opus 5.5 passes; Codex GPT-6 Astra reviews at the key gates.
 codex/
   model-defaults.md         Codex dispatch routing — native subagents,
                             cross-family `claude -p`, and Grok Build over ACP.
@@ -145,8 +144,8 @@ pi/                         Pi's consumption layer. Owned files — settings.jso
 │ skills:      │ │ Astra native │ │            │ │  grok/ (overrides   │
 │  always/+    │ │ claude -p    │ │            │ │  bundled execute-   │
 │  claude/     │ │ for Claude   │ │            │ │  plan). Native Grok │
-│ Codex via    │ │              │ │            │ │ 4.6 spawn_subagent; │
-│ wrappers     │ │              │ │            │ │ Codex wrappers;     │
+│ Opus agents; │ │              │ │            │ │ 4.6 spawn_subagent; │
+│ Astra review │ │              │ │            │ │ Codex wrappers;     │
 └──────────────┘ └──────────────┘ └────────────┘ │ claude -p for Claude│
                                                  └─────────────────────┘
 

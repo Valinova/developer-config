@@ -10,8 +10,8 @@ Before choosing seats or effort, read
 `~/Development/developer-config/instructions/codex-delegation.md` in full —
 neither is always-loaded (`dispatch-bootstrap.md` owns the read rule).
 
-Select audit subagents, effort, and fan-out under `model-selection.md`
-"Roster", "Effort", and "Subagent fan-out".
+Audit subagents are Opus 5.5; set effort and fan-out under
+`model-selection.md` "Effort" and "Subagent fan-out".
 
 Before the audit, follow `model-selection.md` "Announce-then-proceed
 preamble": state first whether any external call is warranted on the

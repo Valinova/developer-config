@@ -39,9 +39,9 @@ as one signal and combines any needed changes into at most one push.
    actual base branch and remote, then rebase onto it (the `git-operations.md`
    stacked-branch exception still applies). Merge order across PRs is the
    user's call.
-3. **Fix.** Accepted findings and CI fixes go to ONE implementer pass; seat
-   and effort come from `model-selection.md` "Harness seats", "Roster", and
-   "Effort". Verify locally and commit.
+3. **Fix.** Accepted findings and CI fixes go to ONE Opus 5.5 implementer
+   pass; effort comes from `model-selection.md` "Effort". Verify locally and
+   commit.
 4. **Push once if changes need publishing** (`--force-with-lease` after a
    rebase), after verifying the remote target.
    Never push a CI fix alone while a CodeRabbit review is pending. If nothing

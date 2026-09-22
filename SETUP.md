@@ -262,8 +262,8 @@ per-skill symlinked into Claude, Codex, Pi, and Grok Build (never
 whole-directory links — Codex owns `.system/` inside its skill root).
 Orchestration workflows whose mechanisms genuinely differ live as complete,
 stable copies under `claude/skills/`, `codex/skills/`, `pi/skills/`, and
-`grok/skills/`. Claude uses the configured Codex wrappers and runs
-Claude-native review; Codex uses native Astra subagents and `claude -p` for
+`grok/skills/`. Claude uses Opus 5.5 passes (native `Agent` or
+`claude-exec.sh`) and the Codex wrappers for cross-family review; Codex uses native Astra subagents and `claude -p` for
 cross-family review; Pi uses Tintin `Agent` subagents and the Pi model card;
 Grok Build uses native Grok 4.6 `spawn_subagent` children, the same Codex
 wrappers as Claude, and `claude -p` for Claude.
@@ -404,7 +404,6 @@ instructions/codex-delegation.md    orchestrators only (Claude / Hermes / Grok B
                                     Claude Code reads it on dispatch (not auto-loaded);
                                     Grok reads it on dispatch (not linked)
 instructions/coding-orchestration.md Hermes farm doctrine — linked, not auto-loaded
-instructions/opus5-quirks.md         Opus 5 prompting reference, not auto-loaded
 instructions/token-efficiency.md     reference, not auto-loaded
 ```
 

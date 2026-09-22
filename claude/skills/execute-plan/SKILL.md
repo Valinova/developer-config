@@ -1,6 +1,6 @@
 ---
 name: execute-plan
-description: Implements an approved phased plan through bounded Codex passes, verification, and coherent commits. Use only when the user explicitly asks to execute an approved plan.
+description: Implements an approved phased plan through bounded Opus implementer passes, verification, and coherent commits. Use only when the user explicitly asks to execute an approved plan.
 ---
 
 # Execute Plan — Claude
@@ -33,8 +33,8 @@ locally, full pre-commit gate included (`model-selection.md` "External calls").
 For each bounded pass:
 
 1. Snapshot worktree provenance.
-2. Delegate through the configured implementation lane with the seat and
-   rung from `model-selection.md` "Harness seats", "Roster", and "Effort".
+2. Delegate to an Opus 5.5 implementer (Astra only when the user names it)
+   at the rung from `model-selection.md` "Harness seats" and "Effort".
    Native Claude subagents inherit session effort; when the selected rung
    differs, follow "The lane follows the effort" instead of changing the
    interactive session.

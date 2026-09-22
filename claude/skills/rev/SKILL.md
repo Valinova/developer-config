@@ -33,11 +33,10 @@ Follow `git-operations.md`: honor the user's branch direction, including work on
 the default branch; do not create or switch branches or worktrees without
 existing authorization. Work on the current branch otherwise.
 
-1. **Review.** Dispatch one cross-family reviewer — seat per
-   `model-selection.md` "External calls", rung per "Effort"; Fable as the
-   reviewer leads Opus discovery subagents per "Roster". The reviewer runs the
-   shared `code-simplifier` skill and the principles audit over the committed
-   diff (the engineering principles and the repo's `AGENTS.md`/`CLAUDE.md`
+1. **Review.** Dispatch one cross-family reviewer — Astra via the Codex
+   wrappers (`model-selection.md` "External calls"), rung per "Effort". The
+   reviewer runs the shared `code-simplifier` skill and the principles audit
+   over the committed diff (the engineering principles and the repo's `AGENTS.md`/`CLAUDE.md`
    guidance: correctness and regressions, with emphasis on simplicity,
    intentionality, canonical ownership, and removal of unnecessary scope) and
    returns one findings list. The orchestrator never reviews its own diff.
@@ -45,7 +44,7 @@ existing authorization. Work on the current branch otherwise.
    dropped finding a one-line reason in the final report. No second review, no
    re-triage loop. Escalate only unresolved critical choices under principles
    §4.
-3. **Fix.** An implementer subagent (seat per `model-selection.md` "Harness
+3. **Fix.** An Opus 5.5 implementer subagent (`model-selection.md` "Harness
    seats") applies the kept set; the orchestrator does no mechanical editing
    itself.
 4. **Verify and commit.** The Claude orchestrator runs the full check

@@ -16,8 +16,9 @@ per-round pushes required by the steps below.
 
 The active Grok 4.6 session is the orchestrator; do not pin a different native
 model (`grok/model-defaults.md`). Cross-family rigor comes from each stage's
-explicit dispatches (Codex wrappers; `claude -p --model fable` as the
-other-family arbiter or implementer override).
+explicit dispatches (Codex wrappers; `claude -p --model opus` as the
+other-family reviewer or user-named implementer override, Fable only as the
+complex arbiter).
 
 ## Preamble
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # claude-exec.sh — wrapper for delegating a bounded task to `claude -p`
-# (Fable 5.1) at a chosen effort, from a Claude Code orchestrator.
+# (Opus 5.5) at a chosen effort, from a Claude Code orchestrator.
 #
 # Why this exists: native Agent-tool subagents inherit the session's model,
 # effort, and the whole context window. A `claude -p` process starts from
@@ -41,8 +41,8 @@ TASK=""
 BRIEF=""
 MODE="background"
 LOG_OVERRIDE=""
-MODEL="fable"
-EFFORT="high"
+MODEL="opus"
+EFFORT="medium"
 RESUME="no"
 
 usage() {
@@ -54,8 +54,8 @@ Arguments:
   <brief-path>    File containing the task brief (passed to claude -p as the prompt).
 
 Options:
-  --effort LEVEL  low|medium|high|xhigh|max. Default: high.
-  --model SLUG    Model to run. Default: fable.
+  --effort LEVEL  low|medium|high|xhigh|max. Default: medium.
+  --model SLUG    Model to run. Default: opus.
   --resume        Resume the session last captured for <task-name>.
   --foreground    Block until claude completes. Default is background dispatch.
   --log PATH      Override default log file. Default: /tmp/claude-<task-name>.log

@@ -32,9 +32,10 @@ and what must be probed to close them, and stop before phases. A later
    degradation (roughly 250K tokens as a guide, not a figure to compute).
 3. Give each phase observable success criteria and lightweight orchestrator
    checks for correctness, simplicity, and adherence to any user-supplied
-   North Star. Each phase also names its **seat and rung** (decided by brief
-   specificity under `model-selection.md` "Roster" and "Effort", never by the
-   operation's risk), whether a **courier** runs and what it reads back (only
+   North Star. Each phase also names its **rung** (decided by brief
+   specificity under `model-selection.md` "Effort", never by the operation's
+   risk; Opus 5.5 executes — name a seat only when a user override applies),
+   whether a **courier** runs and what it reads back (only
    when the success criterion is observable solely on a deployment), and
    whether the implementer may fan out the mechanical tail
    (`codex-delegation.md` "Nested delegation"; seat per the leaf's own harness
@@ -44,7 +45,7 @@ and what must be probed to close them, and stop before phases. A later
    new test — covered by <file>" is a valid answer, and a new test file
    ships only when the plan justifies it.
 4. Apply `model-selection.md` "External calls" to the plan; a warranted
-   reviewer goes through the harness's model card and transports.
+   review is Astra via the Codex wrappers.
 5. Resolve findings before returning the plan. If a reviewer ran, incorporate
    mutually agreed conclusions. Escalate only unresolved critical choices
    under principles §4, with a recommendation and the tradeoff.

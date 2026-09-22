@@ -132,23 +132,6 @@ is a fork that rots both halves.
 
 ## model-selection.md
 
-### opus-quota-seat
-
-Per API token Fable is cheaper than Opus (as of the 2026-09-01 launch: 4x
-cheaper cached tokens, and >95% of coding tokens are cached). On the
-Anthropic subscription, though, the two draw from separate pools and only
-about half the allowance is usable through Fable — so an Opus pass on
-mechanical work costs no Fable quota. That is the whole reason the Opus seat
-exists.
-
-### fable-bar
-
-On 2026-09-17 a static brochure-site rebuild went to Fable at `high` because
-the Roster listed "any implement whose brief admits unknowns" as a Fable
-trigger and its design direction was "unknown". Taste is not complexity.
-The rule is now one line; the intent is cost — never spawn Fable for work
-that isn't difficult.
-
 ### effort-ceilings
 
 Escalation is not free quality. Anthropic's extended-thinking research
@@ -170,6 +153,19 @@ genuinely very complex or cross-cutting work, and the orchestrator proposes a
 `high` vs `xhigh` side-by-side on an ideal candidate rather than picking it,
 so the ceiling moves on evidence, not on how substantial a task looks.
 
+### opus-effort
+
+Opus 5.5 launch charts (Anthropic, Sep 2026). FrontierCode v1.1 (agentic
+coding): low ~47% at $0.40/task, **medium ~55% at $0.80 (peak)**, high ~54%,
+xhigh ~51% (a dip), max ~54.5% at $6. Terminal-Bench 4.0: low ~38%, medium
+~57% at $3, **high ~64% at $4**, xhigh ~66% at $7.50, max ~65% at $11. So
+`medium` is the default for repo coding; `high` earns its ~33% extra cost on
+long terminal-heavy work; `xhigh` buys ~2 points for ~2x cost and regresses
+on repo coding; `low` drops 8–19 points, contrary to the migration guide's
+"comes close" line. The API default is also `medium` (Opus 5's was `high`),
+and at a given level 5.5 thinks more per turn than Opus 5, so carrying Opus
+5's `high` over means longer, costlier turns.
+
 ### session-effort
 
 The user changes the interactive effort constantly with `/effort` depending on
@@ -180,10 +176,10 @@ at are transient TUI state, never the intended baseline.
 
 ### cross-family-review
 
-Genuine cross-family review — Codex implements → Fable reviews, or
-vice-versa; or Fable/Codex over a Grok/DeepSeek implement — catches what
-same-family review misses. A Claude pass over Fable-orchestrated code
-reliably finds nothing.
+Genuine cross-family review catches what same-family review misses: a
+Claude pass over Fable-orchestrated code reliably finds nothing. So
+Claude-authored work (Opus implements under Fable) goes to Astra at the
+gates, and Codex-authored work to Opus or, when complex, Fable.
 
 ### coderabbit
 
@@ -219,9 +215,8 @@ imports), which is why it never pays off for minute-scale tasks.
 
 ### grok-briefing
 
-Grok 4.6 is a third-family peer with its own briefing habits; Claude-side
-briefing and effort habits copied onto it degrade results while we are still
-building evidence.
+When the user names Grok 4.6, its own briefing habits apply; Claude-side
+briefing and effort habits copied onto it degrade results.
 
 ## dispatch-bootstrap.md
 

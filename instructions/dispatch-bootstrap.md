@@ -11,8 +11,8 @@ first. `model-selection.md` (seats, effort, review, pipeline) and
   a retrieval subagent that returns a distilled brief (≤ ~3K tokens) with
   file:line pointers.
 - **Any edit touching more than a couple of files**, or any implement pass
-  with a brief → the implementer lane (`claude-exec.sh`, Codex wrappers),
-  never the orchestrator editing file by file in its own window.
+  with a brief → the implementer lane (`claude-exec.sh` or a native Opus
+  `Agent`; Codex wrappers when Astra implements), never the orchestrator editing file by file in its own window.
 - **Any tool result you expect to exceed ~2K tokens** whose purpose is
   extracting facts, not judging them → delegate and read the verdict.
 - Heuristic: extracting facts → delegate; judging content → read. Verify by

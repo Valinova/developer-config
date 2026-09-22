@@ -59,7 +59,7 @@ every remaining turn:
 - **Duplicate review ingestion** (stdout tail AND file read of the same report).
   Rule: file OR tail, never both.
 - **Repo recon in orchestrator turns** (6 git-grep turns) instead of one `claude -p`
-  Fable dispatch returning a ≤3K brief. Rule: bulk retrieval → subscription harness
+  Opus dispatch returning a ≤3K brief. Rule: bulk retrieval → subscription harness
   (canonical: dispatch-bootstrap.md hard delegation triggers).
 - **Window-scroll dumps** from session_search: extract the one needed message via a
   python filter, not the whole ±window.

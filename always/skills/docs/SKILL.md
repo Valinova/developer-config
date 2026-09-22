@@ -9,7 +9,7 @@ Review all documentation created or modified on the current branch.
 
 **Seat.** When this stage is farmed out (a `claude-exec.sh` lane, or the docs
 stage inside `longrun`), it runs on the Opus seat
-(`claude-exec.sh <task> <brief> --model opus --effort high`), never Fable:
+(`claude-exec.sh <task> <brief> --model opus --effort medium`), never Fable:
 under a distilled brief that names the sources, the allowlist and what to
 verify against the code, the fold is mechanical work per
 `instructions/model-selection.md` "Roster". The orchestrator's own pass over

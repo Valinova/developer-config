@@ -15,11 +15,11 @@ Canonical seat row for this harness; column grammar and shared policy per model-
 
 | Harness | Orchestrator | Implement default | Implement override | Reviewer transport |
 |---------|--------------|-------------------|--------------------|----------------------|
-| **Hermes** | Grok 4.6 (xAI sub) | `codex exec` (ChatGPT sub) | `claude -p --model fable` (Anthropic sub; `opus` for mechanical passes). Never Hermes-native Anthropic. | Grok; `claude -p`; Codex wrappers |
+| **Hermes** | Grok 4.6 (xAI sub) | `codex exec` (ChatGPT sub) | `claude -p --model opus` (Anthropic sub; Fable only as a complex reviewer/arbiter). Never Hermes-native Anthropic. | Grok; `claude -p`; Codex wrappers |
 
 - Recon and bulk fact-gathering (canonical "Orchestrator context
-  discipline"): `claude -p` on the Claude seat chosen by task shape under
-  "Roster"; DeepSeek via `delegate_task` only for trivial
+  discipline"): `claude -p` on Opus 5.5 (Fable only as a complex
+  reviewer/arbiter); DeepSeek via `delegate_task` only for trivial
   retrieval/summaries.
 
 ## Machine-local vs owned here
