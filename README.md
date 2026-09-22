@@ -21,95 +21,35 @@ Pi's machine-owned configs.
 
 ## Layout
 
+One line per top-level entry; each file's header and `SETUP.md` own the detail.
+
 ```
-instructions/               The doctrine. One owner per fact.
-  principles.md             Engineering principles — every agent, every tool, every repo.
-  claude-conventions.md     Claude-Code-only behavior (artifacts policy, …).
-  dispatch-bootstrap.md     Always-loaded in Claude Code: hard delegation triggers,
-                            the read-on-dispatch rule for the two files below,
-                            the External-calls default (none unless decided).
-  model-selection.md        Model profiles, harness seats, effort — what sits where.
-                            Read on dispatch by Claude Code, Grok Build, and Codex
-                            (the latter via `codex/model-defaults.md`);
-                            Hermes links it.
-  coding-orchestration.md   Hermes farm doctrine: dispatch paths, execution paths,
-                            PR-burndown/decision-brief contracts, auth rules.
-                            Reference, linked but not auto-loaded.
-  codex-delegation.md       How any caller (Hermes, Claude Code, Grok Build) dispatches
-                            codex exec: brief grammar, SUMMARY contract, per-caller
-                            wrappers, registry. Claude Code reads it on dispatch.
-  git-operations.md         Git, branch, worktree, and commit operations: permissions,
-                            backstop tiers, commit hygiene, rebase policy.
-                            Always-loaded in Claude Code and Grok Build; principles §7 points here.
-  agent-guidance.md         How to optimize AGENTS.md/CLAUDE.md and routed guidance.
-                            Reference, not auto-loaded.
-  rationale.md              Incident and reasoning archive, not auto-loaded.
-  durable-worktrees.md      Layout, naming, and reuse of durable git worktrees.
-                            Reference, read before creating or repurposing one.
-claude-root.md              Becomes ~/.claude/CLAUDE.md via symlink. Pure @imports —
-                            holds no rules of its own.
-SETUP.md                    The wiring contract + verification checklist. An agent on
-                            each machine applies it; there is no install script.
+instructions/     The doctrine, one owner per fact: principles, git-operations,
+                  claude-conventions, dispatch-bootstrap (always loaded in Claude
+                  Code), model-selection and codex-delegation (read on dispatch),
+                  coding-orchestration, agent-guidance, durable-worktrees, and the
+                  rationale archive (reference, not auto-loaded).
+claude-root.md    Becomes ~/.claude/CLAUDE.md via symlink. Pure @imports.
+SETUP.md          The wiring contract + verification checklist. No install script.
+workflows/        One shared body per delivery workflow (agentplan, execute-plan,
+                  full-docs, longrun, rev, babysit). Not a skill dir, never linked.
 always/
-  scripts/                  Codex dispatch wrappers (exec / resume / wait / status), Pi's
-                            (exec / resume / wait — Pi has no status wrapper), Claude's
-                            (exec / wait / status — same-family `claude -p` at a chosen
-                            effort; resume is a flag on exec), Codex's dependency-free
-                            Grok ACP leaf runner,
-                            reap-orphan-mcp.sh, lib/ (the shared codex_registry and
-                            claude-registry single owners, sourced by the wrappers,
-                            not linked), and the hook-invoked guards
-                            (supervised-git-backstop.py + its test, foreground-dispatch-guard.py
-                            — repo-path-invoked, not on PATH), and check-private-terms.sh,
-                            the CI guard that keeps client/personal identifiers out of the tree
-  commands/
-    shared/                 Harness-neutral entry points: com, comall, docs, no-use-effect.
-    claude/                 Claude entry points: agentplan, babysit, execute-plan,
-                            full-docs, longrun, rev.
-    pi/                     Pi entry points: agentplan, babysit, execute-plan, full-docs,
-                            longrun, rev.
-  skills/                   Shared workflow owner for Claude Code, Codex, Pi, and Grok
-                            Build when behavior and mechanism are genuinely identical:
-                            code-simplifier, com, comall, design-taste-frontend, docs,
-                            high-end-visual-design, no-use-effect. Every one is linked
-                            into all four harnesses.
-  settings.json             User-global ~/.claude/settings.json (permissions, plugins, toggles)
-workflows/                  One shared body per delivery workflow (agentplan, execute-plan,
-                            full-docs, longrun, rev, babysit); not a skill dir, never linked.
-claude/skills/              Claude stubs over workflows/: Fable 5.1 orchestrates
-                            Opus 5.5 passes; Codex GPT-6 Astra reviews at the key gates.
-codex/
-  model-defaults.md         Codex dispatch routing — native subagents,
-                            cross-family `claude -p`, and Grok Build over ACP.
-  skills/                   Codex stubs over workflows/ (native Astra subagents,
-                            `claude -p` for cross-family Claude review) plus Codex-only skills.
-hermes/                     Hermes's consumption layer — owned here, loaded from the
-  model-defaults.md         gitignored ~/.hermes via symlink. Seats live in
-  skills/                   model-selection.md (this file is a pointer). skills/
-                            owns the `/longrun` family (`agentplan`, `execute-plan`,
-                            `rev`, `babysit`, `longrun`) under the same names as
-                            Claude/Pi/Codex.
-                            `docs` is the shared always/skills one.
-grok/                       Grok Build's consumption layer. model-defaults.md is the
-  model-defaults.md         Grok-scoped dispatch card (native Grok 4.6 spawn_subagent,
-  skills/                   Codex wrappers, claude -p). skills/ holds Grok stubs over
-                            workflows/ (agentplan, execute-plan, full-docs, longrun,
-                            rev, babysit). No commands dir — Grok skills
-                            are slash commands. User execute-plan overrides Grok's
-                            bundled Graphite DAG skill of that name.
-                            Convex MCP skill is the Pi-owned `pi/skills/convex-mcp`,
-                            linked in; MCP is machine-local in config.toml. Convex's
-                            installer owns project `name: convex`.
-packages/                   Opt-in skill/agent bundles — currently only browser-walker, which
-                            ships an agent, not a skill (see SETUP.md, judgment-required)
-pi/                         Pi's consumption layer. Owned files — settings.json (models, theme,
-                            packages), subagents.json (Tintin defaults off), unpinned role agents,
-                            model-defaults.md (the Pi-scoped model-×-task card and exact native
-                            Agent model IDs wired to APPEND_SYSTEM.md), Pi stubs over workflows/
-                            (agentplan, execute-plan, full-docs, longrun, rev,
-                            babysit) plus convex-mcp (also linked into Grok Build), and mechanical extensions — with
-                            tests — for destructive operations and bash timeout capping;
-                            Pi otherwise consumes principles and harness-neutral shared skills.
+  scripts/        Dispatch wrappers (Codex, Claude, Pi), Grok ACP runner, hook
+                  guards, wiring and private-terms checkers, reap-orphan-mcp.sh.
+  commands/       Slash-command / prompt entry points: shared/, claude/, pi/.
+  skills/         Harness-neutral skills linked into Claude, Codex, Pi, and Grok
+                  Build: code-simplifier, com, comall, design-taste-frontend, docs,
+                  no-use-effect.
+  mcp/            On-demand MCP server definitions (Playwright).
+  settings.json   User-global ~/.claude/settings.json.
+claude/skills/    Claude stubs over workflows/ (harness facts only).
+codex/            model-defaults.md (Codex dispatch card); skills/: stubs over
+                  workflows/ plus Codex-only skills.
+grok/             model-defaults.md (Grok Build card); skills/: stubs over workflows/.
+pi/               model-defaults.md (Pi card), settings, subagents, role agents,
+                  extensions + tests; skills/: stubs over workflows/ plus convex-mcp.
+hermes/           model-defaults.md; skills/: the /longrun family stubs; scripts/.
+packages/         Opt-in bundles (browser-walker agent); see SETUP.md.
 ```
 
 ## Architecture at a glance
@@ -125,10 +65,10 @@ pi/                         Pi's consumption layer. Owned files — settings.jso
 ┌────────────┐ ┌─────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐
 │instructions│ │ always/ │ │claude/   │ │ codex/   │ │ pi/      │ │ grok/    │
 │ DOCTRINE   │ │ SHARED  │ │skills/   │ │ skills/ +│ │ skills/ +│ │ skills/ +│
-│ principles │ │ skills/ │ │ Claude-  │ │ model-   │ │ model-   │ │ model-   │
-│ model-sel. │ │ commands│ │ owned    │ │ defaults │ │ defaults │ │ defaults │
-│ codex-deleg│ │ scripts │ │ orch     │ │ Codex    │ │ settings,│ │ Grok-    │
-│ conventions│ │settings │ │          │ │ orch     │ │ extens.  │ │ owned    │
+│ principles │ │ skills/ │ │ stubs    │ │ model-   │ │ model-   │ │ model-   │
+│ model-sel. │ │ commands│ │ over     │ │ defaults │ │ defaults │ │ defaults │
+│ codex-deleg│ │ scripts │ │workflows/│ │ stubs    │ │ settings,│ │ stubs    │
+│ conventions│ │settings │ │          │ │          │ │ extens.  │ │          │
 │ bootstrap  │ │         │ │          │ │          │ │          │ │          │
 └─────┬──────┘ └────┬────┘ └────┬─────┘ └────┬─────┘ └────┬─────┘ └────┬─────┘
       │             │           │            │            │            │
@@ -143,12 +83,12 @@ pi/                         Pi's consumption layer. Owned files — settings.jso
 │ model-sel. + │ │ read model-  │ │ lean agent │ │  grok/model-defaults│
 │ codex-deleg  │ │ defaults.md  │ │ always/+pi │ │  (model-sel./codex- │
 │ on dispatch  │ │ always/+codex│ │            │ │  deleg on dispatch) │
-│              │ │              │ │            │ │ skills: always/+    │
-│ skills:      │ │ Astra native │ │            │ │  grok/ (overrides   │
-│  always/+    │ │ claude -p    │ │            │ │  bundled execute-   │
-│  claude/     │ │ for Claude   │ │            │ │  plan). Native Grok │
-│ Opus agents; │ │              │ │            │ │ 4.6 spawn_subagent; │
-│ Astra review │ │              │ │            │ │ Codex wrappers;     │
+│ skills:      │ │              │ │            │ │ skills: always/+    │
+│  always/+    │ │ Astra orch + │ │            │ │  grok/ (overrides   │
+│  claude/     │ │  implements; │ │            │ │  bundled execute-   │
+│ Fable orch;  │ │ claude -p    │ │            │ │  plan). Native Grok │
+│ Opus impl;   │ │  (Claude)    │ │            │ │ 4.6 spawn_subagent; │
+│ Astra review │ │  reviews     │ │            │ │ Codex wrappers;     │
 └──────────────┘ └──────────────┘ └────────────┘ │ claude -p for Claude│
                                                  └─────────────────────┘
 
@@ -187,103 +127,12 @@ configs receive the small merges defined in `SETUP.md`:
               ▼                                           ▼
 ```
 
-Inside each machine, every consumer points at the clone (SETUP.md contract):
-
-```
-  ~/Development/developer-config
-  ├── claude-root.md ◄─────symlink───── ~/.claude/CLAUDE.md      [CLAUDE CODE]
-  │     │ @imports
-  │     ▼
-  ├── instructions/
-  │   ├── principles.md ◄──symlink───── ~/.codex/AGENTS.md       [CODEX]
-  │   │        ▲
-  │   │        ├────────────symlink──── ~/.pi/agent/AGENTS.md    [PI — verbatim, no
-  │   │        │                                                  @import; one global
-  │   │        │                                                  file, so principles only]
-  │   │        └────────────symlink──── ~/.grok/rules/00-        [GROK BUILD — verbatim
-  │   │                             principles.md                 rules/*.md, numbered
-  │   │                                                           because later-alpha wins]
-  │   ├── claude-conventions.md   (Claude only, via claude-root import)
-  │   ├── dispatch-bootstrap.md   (Claude via claude-root import, Grok via
-  │   │                            ~/.grok/rules/05-; says when
-  │   │                            to read the two files below)
-  │   ├── model-selection.md      (read on dispatch by Claude Code, Grok Build,
-  │   │                            and Codex (the latter via
-  │   │                            `codex/model-defaults.md`); Hermes links it)
-  │   ├── codex-delegation.md     (orchestrators: Claude + Grok Build read on
-  │   │                            dispatch; Hermes links it)
-  │   └── coding-orchestration.md (reference, not auto-loaded)
-  ├── grok/model-defaults.md   ◄─symlink─ ~/.grok/rules/30-model-defaults.md
-  ├── always/scripts/*         ◄─symlinks─ ~/.claude/scripts/*       [the live wrappers]
-  ├── always/skills/*          ◄─symlinks─ Claude + Codex + Pi + Grok [shared workflows]
-  ├── claude/skills/*          ◄─symlinks─ ~/.claude/skills/*        [Claude orchestration]
-  ├── codex/skills/*           ◄─symlinks─ ~/.codex/skills/*         [Codex orchestration]
-  ├── pi/skills/*              ◄─symlinks─ ~/.pi/agent/skills/*      [lightweight Pi workflows]
-  ├── grok/skills/*            ◄─symlinks─ ~/.grok/skills/*          [Grok orchestration]
-  ├── always/commands/{shared,pi}/* ◄─ ~/.pi/agent/prompts/*
-  ├── always/commands/{shared,claude}/* ◄─ ~/.claude/commands/*      [Claude: both dirs]
-  └── always/settings.json     ◄─symlink─ ~/.claude/settings.json
-```
-
-Codex's always-loaded engineering doctrine is principles only. Its global
-configuration mechanically defaults native subagents to GPT-6 Astra at high
-reasoning and carries a small instruction to consult `codex/model-defaults.md`
-and read its canonical policy references before choosing each dispatch
-model and effort. When the user names Grok,
-that same card points Codex at the dependency-free `grok-acp-exec.py` runner:
-Codex remains the orchestrator and Grok Build is one sandboxed leaf process.
-Codex-owned workflows arrive through `codex/skills/`. Shared model policy in
-`model-selection.md` applies to every harness; `codex-delegation.md` covers
-external CLI callers. Grok
-Build cannot expand `@import`, so it does not load `claude-root.md`; home
-doctrine is three numbered files under `~/.grok/rules/` (principles,
-`dispatch-bootstrap.md`, `grok/model-defaults.md`); model-selection and
-codex-delegation are read on dispatch. Native
-`spawn_subagent` is Grok 4.6 only; implement still goes through the Codex
-wrappers; Claude is `claude -p`. `~/.grok/config.toml` is a documented merge
-(Claude skill/agent compat off, native subagent models pinned to grok-4.6).
-Pi's always-loaded
-doctrine is also principles only, but for two reasons: Pi injects context files verbatim (no
-`@import` expansion) and loads a single global file, so the multi-file
-`claude-root.md` composition can't reach it; and by design Pi runs as a lean
-coding agent rather than loading the advanced Claude/Codex orchestration
-workflows. Its Pi-scoped model card owns the exact provider/model IDs because,
-unlike the other harnesses, native Tintin `Agent` calls cannot rely on semantic
-family names resolving to the current model. Unpinned role agents make each
-fresh call choose one of those IDs and a thinking level explicitly; resumed
-agents keep their existing model.
-
-Claude Code and Grok Build delegate Codex work through the wrappers in
-`always/scripts/` (Grok has no second wrapper set); Claude Code also delegates
-same-family `claude -p` passes at a chosen effort through `claude-exec.sh`
-(`model-selection.md` "The lane follows the effort"). Pi uses native `Agent`
-subagents instead: the same wrappers remain available through
-`~/.pi/agent/scripts`, but they are not Pi's normal subagent dispatch path.
-Repo-level `AGENTS.md`/`CLAUDE.md` files are inherited on top automatically and
-hold only repo-specific guidance.
-
-Advanced delivery is composable: `agentplan` produces a cross-family reviewed
-plan (full, or scope-only in Discover mode), `execute-plan` implements it in
-verified commits, `rev` performs the other-family adversarial review
-(code-simplifier plus the principles audit), `docs` consolidates
-documentation, and `babysit` watches the open PR to merge-ready — CI and
-CodeRabbit settled together, at most one push per round, with a two-round
-cost circuit breaker. An unmet ship gate is reported as incomplete delivery.
-`longrun` sequences them per the mode (Full / Discover / Iterative — owner:
-`instructions/model-selection.md` "Delivery pipeline modes"), pushes, opens
-the PR, and ends in `babysit`; CodeRabbit runs on the PR, not as a local
-step. Each atomic workflow remains independently invokable; `rev` and
-`babysit` never recurse into `longrun`.
-
-The life of an edit (e.g. tweak a codex wrapper):
-
-```
- edit ~/.claude/scripts/codex-exec.sh      ← the "live" path
-        = editing the clone's file          (symlink: same inode, no copy)
-        → `git status` shows the diff       immediately, automatically
-        → commit + push                     when you decide it's ready
-        → other machine: git pull           done — its symlinks already point here
-```
+Inside each machine, every live path is a symlink into this clone or a small
+documented merge into a machine-owned config; the table is `SETUP.md`
+"Contract". What each harness loads, and why Codex, Pi, and Grok Build load
+less than Claude Code, is in `SETUP.md` (the per-harness sections and
+"Instruction hierarchy"). Who orchestrates, implements, and reviews on each
+harness is `instructions/model-selection.md` "Harness seats" and "Roster".
 
 ## New machine
 
@@ -300,23 +149,21 @@ the standing drift audit.
 
 ## Editing doctrine
 
-Edit the canonical owner: shared doctrine under `instructions/`, shared skills
-under `always/skills/`, or harness-specific workflows under `claude/skills/`,
-`codex/skills/`, `pi/skills/`, and `grok/skills/`. Other machines receive
-committed changes through `git pull`; their live paths already point at these
-owners.
-When the wiring contract or Codex's or Grok Build's mechanical subagent
-defaults change, run the `SETUP.md` compliance check on each machine as well.
+Edit the canonical owner: shared doctrine under `instructions/`, delivery
+workflow bodies under `workflows/`, shared skills under `always/skills/`.
+Harness stubs under `claude/skills/`, `codex/skills/`, `pi/skills/`,
+`grok/skills/`, and `hermes/skills/` carry only harness facts (model card,
+lanes, long-wait mechanism). Other machines receive committed changes through
+`git pull`; their live paths already point at these owners. When the wiring
+contract or Codex's or Grok Build's mechanical subagent defaults change, run
+the `SETUP.md` compliance check on each machine as well.
 
 Never restate an `instructions/` rule in a repo's `AGENTS.md` or in a machine's
 local files: one owner per fact. A repo that needs *different* behavior states
 an explicit, labeled override in its own `AGENTS.md`.
 
-## A note on `always/settings.json`
-
-This is the user-global `~/.claude/settings.json` — Bash allow/deny lists,
-plugin toggles, behavior flags. Because it's a symlink, edits made via
-`/config` or by Claude Code itself flow back to git. Volatile keys may show up
-as occasional diffs; commit or `git restore` them.
+`always/settings.json` is the symlinked `~/.claude/settings.json`; which of its
+keys the repo owns and how to handle runtime drift is `SETUP.md` "Settings
+drift".
 
 License: [MIT](LICENSE).

@@ -31,6 +31,13 @@ or auditing guidance.
 5. Require human approval for guidance changes. Session evidence proposes
    changes; it does not autonomously rewrite standing instructions.
 
+## Skill descriptions
+
+Skills can activate from a `description` match as well as explicit
+invocation. Write the description as a functional, third-person summary, then
+name trigger phrases and exclusions. Do not phrase it as an imperative to the
+agent. Keep it narrow so it does not self-trigger mid-task.
+
 ## Sources and further reading
 
 - Kun Chen, [Your AGENTS.md Is a Neural Net](https://blog.kunchenguid.com/p/your-agentsmd-is-a-neural-net)

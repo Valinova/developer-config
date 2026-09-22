@@ -1,6 +1,6 @@
 # SETUP.md — the wiring contract
 
-This file replaces `install.sh` + `BOOTSTRAP.md`. There is no installer: an
+There is no installer: an
 agent (Claude Code) on each machine implements and verifies this contract with
 judgment a script can't apply. The contract is the canonical definition of
 "correctly wired"; if the machine disagrees with this file, the machine is wrong.
@@ -74,45 +74,9 @@ the interactive shell's `PATH` (on zsh, configure `~/.zshrc`). Verify in a fresh
 shell that `command -v codex-exec.sh`, `command -v claude-exec.sh`, and, when
 installed, `command -v pi-exec.sh` resolve to these repo-owned wrappers.
 
-**Runtime-mutable keys in `always/settings.json`:** because the file is
-symlinked, Claude Code's `/model` and `/effort` toggles rewrite the `model` and
-`effortLevel` keys in place — and picking the default model deletes the `model`
-key outright rather than writing a value. Whatever those two keys hold at HEAD
-is last-toggle residue, not a deliberate cross-machine default; diffs limited to
-them are session noise. The sanctioned way to keep that noise out of `git
-status` is machine-local `git update-index --skip-worktree` on the settings
-file (`git ls-files -v` shows `S` once set). Set it per machine for this file
-and `pi/settings.json`. The tradeoff: real changes (e.g. Pi's `packages`) also stop
-showing; un-skip, commit, re-skip when deliberately editing one.
-
-The same is true of the keys the harness itself owns: `enabledPlugins`,
-`extraKnownMarketplaces`, and the UI toggles are rewritten whenever a plugin is
-installed or a cloud-side setting syncs down. **This drift is expected — do not
-"reconcile" it.** Only two things in this file are the repo's to own and worth
-keeping in sync: `permissions` (allow / deny) and `hooks`. If a machine's
-`~/.claude/settings.json` is a plain copy rather than the symlink, that's the
-same story — compare the `permissions` and `hooks` blocks, ignore the rest.
-
-To stop the noise on a symlinked clone, set the skip-worktree bit once:
-
-```bash
-git update-index --skip-worktree always/settings.json
-```
-
-This is whole-file, not hunk-level: git ignores *all* local edits to the file,
-so runtime toggles never surface in `git status`. The tradeoff is pulls — when
-an upstream commit changes `settings.json`, the pull refuses ("local changes
-would be overwritten"). To take it: `--no-skip-worktree`, `git checkout --
-always/settings.json`, pull, then re-set the bit. Editing shared settings
-yourself is the same dance. Prefer not to carry the bit? Fall back to dropping
-the model/effort hunks (`git add -p` / `git checkout -p`) when committing other
-settings changes.
-
-`~/.codex/AGENTS.md` is what Codex actually reads globally — NOT
-`~/.claude/AGENTS.md` (the old install.sh linked there; Codex never looks in
-`~/.claude/`, which is why Codex ran with no instructions on WSL). That symlink
-loads the shared engineering principles only. Keep model routing out of that
-file. Merge these values into `~/.codex/config.toml` without replacing any
+`~/.codex/AGENTS.md` is what Codex reads globally (never
+`~/.claude/AGENTS.md`); it loads the shared engineering principles only. Keep
+model routing out of that file. Merge these values into `~/.codex/config.toml` without replacing any
 unrelated instruction or setting:
 
 ```toml
@@ -128,14 +92,10 @@ string, or create that string if it is absent:
 > `~/Development/developer-config/codex/model-defaults.md` and apply it unless
 > an explicit user or per-dispatch model/reasoning choice overrides it.
 
-The TOML values are mechanical defaults, not an effort floor. Before each
-dispatch, the referenced card requires reading
-`instructions/model-selection.md` and choosing the model and rung for that
-task. Explicit spawn values override the defaults. This is an intentional
-merge rather than a symlink because Codex owns and mutates the rest of
-`config.toml` (plugins, trusted projects, MCP, and desktop state). Shared
-model policy in `model-selection.md` applies to every harness;
-`codex-delegation.md` covers external CLI callers.
+The TOML values are mechanical defaults, not an effort floor; the card routes
+each dispatch through `instructions/model-selection.md`. It is a merge rather
+than a symlink because Codex owns and mutates the rest of `config.toml`
+(plugins, trusted projects, MCP, and desktop state).
 
 **Grok Build** (`~/.grok/`) is a **full orchestrator**, like Claude Code: native
 Grok 4.6 session, native `spawn_subagent` children (Grok 4.6 only — they cannot
@@ -179,9 +139,9 @@ get conversational approval); `bypassPermissions` still skips that tier.
 
 Grok skills *are* slash commands — there is no `always/commands/grok/` and no
 `~/.grok/commands/` links. Shared skills come from `always/skills/` via
-per-skill symlinks into `~/.grok/skills/`; the delivery six are Grok-owned
-ports under `grok/skills/` (native `spawn_subagent` + Codex wrappers +
-`claude -p`). A user skill named `execute-plan` overrides Grok's bundled
+per-skill symlinks into `~/.grok/skills/`; the delivery six are stubs under
+`grok/skills/` over `workflows/`. Grok invokes the Codex wrappers through the
+same `~/.claude/scripts/` links; there is no second Grok wrapper set. A user skill named `execute-plan` overrides Grok's bundled
 Graphite DAG `/execute-plan`; that shadow is intentional so `/execute-plan`
 means the same delivery workflow as in the other harnesses. Bundled `/design`
 and `/implement` stay.
@@ -198,57 +158,21 @@ pure-imports pattern does NOT work for it) and it loads only **one** global
 context file. So Pi receives the universal root doctrine (`principles.md`) and
 nothing is duplicated.
 
-The full orchestrator doctrine (`coding-orchestration.md`, `codex-delegation.md`)
-is deliberately NOT wired into Pi — most of it (Hermes `delegate_task`, Fable,
-cron, PR-burndown) doesn't apply. Orchestration is handled by the
-`@tintinweb/pi-subagents` package (declared in `pi/settings.json`), which spawns
-sub-agents on any model in Pi's registry. Its hardcoded default agents are
-disabled by `pi/subagents.json`; `pi/agents/*.md` supplies only role, tool, and
-prompt-inheritance profiles, with no pinned model or thinking level. **Models
-and thinking are specified at runtime in every fresh `Agent()` call** (resume
-keeps the existing session model). `bash-timeout-guard.ts` — see contract
-table.
+Pi dispatches through the `@tintinweb/pi-subagents` package (declared in
+`pi/settings.json`); `coding-orchestration.md` and `codex-delegation.md` are
+deliberately not wired in. `pi/model-defaults.md`, loaded through
+`~/.pi/agent/APPEND_SYSTEM.md` (a separate system-prompt slot, so Codex never
+sees it), owns Pi's seat, the exact provider/model IDs, and the rule that every
+fresh `Agent()` call names its model and thinking level; role profiles under
+`pi/agents/` never pin one, and there is no `pi-root.md`. On a shared fact
+`model-selection.md` wins. The wrappers are on Pi's `PATH` through
+`~/.pi/agent/scripts` but are not its dispatch path; add a purpose-built owner
+before making Pi invoke them.
 
-Pi loads a lean, Pi-scoped distillation of the model-×-task table via
-`~/.pi/agent/APPEND_SYSTEM.md` → `pi/model-defaults.md` (a separate system-prompt
-slot, so `principles.md` / `AGENTS.md` stays clean and Codex never sees it). It
-helps the orchestrator choose each explicit dispatch and is a labeled Pi-scope
-of canonical `model-selection.md`; if the two conflict on a shared fact, the
-canonical doc wins and both get updated. The same Pi file owns the exact
-provider/model ID mapping: other harnesses may resolve a semantic family name
-to its current model, but a native Pi `Agent` dispatch must use the mapped slug
-rather than infer or guess a version. There is no `pi-root.md`, and custom agent
-profiles never pin models.
-
-Claude Code and Grok Build use the Codex wrappers under `always/scripts/` when
-delegating Codex work (Grok invokes the same `~/.claude/scripts/` links; there
-is no second Grok wrapper set). Pi instead uses native Tintin `Agent` subagents.
-The wrappers are still on Pi's `PATH` through `~/.pi/agent/scripts`, but they
-are not Pi's normal dispatch mechanism; add a purpose-built owner before making
-Pi invoke them.
-
-**Runtime-mutable keys in `pi/settings.json`:** because the file is
-symlinked, Pi's `/model` and thinking toggles rewrite `defaultProvider`,
-`defaultModel`, and `defaultThinkingLevel` in place — the versioned values are
-cross-machine *initial* defaults, not a live policy to keep in sync. Diffs
-limited to those keys (plus `lastChangelogVersion` and `theme`) are session
-noise. **This drift is expected — do not "reconcile" it.** Dispatch policy is
-independent and lives in `pi/model-defaults.md`. The repo owns `packages`.
-
-Pi's consumption layer stays intentionally lean:
-`~/.pi/agent/settings.json` → `pi/settings.json`,
-`~/.pi/agent/subagents.json` → `pi/subagents.json`, role profiles under
-`~/.pi/agent/agents/` → `pi/agents/`,
-Pi-owned skills under `~/.pi/agent/skills/<f>` → `pi/skills/<f>`
-(`agentplan`, `execute-plan`, `full-docs`, `longrun`, `rev`, `babysit`, plus `convex-mcp`),
-and prompt entry points from `always/commands/{shared,pi}/`. It receives the
-shared principles and clear-cut shared workflows. The delivery workflows are
-Pi-native ports (Tintin `Agent` dispatch + Pi model card), not the Claude or
-Codex orchestration implementations. Convex deployment access rides the
-official Convex MCP server — a `convex` entry
-(`npx -y convex@latest mcp start`) in machine-local `~/.pi/agent/mcp.json`,
-merged under `mcpServers.convex` with `command: "npx"` and
-`args: ["-y", "convex@latest", "mcp", "start"]`;
+Pi's delivery skills under `pi/skills/` are stubs over `workflows/`, plus
+`convex-mcp`. Convex deployment access rides the official Convex MCP server,
+merged into machine-local `~/.pi/agent/mcp.json` under `mcpServers.convex` with
+`command: "npx"` and `args: ["-y", "convex@latest", "mcp", "start"]`;
 `pi/skills/convex-mcp` owns MCP policy (status
 first, never production deployments). Code guidance is Convex's project skills
 and `convex/_generated/ai/guidelines.md` — the installer owns `name: convex`. `~/.pi/agent/mcp.json` is never repo-owned: MCP entries carry
@@ -260,20 +184,38 @@ is machine-local custom provider configuration outside this contract.
 Harness-neutral skills live once under `always/skills/<name>/SKILL.md` and are
 per-skill symlinked into Claude, Codex, Pi, and Grok Build (never
 whole-directory links — Codex owns `.system/` inside its skill root).
-The delivery set — `agentplan`, `execute-plan`, `full-docs`, `longrun`, `rev`,
-and `babysit` (Hermes has no `full-docs`) — has one shared, harness-neutral
-body per workflow at `workflows/<name>.md`, outside every skills directory so
-no loader indexes it and nothing links it. Each harness's
-`<harness>/skills/<name>/SKILL.md` (the linked path) is a thin stub: its
-frontmatter, a pointer to the body by absolute path, and only that harness's
-facts — model card, orchestrator, implement and reviewer lanes, long-wait
-mechanism. Change the body once; a stub carries only harness facts.
+The delivery set (`agentplan`, `execute-plan`, `full-docs`, `longrun`, `rev`,
+`babysit`; Hermes has no `full-docs`) has one body per workflow at
+`workflows/<name>.md`, outside every skills directory so nothing indexes or
+links it. Each linked `<harness>/skills/<name>/SKILL.md` is a stub over that
+body carrying only harness facts.
 
 `codex-branch-review` (which also covers a stated recent range, e.g. the last
 48 hours), `codex-functionality-review`, and `codexclear` are Codex-only.
 `convex-mcp` is owned under `pi/skills/convex-mcp` and linked into Pi and Grok
 Build; the name `convex` is left to Convex's project installer. Claude uses
 the official plugin instead.
+
+### Settings drift
+
+`always/settings.json` and `pi/settings.json` are symlinked, so the harnesses
+rewrite them in place: Claude Code's `/model` and `/effort` rewrite (or delete)
+`model` and `effortLevel`; plugin installs and cloud sync rewrite
+`enabledPlugins`, `extraKnownMarketplaces`, and the UI toggles; Pi's `/model`
+and thinking toggles rewrite `defaultProvider`, `defaultModel`,
+`defaultThinkingLevel`, `lastChangelogVersion`, and `theme`. **This drift is
+expected — do not "reconcile" it**, and never read a HEAD value of those keys
+as a cross-machine default. The repo owns only `permissions` and `hooks` in
+`always/settings.json` and `packages` in `pi/settings.json`; a plain-copy
+`~/.claude/settings.json` is compared on those blocks alone.
+
+To keep the noise out of `git status`, set
+`git update-index --skip-worktree <file>` on both files per machine
+(`git ls-files -v` shows `S`). It is whole-file: owned-key edits stop showing
+too, and a pull that changes the file refuses. To edit or take upstream
+changes: `--no-skip-worktree`, `git checkout -- <file>`, pull or edit and
+commit, then re-set the bit. Without the bit, drop the drift hunks
+(`git add -p`) when committing other settings changes.
 
 ### MCP servers load on demand
 
@@ -282,10 +224,8 @@ scope (`~/.claude.json`), project scope (a repo's `.mcp.json` or the project
 block in `~/.claude.json`), and every enabled plugin that ships an
 `.mcp.json` — whether or not the session ever calls a tool on it. Deferred
 tool schemas defer only the schema text, never the process. A server that
-spawns its own child processes (Playwright launches a Chromium of 10–15 OS
-processes per session that navigates) multiplies by the number of open
-sessions; seven concurrent sessions with Playwright at user scope tripped
-WSL's memory ceiling on 2026-09-08 and stalled the WSLg compositor.
+spawns its own child processes (Playwright launches a Chromium) multiplies by the number of open
+sessions (why: rationale.md#mcp-on-demand).
 
 The rule, for every MCP server on every machine:
 
@@ -318,6 +258,8 @@ one `claude-pw` session so the MCP downloads its Chromium into
 `--mcp-config ~/.claude/mcp/playwright.json` in its launch args on machines
 where a browser from Zed is wanted; that setting is machine-local.
 `always/scripts/reap-orphan-mcp.sh` reaps orphaned Playwright MCP servers older than two hours; Codex workers are excluded.
+It runs from the user crontab every 15 minutes; on a new machine add this line with `crontab -e`:
+`*/15 * * * * $HOME/.claude/scripts/reap-orphan-mcp.sh`.
 
 ### Skills — the shared workflow primitive
 
@@ -335,7 +277,7 @@ directories live under `claude/skills/`, `codex/skills/`, `pi/skills/`, and
 those owners.
 
 The shared set is `code-simplifier`, `com`, `comall`, `design-taste-frontend`,
-`docs`, `high-end-visual-design`, and `no-use-effect` — all seven linked into
+`docs`, and `no-use-effect` — all six linked into
 Claude, Codex, Pi, and Grok Build. Keep this list current when adding a shared
 skill: a skill nobody enumerates is a skill nobody links (`code-simplifier` sat
 unlinked in every harness for exactly that reason).
@@ -347,10 +289,8 @@ target `pi/skills/<name>/SKILL.md`. The command surfaces inject the YAML
 frontmatter along with the body; that cosmetic preamble is preferable to a
 second maintained prompt.
 
-Skills can activate from a `description` match as well as explicit invocation.
-Write the description as a functional, third-person summary, then name trigger
-phrases and exclusions. Do not phrase it as an imperative to the agent. Keep it
-narrow so it does not self-trigger mid-task.
+Skills can activate from a `description` match as well as explicit invocation;
+how to write one is `instructions/agent-guidance.md` "Skill descriptions".
 
 Workflows that carry consequential intent include `agents/openai.yaml` with
 `allow_implicit_invocation: false`; they remain visible for explicit selection
@@ -358,9 +298,8 @@ but cannot activate from conversational similarity. That is every skill under
 `codex/skills/`, plus `com`, `comall`, `docs`, and `design-taste-frontend` from
 `always/skills/`. Standing policies such as `no-use-effect` ship an
 `agents/openai.yaml` carrying an `interface:` block and deliberately no
-`policy:` block, so they stay implicitly discoverable; `code-simplifier` and
-`high-end-visual-design` carry no `agents/` directory at all and are likewise
-discoverable.
+`policy:` block, so they stay implicitly discoverable; `code-simplifier`
+carries no `agents/` directory at all and is likewise discoverable.
 
 ## Instruction hierarchy (who loads what)
 
@@ -472,18 +411,16 @@ Model/effort policy: read `instructions/model-selection.md` "Harness seats",
 
 **WSL.** Keep all clones on the Linux filesystem (`~/Development/...`), never
 under `/mnt/c` — symlinks are unreliable on the Windows mount and git won't
-preserve them. No Hermes install needed, and don't create `~/.hermes/` by hand
-— the Codex wrappers `mkdir -p ~/.hermes/state/` lazily on the first delegation.
+preserve them. No Hermes install needed; `~/.hermes/state/` is covered by the
+Verification item above.
 
-## Judgment-required extras (the old BOOTSTRAP.md scope)
+## Judgment-required extras
 
 - `packages/` — opt-in skill/agent bundles; ask which to install, then wire each
   into the directory matching what it ships (the only one today,
   `browser-walker`, declares an agent, so it belongs in `~/.claude/agents/`, not
   `~/.claude/skills/`). Skip anything an official marketplace plugin now
-  covers — install the plugin instead of vendoring a stale copy. (Convex was
-  removed for exactly this: use the `convex@claude-plugins-official` plugin,
-  which supersedes the old vendored skills.)
+  covers — install the plugin instead of vendoring a stale copy.
 - Repo permission grants are machine-local (`<repo>/.claude/settings.local.json`,
   re-created on demand); the root-level settings are canonical and permissive.
 - `~/.claude-local/` — personal overlay, gitignored, layered on top if present.

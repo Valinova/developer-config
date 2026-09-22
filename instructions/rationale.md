@@ -373,3 +373,14 @@ warm pings — for any wait shorter than about seven hours a heartbeat is
 cheaper than letting the cache lapse (settled 2026-09-03). Fifty minutes, not
 fifty-nine: the wake fires after the delay, then queues and runs, and the TTL
 clock does not wait for that.
+
+## SETUP.md
+
+### mcp-on-demand
+
+Deferred tool schemas hide only the schema text; Claude Code still spawns
+every configured stdio MCP server at session start. Playwright's server
+launches a Chromium of 10–15 OS processes per session that navigates, so the
+cost scales with open sessions: on 2026-09-08 seven concurrent sessions with
+Playwright at user scope tripped WSL's memory ceiling and stalled the WSLg
+compositor. That is why heavy servers are a per-session `--mcp-config` opt-in.

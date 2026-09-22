@@ -394,30 +394,24 @@ These are tools, not defaults. Use them when the design read calls for them. **N
 * In CSS: gate animations behind `@media (prefers-reduced-motion: no-preference)` or provide an override block under `@media (prefers-reduced-motion: reduce)` that disables.
 * Infinite loops, parallax, scroll-hijack, and magnetic physics MUST collapse to static / instant under reduced motion.
 
-### 6.C Dark Mode (mandatory for any consumer-facing page)
-* Design for **both modes from the start**. Never ship light-only or dark-only without explicit user instruction.
-* Use Tailwind `dark:` variant OR CSS variables for tokens. Pick one strategy per project.
-* **Do not prescribe specific dark-mode colors here.** The brief decides. Maintain visual hierarchy, brand identity, and WCAG AA contrast (AAA for body) across both modes.
-* Respect `prefers-color-scheme: dark`. Default to system preference unless the brand insists on one mode.
-
-### 6.D Core Web Vitals Targets
+### 6.C Core Web Vitals Targets
 * **LCP** < 2.5s. Hero image must be `next/image priority` or preloaded.
 * **INP** < 200ms. Heavy work off main thread.
 * **CLS** < 0.1. Reserve space for images, fonts, embeds.
-* Run Lighthouse before declaring a page done.
+* Run Lighthouse before declaring a page done; ask the user before starting a browser session to run it.
 
-### 6.E DOM Cost
+### 6.D DOM Cost
 * Apply grain / noise filters EXCLUSIVELY to fixed, `pointer-events-none` pseudo-elements (e.g., `fixed inset-0 z-[60] pointer-events-none`). NEVER on scrolling containers - continuous GPU repaints destroy mobile FPS.
 * Be aware of bundle size. Motion is not tiny. Three.js is large. Lazy-load anything that's not above-the-fold.
 
-### 6.F Z-Index Restraint
+### 6.E Z-Index Restraint
 NEVER spam arbitrary `z-50` or `z-10`. Use z-index strictly for systemic layer contexts (sticky navbars, modals, overlays, grain). Document the z-index scale in a project constants file.
 
 ---
 
 ## 7. DARK MODE PROTOCOL
 
-Dual-mode by default. Never assume light-only unless the brief is print-emulating editorial.
+Mandatory for any consumer-facing page: design for both modes from the start. Never ship light-only or dark-only without explicit user instruction, unless the brief is print-emulating editorial.
 
 ### 7.A Token Strategy (pick one, stick to it)
 * **Tailwind `dark:` variant** (default for utility-first projects): every color utility paired with its dark variant (`bg-white dark:bg-zinc-950`, `text-gray-900 dark:text-gray-100`).
@@ -619,7 +613,7 @@ This is a vocabulary, not a library. The agent should KNOW these pattern names t
 
 ### Animation Library Choice
 * **Motion (`motion/react`)** - default for UI / Bento / state-change motion.
-* **GSAP + ScrollTrigger** - for full-page scrolltelling and scroll hijacks. Isolate in dedicated leaf components with `useEffect` cleanup.
+* **GSAP + ScrollTrigger** - for full-page scrolltelling and scroll hijacks. Isolate in dedicated leaf components with `useEffect` cleanup (a genuine external-system sync, which the no-use-effect policy allows; comment why in the code).
 * **Three.js / WebGL** - for canvas backgrounds and 3D scenes. Same isolation rule.
 * **NEVER mix GSAP / Three.js with Motion in the same component tree.** They fight over the same frames.
 
