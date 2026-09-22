@@ -1,54 +1,14 @@
 ---
 name: rev
-description: Runs a standalone or composable branch review as one cross-family review (code-simplifier plus the principles audit) with agreed fixes committed. Use only when the user explicitly invokes "rev" or requests this review workflow.
+description: Runs a standalone or composable branch review as one cross-family review at the depth the change warrants (code-simplifier plus the principles audit on the full row) with agreed fixes committed. Use only when the user explicitly invokes "rev" or requests this review workflow.
 disable-model-invocation: true
 ---
 
 # Adversarial Review — Grok Build
 
-Before choosing seats or effort, read
-`~/Development/developer-config/grok/model-defaults.md`
-and its required canonical policy sections.
+Read `~/Development/developer-config/workflows/rev.md` and follow it.
+This stub carries only the Grok Build facts that body defers to:
 
-Review the committed branch. This workflow is independently runnable and is
-also the review stage composed by `longrun`; it never invokes `longrun` itself.
-Invoking it authorizes the code-simplifier pass and the commits required for
-the agreed fixes.
-
-The active Grok session orchestrates. Use `grok/model-defaults.md` for
-reviewer transports; the implementing lane applies the fixes.
-
-## Preamble
-
-State first the reviewer seat and rung chosen, and why (`model-selection.md`
-"External calls" for who, "Effort" for the rung, "Announce-then-proceed
-preamble").
-
-## Sequence
-
-Verify the branch before modifying files.
-Follow `git-operations.md`: honor the user's branch direction, including work on
-the default branch; do not create or switch branches or worktrees without
-existing authorization. Work on the current branch otherwise.
-
-1. **Review.** Dispatch one cross-family reviewer — seat per `model-
-   selection.md` "External calls", rung per "Effort"; a Claude reviewer is Opus
-   5.5 for contained work, or Fable 5.1 leading nested Opus discovery subagents
-   for complex work. The reviewer runs the shared `code-simplifier` skill and
-   the principles audit over the committed diff (the engineering principles and
-   the repo's `AGENTS.md`/`CLAUDE.md` guidance: correctness and regressions,
-   with emphasis on simplicity, intentionality, canonical ownership, and
-   removal of unnecessary scope) and returns one findings list. The
-   orchestrator never reviews its own diff.
-2. **Agree.** Read the findings once; keep what is valuable and give each
-   dropped finding a one-line reason in the final report. No second review, no
-   re-triage loop. Escalate only unresolved critical choices under principles
-   §4.
-3. **Fix.** An implementer subagent (seat per `model-selection.md` "Harness
-   seats") applies the kept set; the orchestrator does no mechanical editing
-   itself.
-4. **Verify and commit.** The Grok orchestrator runs the full check
-   battery, stages exact files, and creates coherent descriptive commits.
-
-If the kept findings require several passes, execute them here as a bounded
-review-fix plan; do not recurse into `longrun`. Do not push or open a PR.
+- Orchestrator: the Grok 4.6 session; native `spawn_subagent` children are Grok 4.6 only. Model card: `grok/model-defaults.md`.
+- Reviewer seat: from the card's reviewer transports, never the author's family; a Claude reviewer runs through `claude -p` — Opus 5.5 for contained work, Fable 5.1 leading nested Opus discovery for complex work; lifecycle per `codex/model-defaults.md`.
+- Implement lane: Codex `gpt-6-astra` via the Codex wrappers, rung passed explicitly; Grok Build writes no product code. Grok `spawn_subagent` or `claude -p --model opus` only when the user names one.

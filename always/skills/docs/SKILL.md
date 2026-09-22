@@ -7,13 +7,13 @@ description: Reviews documentation created or modified on the current branch, co
 
 Review all documentation created or modified on the current branch.
 
-**Seat.** When this stage is farmed out (a `claude-exec.sh` lane, or the docs
-stage inside `longrun`), it runs on the Opus seat
-(`claude-exec.sh <task> <brief> --model opus --effort medium`), never Fable:
-under a distilled brief that names the sources, the allowlist and what to
-verify against the code, the fold is mechanical work per
-`instructions/model-selection.md` "Roster". The orchestrator's own pass over
-the resulting diff is the judgment step.
+**Seat.** When this stage is farmed out (a delegated lane, or the docs stage
+inside `longrun`), it runs on the harness's implement seat at a task-chosen
+rung under `instructions/model-selection.md` "Harness seats" and "Effort"; in
+Claude Code that is Opus 5.5, never Fable. Under a distilled brief that names
+the sources, the allowlist and what to verify against the code, the fold is
+mechanical work. The orchestrator's own pass over the resulting diff is the
+judgment step.
 
 - Fold useful one-time documents, such as implementation guides, into the canonical architectural documentation.
 - Delete one-time material when it is stale or no longer useful.

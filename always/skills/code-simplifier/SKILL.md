@@ -27,9 +27,7 @@ Apply these lenses, in order of value:
 4. **Audit defensive code.** Swallowing try/catch, silent fallbacks, null
    checks against internal guarantees → replace with loud failure or delete.
 5. **Simplify structure.** Guard clauses over nesting; inline pass-through
-   indirection. Reduce complexity by simplifying logic, never by
-   redistributing it — splitting one hard function into wrappers to lower a
-   complexity score is a regression, not a finding.
+   indirection.
 
 ## Finding grammar
 

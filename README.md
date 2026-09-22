@@ -74,13 +74,15 @@ always/
                             high-end-visual-design, no-use-effect. Every one is linked
                             into all four harnesses.
   settings.json             User-global ~/.claude/settings.json (permissions, plugins, toggles)
-claude/skills/              Claude-owned orchestration workflows. Fable 5.1 orchestrates
+workflows/                  One shared body per delivery workflow (agentplan, execute-plan,
+                            full-docs, longrun, rev, babysit); not a skill dir, never linked.
+claude/skills/              Claude stubs over workflows/: Fable 5.1 orchestrates
                             Opus 5.5 passes; Codex GPT-6 Astra reviews at the key gates.
 codex/
   model-defaults.md         Codex dispatch routing — native subagents,
                             cross-family `claude -p`, and Grok Build over ACP.
-  skills/                   Codex-owned orchestration workflows using native Astra subagents
-                            and `claude -p` for cross-family Claude review.
+  skills/                   Codex stubs over workflows/ (native Astra subagents,
+                            `claude -p` for cross-family Claude review) plus Codex-only skills.
 hermes/                     Hermes's consumption layer — owned here, loaded from the
   model-defaults.md         gitignored ~/.hermes via symlink. Seats live in
   skills/                   model-selection.md (this file is a pointer). skills/
@@ -90,9 +92,9 @@ hermes/                     Hermes's consumption layer — owned here, loaded fr
                             `docs` is the shared always/skills one.
 grok/                       Grok Build's consumption layer. model-defaults.md is the
   model-defaults.md         Grok-scoped dispatch card (native Grok 4.6 spawn_subagent,
-  skills/                   Codex wrappers, claude -p). skills/ owns Grok-native ports
-                            of the delivery workflows (agentplan, execute-plan,
-                            full-docs, longrun, rev, babysit). No commands dir — Grok skills
+  skills/                   Codex wrappers, claude -p). skills/ holds Grok stubs over
+                            workflows/ (agentplan, execute-plan, full-docs, longrun,
+                            rev, babysit). No commands dir — Grok skills
                             are slash commands. User execute-plan overrides Grok's
                             bundled Graphite DAG skill of that name.
                             Convex MCP skill is the Pi-owned `pi/skills/convex-mcp`,
@@ -103,8 +105,8 @@ packages/                   Opt-in skill/agent bundles — currently only browse
 pi/                         Pi's consumption layer. Owned files — settings.json (models, theme,
                             packages), subagents.json (Tintin defaults off), unpinned role agents,
                             model-defaults.md (the Pi-scoped model-×-task card and exact native
-                            Agent model IDs wired to APPEND_SYSTEM.md), Pi-native ports of the
-                            delivery workflows (agentplan, execute-plan, full-docs, longrun, rev,
+                            Agent model IDs wired to APPEND_SYSTEM.md), Pi stubs over workflows/
+                            (agentplan, execute-plan, full-docs, longrun, rev,
                             babysit) plus convex-mcp (also linked into Grok Build), and mechanical extensions — with
                             tests — for destructive operations and bash timeout capping;
                             Pi otherwise consumes principles and harness-neutral shared skills.

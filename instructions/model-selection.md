@@ -126,7 +126,8 @@ tests, and the pre-commit gate are not external calls and always run.
 - **A workflow skill carries its own gates, and invoking it is the
   approval:** `agentplan` → plan/scope review; `execute-plan` → only the seam
   review, when a later phase tears out what an earlier one built; `rev` → the
-  diff review; `longrun` → plan review + final `rev` (+ the seam review).
+  diff review; `longrun` → plan review + final `rev` (+ the seam review);
+  `full-docs` → its adversarial validation of the documentation diff.
 - **Granted autonomy without a skill** ("go build it and open a PR"): judge
   it, and state what was chosen and why.
 

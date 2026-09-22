@@ -5,27 +5,9 @@ description: Performs a deep native Codex documentation audit with Claude advers
 
 # Full Documentation Review — Codex
 
-Before choosing seats or effort, read
-`~/Development/developer-config/codex/model-defaults.md`
-and its required canonical policy sections.
+Read `~/Development/developer-config/workflows/full-docs.md` and follow it.
+This stub carries only the Codex facts that body defers to:
 
-Select native audit subagents, effort, and fan-out under `model-selection.md`
-"Roster", "Effort", and "Subagent fan-out".
-
-Before the audit, follow `model-selection.md` "Announce-then-proceed
-preamble": state first whether any external call is warranted on the
-documentation diff, and why; only if one is, its seat and rung;
-then the audit scope, and the parent pipeline mode only when composed. In a
-non-interactive run, put the same block at the top of the final report.
-
-Audit the current branch for:
-
-1. One-time documents that should be deleted or folded into canonical architecture documentation.
-2. Mismatches between the implementation and the core documentation.
-3. Clear improvements in correctness, consolidation, simplicity, visual explanation, and canonical ownership.
-
-Implement every clear, valuable improvement. Then apply `model-selection.md`
-"External calls" to the complete documentation diff, following the dispatch
-mechanics in `codex/model-defaults.md`. Apply only findings the orchestrator
-and reviewer both deem valuable. Leave the resulting edits unstaged for the
-user's final review.
+- Orchestrator: GPT-6 Astra. Model card: `codex/model-defaults.md`.
+- Audit seat: native Astra subagents.
+- Validation reviewer: Claude through `claude -p` (seat per the card).

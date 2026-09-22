@@ -15,14 +15,7 @@ Never call `useEffect` directly without first exhausting the repository's prefer
 | One-time external synchronization | A dedicated mount hook when the project provides one |
 | Resetting state when identity changes | A `key` prop on the parent |
 
-## Decision Process
-
-1. If the effect derives state, compute the value during render or with `useMemo`.
-2. If it fetches data, use the project's data-fetching pattern.
-3. If it responds to a user action through a flag, move the work into the event handler.
-4. If it synchronizes once with an external system, use the project's mount or subscription abstraction.
-5. If it resets state when an ID or key changes, force a remount with the parent's `key`.
-6. If none apply, treat it as a possible genuine effect and document why it must synchronize with an external system.
+If none apply, it may be a genuine effect: comment why it must synchronize with an external system.
 
 ## Common Patterns
 
@@ -52,5 +45,3 @@ useEffect(() => {
 // Prefer
 const { displayValue, handlers } = useEditableField(storeValue, onChange)
 ```
-
-After refactoring, run type checking and linting and confirm that observable component behavior is unchanged.

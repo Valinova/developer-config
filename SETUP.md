@@ -260,22 +260,14 @@ is machine-local custom provider configuration outside this contract.
 Harness-neutral skills live once under `always/skills/<name>/SKILL.md` and are
 per-skill symlinked into Claude, Codex, Pi, and Grok Build (never
 whole-directory links — Codex owns `.system/` inside its skill root).
-Orchestration workflows whose mechanisms genuinely differ live as complete,
-stable copies under `claude/skills/`, `codex/skills/`, `pi/skills/`, and
-`grok/skills/`. Claude uses Opus 5.5 passes (native `Agent` or
-`claude-exec.sh`) and the Codex wrappers for cross-family review; Codex uses native Astra subagents and `claude -p` for
-cross-family review; Pi uses Tintin `Agent` subagents and the Pi model card;
-Grok Build uses native Grok 4.6 `spawn_subagent` children, the same Codex
-wrappers as Claude, and `claude -p` for Claude.
-
-The intentional Claude/Codex/Pi/Grok delivery set is `agentplan`,
-`execute-plan`, `full-docs`, `longrun`, `rev`, and `babysit`. They share outcomes and
-safety invariants but not dispatch mechanics. When changing one harness copy,
-an agent must inspect the counterparts and reconcile only the facts that
-should remain aligned; do not mechanically make the files identical.
-<!-- simplified: sibling parity across the five skill projections is by hand.
-     upgrade when: a second delivery-skill commit lands in fewer than five
-     projections (then a staged-diff sibling check in the gate). -->
+The delivery set — `agentplan`, `execute-plan`, `full-docs`, `longrun`, `rev`,
+and `babysit` (Hermes has no `full-docs`) — has one shared, harness-neutral
+body per workflow at `workflows/<name>.md`, outside every skills directory so
+no loader indexes it and nothing links it. Each harness's
+`<harness>/skills/<name>/SKILL.md` (the linked path) is a thin stub: its
+frontmatter, a pointer to the body by absolute path, and only that harness's
+facts — model card, orchestrator, implement and reviewer lanes, long-wait
+mechanism. Change the body once; a stub carries only harness facts.
 
 `codex-branch-review` (which also covers a stated recent range, e.g. the last
 48 hours), `codex-functionality-review`, and `codexclear` are Codex-only.

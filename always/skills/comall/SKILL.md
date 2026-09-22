@@ -10,11 +10,9 @@ worktree. Flag anything that looks unintended — secrets, scratch files,
 unrelated parallel WIP — before including it, instead of committing blindly.
 
 1. Inspect the full picture first: staged, unstaged, and untracked.
-2. Split the changes into coherent groupings — one logical change per commit,
-   by concern, at file level (`git-operations.md`). Never lump unrelated changes
-   into one commit, and never `git add -A`: stage each group as an explicit
-   file list. Split at file level only — no hunk-level splitting; when one
-   file mixes concerns, put it in the most fitting commit and move on.
+2. Split the changes into coherent groupings per `git-operations.md`
+   "Commits"; when one file mixes concerns, put it in the most fitting commit
+   and move on.
 3. Run the repository's required pre-commit verification before the first
    commit.
 4. Give every commit a descriptive message: a subject saying what changed and
