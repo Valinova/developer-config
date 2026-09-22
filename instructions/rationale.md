@@ -123,39 +123,15 @@ resolution cost and keeps history linear and free of update-merge bubbles.
 
 ## model-selection.md
 
-### effort-ceilings
+### effort
 
-Escalation is not free quality. Anthropic's extended-thinking research
-measures up to −36% on intuitive, pattern-matching tasks, and Astra's own
-coding evals peak at `high` and put `max` below it (Terminal-Bench 4.0,
-DeepSWE v1.1). On
-well-specified work the top rungs make the output worse, not merely slower.
-Nothing in the roster earns `max` on current evidence: Astra scores worse
-there, Fable buys ~1 index point for +40% cost, and the rest top out below
-it. The Fable range is experience over benchmarks, deliberately: Artificial
-Analysis puts Fable `xhigh` at 65 and `max` at ~66, but `xhigh` has not paid
-off in our own runs, so it stays an opt-in experiment rather than the
-ceiling.
-
-Field note, 2026-09: initial feedback has Fable 5.1 and Astra 6 performing
-well at `medium`–`high`; `xhigh` shows little benefit and is excessive in
-most cases. Hence the restraint in the table — `xhigh` is reserved for
-genuinely very complex or cross-cutting work, and the orchestrator proposes a
-`high` vs `xhigh` side-by-side on an ideal candidate rather than picking it,
-so the ceiling moves on evidence, not on how substantial a task looks.
-
-### opus-effort
-
-Opus 5.5 launch charts (Anthropic, Sep 2026). FrontierCode v1.1 (agentic
-coding): low ~47% at $0.40/task, **medium ~55% at $0.80 (peak)**, high ~54%,
-xhigh ~51% (a dip), max ~54.5% at $6. Terminal-Bench 4.0: low ~38%, medium
-~57% at $3, **high ~64% at $4**, xhigh ~66% at $7.50, max ~65% at $11. So
-`medium` is the default for repo coding; `high` earns its ~33% extra cost on
-long terminal-heavy work; `xhigh` buys ~2 points for ~2x cost and regresses
-on repo coding; `low` drops 8–19 points, contrary to the migration guide's
-"comes close" line. The API default is also `medium` (Opus 5's was `high`),
-and at a given level 5.5 thinks more per turn than Opus 5, so carrying Opus
-5's `high` over means longer, costlier turns.
+The data log is `instructions/benchmarks.md`. Knees: Opus 5.5 at `medium` on
+repo code and `high` on long agentic/terminal work; Sol at `high`; Astra
+gains little past `medium`, Fable little past `high`. Past the knee
+each rung costs 1.5–4x for ≤3 points, and on merge-readiness evals the top
+rungs score lower (out-of-scope changes grow with effort) — so nothing earns
+`max`, `xhigh` stays a suggested stretch, and a Sol pass that is not enough
+at `high` goes to Astra instead of a higher Sol rung.
 
 ### session-effort
 
@@ -206,7 +182,7 @@ imports), which is why it never pays off for minute-scale tasks.
 
 ### grok-briefing
 
-When the user names Grok 4.6, its own briefing habits apply; Claude-side
+When the user names Grok (observed on 4.6), its own briefing habits apply; Claude-side
 briefing and effort habits copied onto it degrade results.
 
 ## dispatch-bootstrap.md

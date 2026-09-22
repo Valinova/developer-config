@@ -27,8 +27,9 @@ One line per top-level entry; each file's header and `SETUP.md` own the detail.
 instructions/     The doctrine, one owner per fact: principles, git-operations,
                   claude-conventions, dispatch-bootstrap (always loaded in Claude
                   Code), model-selection and codex-delegation (read on dispatch),
-                  coding-orchestration, agent-guidance, durable-worktrees, and the
-                  rationale archive (reference, not auto-loaded).
+                  coding-orchestration, agent-guidance, durable-worktrees, the
+                  rationale archive (reference, not auto-loaded), and benchmarks
+                  (data log behind the effort rule, not loaded).
 claude-root.md    Becomes ~/.claude/CLAUDE.md via symlink. Pure @imports.
 SETUP.md          The wiring contract + verification checklist. No install script.
 workflows/        One shared body per delivery workflow (agentplan, execute-plan,
@@ -79,15 +80,15 @@ packages/         Opt-in bundles (browser-walker agent); see SETUP.md.
 │ CLAUDE CODE  │ │    CODEX     │ │     PI     │ │     GROK BUILD      │
 │ principles + │ │ principles   │ │ principles │ │ rules/*.md:         │
 │ conventions +│ │ ONLY; merge  │ │ + pi/model-│ │  principles +       │
-│ bootstrap;   │ │ Astra/high;  │ │ defaults   │ │  bootstrap +        │
-│ model-sel. + │ │ read model-  │ │ lean agent │ │  grok/model-defaults│
-│ codex-deleg  │ │ defaults.md  │ │ always/+pi │ │  (model-sel./codex- │
+│ bootstrap;   │ │ Sol/high;    │ │ defaults   │ │  bootstrap +        │
+│ model-sel. + │ │ read model-  │ │ skills:    │ │  grok/model-defaults│
+│ codex-deleg  │ │ defaults.md  │ │  always/+pi│ │  (model-sel./codex- │
 │ on dispatch  │ │ always/+codex│ │            │ │  deleg on dispatch) │
 │ skills:      │ │              │ │            │ │ skills: always/+    │
-│  always/+    │ │ Astra orch + │ │            │ │  grok/ (overrides   │
-│  claude/     │ │  implements; │ │            │ │  bundled execute-   │
-│ Fable orch;  │ │ claude -p    │ │            │ │  plan). Native Grok │
-│ Opus impl;   │ │  (Claude)    │ │            │ │ 4.6 spawn_subagent; │
+│  always/+    │ │ Astra orch;  │ │ local model│ │  grok/ (overrides   │
+│  claude/     │ │ Sol impl;    │ │ per machine│ │  bundled execute-   │
+│ Fable orch;  │ │ claude -p    │ │ (two-family│ │  plan). Native Grok │
+│ Opus impl;   │ │  (Claude)    │ │  rule)     │ │ 4.7 spawn_subagent; │
 │ Astra review │ │  reviews     │ │            │ │ Codex wrappers;     │
 └──────────────┘ └──────────────┘ └────────────┘ │ claude -p for Claude│
                                                  └─────────────────────┘
@@ -102,9 +103,11 @@ packages/         Opt-in bundles (browser-walker agent); see SETUP.md.
                                            ▼
    /longrun = agentplan → execute-plan → rev → docs → (push → PR) → babysit
    (each stage independently invokable; rev/babysit never recurse into longrun)
-   Hermes uses the same names; default orch is Grok 4.6, implementer is Codex,
-   Claude only through `claude -p`. Grok Build is the same seat in a TUI:
-   native Grok 4.6, Codex wrappers, `claude -p`.
+   Two families: Claude side (Fable orch, Opus executes, Astra reviews) and
+   Codex side (Astra orch, Sol executes, Claude reviews). Pi, Hermes, and Grok
+   Build run each machine's local default model under the same two-family
+   rule; Grok 4.7, DeepSeek, open-source models, and Luna are user-named
+   overrides anywhere.
 ```
 
 ## How it all fits together

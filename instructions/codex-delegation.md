@@ -103,7 +103,7 @@ sustained memory pressure a `ScheduleWakeup` poll replaces the waiter since it
 holds no process. `codex-status.sh` is the mandatory liveness check before
 concluding a run is dead: STALE means "look at the log tail", not "kill it".
 
-Model, effort, and service tier are passed **per run as flags** — no env vars. The consumer decides each in its own prompt; unset, they default to `gpt-6-astra` / `high` / `default` tier:
+Model, effort, and service tier are passed **per run as flags** — no env vars. The consumer decides each in its own prompt; unset, they default to `gpt-6-astra` / `high` / `default` tier — used mostly for reviews from Claude Code; pass `--model gpt-6-sol` for a Sol implement pass:
 
 - `--model SLUG` — the permitted Codex slug under `model-selection.md` "Roster"; passed through without roster validation.
 - `--effort LEVEL` — passed through verbatim without validation. The CLI decides wire support; `model-selection.md` "Effort" decides which rung to request. Wrapper defaults are not a task's effort floor.
@@ -117,7 +117,7 @@ The exec wrapper redirects stdin, logs to `/tmp/codex-<task>.log`, registers in 
 
 Codex writes full session transcripts to `~/.codex/sessions/<date>/rollout-<timestamp>-<uuid>.jsonl`. The wrappers capture the session UUID in the registry at dispatch time so follow-ups don't have to grep the logs. Preserve resumability until cleanup: if a run fails before the session ID is captured, warn before starting over.
 
-## Pi delegation (grok-4.6)
+## Pi delegation (Grok 4.7)
 
 A user-named override lane (`model-selection.md` "Roster"). Delegated `pi -p` runs (`pi-exec.sh` and twins in `~/.claude/scripts/`) follow the same brief sections, Sandbox note, SUMMARY block, and post-run discipline as Codex; wrapper flags, registry, and Pi-specific differences are in `pi/model-defaults.md` "Delegated runs".
 

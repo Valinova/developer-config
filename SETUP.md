@@ -14,7 +14,7 @@ The repo is cloned at `~/Development/developer-config` on every machine
 |---|---|---|
 | `~/.claude/CLAUDE.md` | symlink | `claude-root.md` |
 | `~/.codex/AGENTS.md` | symlink | `instructions/principles.md` |
-| `~/.codex/config.toml` native subagent defaults | merge | Set `[agents]` to GPT-6 Astra / high and tell Codex to read `codex/model-defaults.md` before dispatch; preserve every unrelated setting |
+| `~/.codex/config.toml` native subagent defaults | merge | Set `[agents]` to GPT-6 Sol / high and tell Codex to read `codex/model-defaults.md` before dispatch; preserve every unrelated setting |
 | `~/.pi/agent/AGENTS.md` | symlink | `instructions/principles.md` |
 | `~/.claude/settings.json` | symlink | `always/settings.json` |
 | `~/.claude/mcp/playwright.json` | symlink | `always/mcp/playwright.json` (on-demand MCP server definition — see "MCP servers load on demand") |
@@ -40,7 +40,7 @@ The repo is cloned at `~/Development/developer-config` on every machine
 | `~/.grok/skills/<shared>` | symlink each | `always/skills/<shared>` |
 | `~/.grok/skills/<grok>` | symlink each | `grok/skills/<grok>` |
 | `~/.grok/skills/convex-mcp` | symlink | `pi/skills/convex-mcp` (Pi/Grok MCP policy; Claude uses the official plugin. Convex's installer owns project `name: convex`) |
-| `~/.grok/config.toml` Claude compat + native subagent models | merge | Set `[compat.claude] skills = false` and `agents = false`; pin `[subagents.models]` explore / plan / general-purpose to `grok-4.6`; preserve every unrelated setting |
+| `~/.grok/config.toml` Claude compat + native subagent models | merge | Set `[compat.claude] skills = false` and `agents = false`; pin `[subagents.models]` explore / plan / general-purpose to `grok-4.7`; preserve every unrelated setting |
 | `~/.claude/scripts/<f>` | symlink each | `always/scripts/<f>` (PATH-invoked scripts only — see note) |
 | `~/.pi/agent/scripts` | symlink | `always/scripts` |
 | `~/.claude/commands/<f>` | symlink each | `always/commands/{shared,claude}/<f>` (both dirs) |
@@ -81,7 +81,7 @@ unrelated instruction or setting:
 
 ```toml
 [agents]
-default_subagent_model = "gpt-6-astra"
+default_subagent_model = "gpt-6-sol"
 default_subagent_reasoning_effort = "high"
 ```
 
@@ -93,13 +93,15 @@ string, or create that string if it is absent:
 > an explicit user or per-dispatch model/reasoning choice overrides it.
 
 The TOML values are mechanical defaults, not an effort floor; the card routes
-each dispatch through `instructions/model-selection.md`. It is a merge rather
+each dispatch through `instructions/model-selection.md`. After pulling a change
+to these values, each machine updates its own `[agents]` and Grok
+`[subagents.models]` values (`check-wiring.py` asserts them). It is a merge rather
 than a symlink because Codex owns and mutates the rest of `config.toml`
 (plugins, trusted projects, MCP, and desktop state).
 
-**Grok Build** (`~/.grok/`) is a **full orchestrator**, like Claude Code: native
-Grok 4.6 session, native `spawn_subagent` children (Grok 4.6 only — they cannot
-be Claude or Codex), Codex implement via the existing Claude Code wrappers, and
+**Grok Build** (`~/.grok/`) is a **full orchestrator**, like Claude Code: its
+session model is the machine's local config, native `spawn_subagent` children
+are Grok 4.7 (they cannot be Claude or Codex), Codex implement via the existing Claude Code wrappers, and
 Claude via `claude -p`. Grok does **not** expand `@import`, so there is no
 `grok-root.md`. Home doctrine is `~/.grok/rules/*.md` (verbatim, every file;
 later-alphabetical wins on conflict, which is why the links are numbered). That
@@ -117,9 +119,9 @@ skills = false
 agents = false
 
 [subagents.models]
-explore = "grok-4.6"
-plan = "grok-4.6"
-general-purpose = "grok-4.6"
+explore = "grok-4.7"
+plan = "grok-4.7"
+general-purpose = "grok-4.7"
 ```
 
 `skills = false` / `agents = false` stop Grok from ingesting Claude's
@@ -150,8 +152,8 @@ Do not create `~/.grok/hooks/` copies of the Claude PreToolUse hooks — Grok
 already loads them from `~/.claude/settings.json`, and a second registration
 would double-fire.
 
-**Pi** (`~/.pi/agent/`) is wired as a deliberately **lean coding agent**, not an
-orchestrator. Its one global context file points at `principles.md` (same as
+**Pi** (`~/.pi/agent/`) runs the machine's local default model. Its one global
+context file points at `principles.md` (same as
 Codex). Pi differs from Claude Code in two ways that matter here — it injects
 context files **verbatim** (no `@import` expansion, so the `claude-root.md`
 pure-imports pattern does NOT work for it) and it loads only **one** global
@@ -162,7 +164,7 @@ Pi dispatches through the `@tintinweb/pi-subagents` package (declared in
 `pi/settings.json`); `coding-orchestration.md` and `codex-delegation.md` are
 deliberately not wired in. `pi/model-defaults.md`, loaded through
 `~/.pi/agent/APPEND_SYSTEM.md` (a separate system-prompt slot, so Codex never
-sees it), owns Pi's seat, the exact provider/model IDs, and the rule that every
+sees it), owns the exact provider/model IDs, and the rule that every
 fresh `Agent()` call names its model and thinking level; role profiles under
 `pi/agents/` never pin one, and there is no `pi-root.md`. On a shared fact
 `model-selection.md` wins. The wrappers are on Pi's `PATH` through
@@ -329,8 +331,9 @@ codex/model-defaults.md              Codex dispatch routing (native subagents,
 pi/model-defaults.md                 Pi dispatch projection, loaded via APPEND_SYSTEM.md
 grok/model-defaults.md               Grok Build dispatch projection, loaded via
                                      ~/.grok/rules/30-model-defaults.md
-hermes/model-defaults.md             Hermes seat row + recon notes (Claude via claude -p only)
+hermes/model-defaults.md             Hermes dispatch mechanics (Claude via claude -p only)
 instructions/rationale.md            incident and reasoning archive behind the loaded rules — not auto-loaded
+instructions/benchmarks.md           data log behind the effort rule — not loaded
 instructions/codex-delegation.md    orchestrators only (Claude / Hermes / Grok Build) —
                                     Claude Code reads it on dispatch (not auto-loaded);
                                     Grok reads it on dispatch (not linked)

@@ -6,30 +6,22 @@ Before dispatch, read
 "Harness seats", "Roster", "Effort", and "Subagent fan-out". Those sections
 own shared policy; this card is not a substitute for them.
 
-Pi-only concerns below: the Pi seat row, explicit slugs (Pi cannot
-fuzzy-resolve family names), dispatch mechanics, and delegated `pi -p` runs.
-Hermes farm contracts in `coding-orchestration.md` (`delegate_task`, cron,
-PR-burndown) do not apply to Pi. Allowed transports are the seat row below, canonical
-for Pi; shared policy per model-selection.md "Harness seats".
+Pi-only concerns below: explicit slugs (Pi cannot fuzzy-resolve family
+names), dispatch mechanics, and delegated `pi -p` runs. Hermes farm contracts
+in `coding-orchestration.md` (`delegate_task`, cron, PR-burndown) do not apply
+to Pi.
 
 An explicit user instruction wins among valid combinations; hard constraints
 still apply.
 
 ## Pi seat
 
-| Harness | Orchestrator | Implement default | Implement override | Reviewer transport |
-|---------|--------------|-------------------|--------------------|----------------------|
-| **Pi** | Grok 4.6 | Codex `Agent` | Grok / DeepSeek `Agent`; Anthropic **only if the user names it** | Grok / Codex `Agent`; Anthropic only when named |
-
-- Pi `/rev` and `/full-docs` use Grok vs Codex, not native Claude, unless the
-  user names Anthropic.
-- Recon and bulk fact-gathering (canonical "Orchestrator context
-  discipline"): Grok `Agent`, not native Anthropic.
-- Browser-driving subagents use Pi's native seat; the subscription-only Opus
-  rule in canonical "Subagent fan-out" does not authorize Anthropic access on
-  Pi.
-- DeepSeek Flash is an opt-in peer across explore / plan / implement here,
-  never a silent default.
+- The session model is the machine's local config (`model-selection.md`
+  "Harness seats"). Each `Agent` dispatch's model follows the same
+  two-family rule, translated through the ID map below.
+- Native Anthropic on Pi bills the API: an `anthropic/…` `Agent` runs only
+  when the user names it, and the subscription-only Opus rule in canonical
+  "Subagent fan-out" does not authorize it.
 
 ## Exact Pi model IDs
 
@@ -38,8 +30,9 @@ versioned slugs:
 
 | Family | Pi ID |
 |--------|-------|
-| **Grok 4.6** | `xai/grok-4.6` |
-| **Codex** | `openai-codex/gpt-6-astra` |
+| **Grok 4.7** | `xai/grok-4.7` |
+| **Codex (Astra)** | `openai-codex/gpt-6-astra` |
+| **Codex (Sol)** | `openai-codex/gpt-6-sol` |
 | **Fable 5.1** | `anthropic/claude-fable-5-1` |
 | **DeepSeek V4 Flash** | `deepseek/deepseek-flash` |
 
@@ -95,7 +88,7 @@ The Codex delegation pattern (`instructions/codex-delegation.md`) works for
 ~/.claude/scripts/pi-resume.sh <task-name> /tmp/pi-<task-name>-followup.md [same flags]
 ```
 
-Wrapper defaults: `xai` / `grok-4.6` / thinking `high`; select each dispatch under `model-selection.md` and resolve Pi IDs through the map above. Registry: `~/.hermes/state/pi-sessions.jsonl` (separate file, created on first dispatch — it does not exist until then; shell-wrapper line grammar, i.e. the `log_file` + `source` shape, not the Hermes-helper `log_path` shape). Logs `/tmp/pi-<task>.log`, post-run summary `/tmp/pi-<task>.post-run.md`. Resume is cwd-keyed — run `pi-resume.sh` from the same repo as the dispatch.
+Wrapper defaults: `xai` / `grok-4.7` / thinking `high`; select each dispatch under `model-selection.md` and resolve Pi IDs through the map above. Registry: `~/.hermes/state/pi-sessions.jsonl` (separate file, created on first dispatch — it does not exist until then; shell-wrapper line grammar, i.e. the `log_file` + `source` shape, not the Hermes-helper `log_path` shape). Logs `/tmp/pi-<task>.log`, post-run summary `/tmp/pi-<task>.post-run.md`. Resume is cwd-keyed — run `pi-resume.sh` from the same repo as the dispatch.
 
 Differences from Codex that change the brief:
 

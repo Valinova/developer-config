@@ -77,7 +77,7 @@ Hermes reaches the Claude seat selected under `model-selection.md` via `claude -
 
 When the user is in an interactive Claude Code session (terminal or IDE), Claude Code invokes Codex directly for cross-family review. This is Claude Code's own internal toolchain — Hermes is not involved.
 
-**When:** A key gate under `model-selection.md` "External calls" (the plan/scope review, the final `rev`), or an Astra implement pass the user named for that dispatch.
+**When:** A key gate under `model-selection.md` "External calls" (the plan/scope review, the final `rev`), or a Sol implement pass (`--model gpt-6-sol`) the user named for that dispatch.
 
 **How it works:**
 1. Claude Code (Opus under the Fable orchestrator) produces the plan or diff
@@ -120,7 +120,7 @@ Claude subagents inherit the session's effort. The orchestrator
 partitions, validates, deduplicates, audits, and synthesizes; the subagents own
 deep code review.
 
-Direct fixes are sequential Opus 5.5 implementation passes; Astra implements
+Direct fixes are sequential Opus 5.5 implementation passes; Sol implements
 only when the user names it. Select effort under `model-selection.md`, and
 audit one pass before starting the next.
 

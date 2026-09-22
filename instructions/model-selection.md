@@ -8,15 +8,11 @@ Reasoning behind the rules: `rationale.md` (not loaded).
 
 ## Harness seats
 
-The shared policy (roster, effort, reviewer selection) is canonical here; each
-harness's own seat row is canonical in its card. Farm-out mechanics
-(`claude -p` / `codex exec` lifecycle, Hermes paths, auth doctrine) live in
-`coding-orchestration.md` and the harness projections:
-
-- Pi seat, slugs, `Agent` dispatch, delegated `pi -p` runs: `pi/model-defaults.md`
-- Codex native / `claude -p` / Grok ACP process lifecycle: `codex/model-defaults.md`
-- Grok Build seat, native / wrappers / `claude -p`, Grok as a leaf: `grok/model-defaults.md`
-- Hermes seat + machine-local vs owned: `hermes/model-defaults.md`
+The roster and the shared policy (effort, reviewer selection) are canonical
+here. Harness cards own only mechanics — IDs, provider routing, CLI
+lifecycle, sandbox limits: `codex/`, `grok/`, `pi/`, and
+`hermes/model-defaults.md`. Farm-out mechanics (`claude -p` / `codex exec`
+lifecycle, Hermes paths, auth doctrine) live in `coding-orchestration.md`.
 
 Interactive Claude Code and `claude -p` ride the Anthropic subscription.
 Native Anthropic on Pi or inside Hermes bills the API (extra usage).
@@ -30,76 +26,57 @@ the model's vendor rather than an authenticated provider does not error; it
 falls through to OpenRouter and bills the metered key. Pi's exact IDs and the
 pre-dispatch resolution check live in `pi/model-defaults.md`.
 
-| Harness | Orchestrator | Implement default | Implement override (user-named only) | Reviewer transport |
-|---------|--------------|-------------------|--------------------------------------|----------------------|
-| **Claude Code** | Fable 5.1 (Anthropic sub) | Opus 5.5 via native `Agent` (`model: "opus"`) or `claude-exec.sh --model opus` | Astra via Codex wrappers (ChatGPT sub); Grok via `pi-exec.sh` | Codex wrappers (Astra) |
-| **Codex** | GPT-6 Astra | Astra native | `claude -p --model opus`; Grok Build over ACP | `claude -p` (Opus; Fable when complex) |
-| **Pi**, **Hermes**, **Grok Build** | rows live in their projection files (above); same column grammar | | | |
+Every session starts in one of two families, by harness:
 
-Reviewer need and model follow "External calls"; this table only selects
-transports. Pi does not farm `claude -p`.
+| Side | Orchestrator | Executes | Adversarial review |
+|------|--------------|----------|--------------------|
+| **Claude Code** (and `claude -p` from anywhere) | Fable 5.1 — the session model is the user's `/model` pick; Opus for simpler sessions is fine | Opus 5.5 via native `Agent` (`model: "opus"`) or `claude-exec.sh --model opus` | GPT-6 Astra via the Codex wrappers |
+| **Codex** | GPT-6 Astra | GPT-6 Sol (`gpt-6-sol`) native subagents at `high`; Astra when the work is long-horizon, cross-cutting, or a Sol pass failed the gate | Claude via `claude -p`: Opus 5.5 contained, Fable 5.1 + nested Opus complex |
+
+**Pi, Hermes, Grok Build:** their default model is whatever each machine's
+local config sets — out of doctrine. When they review or implement
+cross-family, the same two-family rule applies (never the author's family).
+
+**Overrides (user-named only):** cross-family implement — from Claude Code
+→ Sol (Codex wrappers, `--model gpt-6-sol`), from Codex → Opus
+(`claude -p --model opus`); anywhere, Grok 4.7, DeepSeek, open-source models,
+and GPT-6 Luna, at `high` unless the user says otherwise.
 
 ## Roster
 
-Only these families are in play. Haiku is never used. Sonnet is out of the
+Only the families above are in play. Haiku is never used. Sonnet is out of the
 default roster — admissible only as an explicit override for a remedial
 browser walk (see "Subagent fan-out"), never chosen on an agent's own judgment.
 
-**Claude Code:** Fable 5.1 orchestrates; Opus 5.5 executes everything else —
+On the Claude side Opus 5.5 executes everything the orchestrator does not —
 implement, explore/recon, retrieval, browser walks, docs fold, contained
-review, mechanical tails. Fable is never an implementer by default. Astra
-reviews at the key gates ("External calls").
+review, mechanical tails. Fable is never an implementer by default.
 
-**Codex:** Astra orchestrates and implements; Claude reviews via `claude -p` —
-Opus 5.5 for contained work, Fable 5.1 with nested Opus discovery subagents
-for complex or cross-cutting work.
+Codex dispatch uses `gpt-6-astra` and `gpt-6-sol`; `gpt-6-luna` only as a
+user-named override. Older model lines are retired from this repo; their
+availability in a harness does not authorize their use.
 
-The Opus seat applies from every harness that farms `claude -p` on the
-subscription (Claude Code, Codex, Hermes, Grok Build); Pi is API-billed and
-does not use it.
-
-| Family | Default role | Override (user-named only) |
-|--------|--------------|----------------------------|
-| **Fable 5.1** | Claude Code orchestrator; complex reviewer of Codex-authored work | — |
-| **Opus 5.5** | All Claude-side execution; contained review of Codex-authored work | Implementer from Codex |
-| **Codex (GPT-6 Astra)** | Codex orchestrator and implementer; gate reviewer of Claude-authored work | Implementer from Claude Code |
-| **Grok 4.6** | Pi / Hermes / Grok Build native seat | Any other seat |
-| **DeepSeek V4 Flash** | — | Any seat |
-
-Codex dispatch uses only `gpt-6-astra`; older model lines are retired from
-this repo. Their availability in a harness does not authorize their use.
-
-**Grok and DeepSeek outside their native harnesses run only when the user
-names them for that dispatch** — never a default seat, a cost saving, or an
-extra opinion an agent adds on its own judgment. When named, do not copy
-Claude-specific prompting or effort habits onto them. Briefing Grok and
-routing an implement to a Grok leaf: `grok/model-defaults.md` "Grok as a leaf".
+**Overrides run only when the user names them for that dispatch** — never a
+default seat, a cost saving, or an extra opinion an agent adds on its own
+judgment. When named, do not copy Claude-specific prompting habits onto them.
+Briefing Grok and routing an implement to a Grok leaf:
+`grok/model-defaults.md` "Grok as a leaf".
 
 ## Effort
 
-**Task shape picks the rung; the family's band clamps it.** On
-well-specified work the top rungs make the output worse, not merely slower
-(why: rationale.md#effort-ceilings).
+`medium` or `high` for everything; `xhigh` only suggested (a Fable or Astra
+stretch); never `max`. Step up one rung only for long multistep
+terminal/agent work or a brief with open unknowns. On the Codex side, when Sol
+at `high` isn't enough, switch to Astra rather than raising Sol's rung.
 
-| Family | Band | Outside the band |
+| Family | Default | Step up |
 |---|---|---|
-| **Fable 5.1** | `medium`–`high` | `xhigh` (genuinely very complex or cross-cutting) and `low` (mechanical passes): suggested, never taken by default |
-| **Astra** | `medium`–`high` | as Fable |
-| **Opus 5.5** | `medium`–`high`; `medium` is the default, `high` for long multistep terminal/agentic passes or open unknowns | `low` (trivial retrieval) and `xhigh` (genuinely very complex): suggested, never taken by default; `max` never (why: rationale.md#opus-effort) |
-| **Grok 4.6** | `high`–`xhigh`; `xhigh` is evidence-backed and reached for directly on complex or cross-cutting work | `medium` for explicitly trivial passes |
-| **DeepSeek V4 Flash** | `high`–`xhigh`; `xhigh` for complex or cross-cutting | no useful mid-rung — trivial still runs `high` |
+| Opus 5.5 | `medium` | `high` |
+| GPT-6 Sol | `high` | → Astra |
+| GPT-6 Astra | `high` | `xhigh` (suggest only) |
+| Fable 5.1 | `medium` | `high` |
 
-The brief's specificity is the signal: a known owner, a fixed allowlist, and
-success criteria that fit in a sentence favor the lower rung of the band;
-unknowns warrant more reasoning. A plan, arbitration, investigation, or
-review is not automatically complex work.
-
-**Fable and Astra overrides are suggested, never picked.** When a task looks
-like a genuinely ideal candidate for `xhigh` — not merely substantial — the
-orchestrator says so and proposes a `high` vs `xhigh` side-by-side (same
-brief, two dispatches, compare the diffs and the cost); `low` is proposed the
-same way. The user decides, and one favourable comparison is not standing
-permission (why: rationale.md#effort-ceilings).
+(why: rationale.md#effort)
 
 **`max` and `ultra` are never an agent's choice.** `ultra` (Astra's
 delegate-for-you rung) is out entirely — delegation is the orchestrator's job,
@@ -139,18 +116,18 @@ rationale.md#pipeline-proportionality).
 cross-family review at the weight the complexity warrants (why:
 rationale.md#cross-family-review).
 
-- **Never the author's family.** Claude-authored work (Opus or Fable) goes
-  to Astra at the gates. Codex-authored work goes to Opus 5.5 when contained,
-  to Fable 5.1 with nested Opus discovery when complex or cross-cutting.
-- **Rung per "Effort":** the upper rung of the band for complex or
-  cross-cutting work (a reviewer is the check on everything below it), the
-  lower rung for contained work.
+- **Never the author's family.** Codex-authored work goes to Claude — Opus
+  5.5 when contained, Fable 5.1 with nested Opus discovery when complex or
+  cross-cutting. Claude-authored work (Opus or Fable) goes to Astra. After an
+  implementer override, the reviewer follows the actual author's family.
+- **Rung per "Effort":** the family default for contained work, its step-up
+  for complex or cross-cutting work (a reviewer is the check on everything
+  below it).
 - **No third family** unless the user names one.
 
-This mapping applies to Claude Code and Codex; if its seat is unavailable
-under the harness's access rules, stop and say so; the user decides the
-substitute. Pi, Hermes, and Grok Build use the reviewer pairing in their
-projection file. Reuse valid findings; ordinary
+Pi, Hermes, and Grok Build follow the same two-family rule. If the seat is
+unavailable under the harness's access rules, stop and say so; the user
+decides the substitute. Reuse valid findings; ordinary
 fixes get regression checks, not another pass. The final report states what
 each pass changed; a pass that changed nothing is reported as such, never
 hidden — that is the signal to lower the default next time.
@@ -206,7 +183,7 @@ workflow was invoked (why: rationale.md#pipeline-proportionality):
 | Change | Rev depth |
 |---|---|
 | Complex or cross-cutting | Full rev: code-simplifier, judgment lenses where they earn fan-out, other-family validation per "External calls" |
-| Contained, well-specified | One cross-family pass at the reviewer family's lower rung ("Effort"); no lens fan-out |
+| Contained, well-specified | One cross-family pass at the reviewer family's default rung ("Effort"); no lens fan-out |
 | Mini PR, or a fix-verify iteration loop | A light cross-family validation of the fix and its test; no simplifier or lenses |
 
 Classify by risk and affected contracts, not size: a change that fits the
@@ -256,7 +233,7 @@ Browser-driving subagents (Playwright walks, UI verification, screenshot
 loops) are mechanical work: in subscription Claude lanes they take the
 **Opus 5.5** seat (why: rationale.md#opus-browser-walks); Sonnet is admissible
 there for a purely remedial walk, only as an explicit override. Pi uses its
-native seat (`pi/model-defaults.md`). The per-call economy rule in
+local default. The per-call economy rule in
 `principles.md` §9 still governs.
 
 ## Orchestrator context discipline
@@ -271,9 +248,8 @@ verification (including the full pre-commit gate), and git. Everything else
 is farmed out to Opus per "Roster"; when to delegate at all is
 `dispatch-bootstrap.md`.
 
-Research on Claude Code uses a native Opus subagent, or
-`claude -p --model opus` on Hermes/Grok Build; research on Codex uses Astra.
-Pi, Grok Build, and Hermes recon seats: their projection files.
+Research on Claude Code uses a native Opus subagent; research on Codex uses
+a native Sol subagent. Pi, Grok Build, and Hermes use their local default.
 
 ### Leaf fan-out: a judgment core and a mechanical tail
 
@@ -298,7 +274,7 @@ Only context degradation drives this decision, never cache cost
 - A **`claude -p` process** (`claude-exec.sh`) starts from zero plus the brief
   and takes `--effort` as a flag. It is right when a brief *can* be the input
   — any bounded, well-specified pass, concentrated implementation above all —
-  and whenever the task's rung differs from the session's (for Astra, the
+  and whenever the task's rung differs from the session's (for the Codex family, the
   Codex wrappers or `spawn_agent(reasoning_effort=…)`). Its cold-start floor
   means it never pays off for minute-scale tasks.
 - The orchestrator's window size is the tiebreaker. The larger it grows, the

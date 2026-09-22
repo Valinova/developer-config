@@ -12,7 +12,7 @@ first. `model-selection.md` (seats, effort, review, pipeline) and
   file:line pointers.
 - **Any edit touching more than a couple of files**, or any implement pass
   with a brief → the implementer lane (`claude-exec.sh` or a native Opus
-  `Agent`; Codex wrappers when Astra implements), never the orchestrator editing file by file in its own window.
+  `Agent`; Codex wrappers for a user-named Sol or Astra implement), never the orchestrator editing file by file in its own window.
 - Heuristic: extracting facts → delegate (above all any tool result you expect
   to exceed ~2K tokens); judging content → read. Verify by spot-checking
   pointers, not re-reading the corpus.

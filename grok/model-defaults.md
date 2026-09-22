@@ -9,24 +9,13 @@ process lifecycle is owned in `codex/model-defaults.md` — follow it rather
 than restating it. An explicit user or per-dispatch model/reasoning choice
 always wins among valid combinations.
 
-## Grok Build seat
+## Native subagents
 
-Canonical seat row for this harness; column grammar and shared policy per model-selection.md "Harness seats":
-
-| Harness | Orchestrator | Implement default | Implement override | Reviewer transport |
-|---------|--------------|-------------------|--------------------|----------------------|
-| **Grok Build** | Grok 4.6 (xAI sub). Native `spawn_subagent` is Grok 4.6 only — never a silent `grok-4.5`. | Codex via wrappers (ChatGPT sub) | Grok `spawn_subagent`; `claude -p --model opus` (Fable only as a complex reviewer/arbiter). Never Grok-native Anthropic. | Native Grok; `claude -p`; Codex wrappers |
-
-## Native seat
-
-- Pin the canonical native model on `spawn_subagent` when the parent might
-  not already be on it; the seat row above names the selected version.
+- The session model is the machine's local config (`model-selection.md`
+  "Harness seats"). Pin `grok-4.7` on `spawn_subagent` when the parent might
+  not already be on it — never a silent older version.
 - `spawn_subagent` is Grok-only (`explore`, `plan`, `general-purpose`, plus any
   user-defined type). It cannot start a Claude or Codex child.
-- Choose native effort under canonical "Effort".
-- Recon and bulk fact-gathering (canonical "Orchestrator context
-  discipline"): `claude -p` on Opus 5.5 (Fable only as a complex
-  reviewer/arbiter); native Grok 4.6 `spawn_subagent` is also fine for in-family recon.
 
 ## Cross-family dispatch
 
@@ -48,10 +37,10 @@ Follow canonical "Subagent fan-out", including browser-driving seats.
 ## Grok as a leaf
 
 How another orchestrator (Claude Code via `pi-exec.sh`, Codex over ACP,
-Hermes) briefs a Grok 4.6 leaf. Grok is never a default seat: route to it
+Hermes) briefs a Grok 4.7 leaf. Grok is never a default seat: route to it
 only when the user names Grok for that dispatch.
 
-**Grok 4.6 briefing (light):** prefer short briefs with a clear preference and
+**Grok 4.7 briefing (light):** prefer short briefs with a clear preference and
 hard done criteria; long specs are fine when you already have them. Do not
 import Claude-side briefing habits onto Grok — brief it on its own terms
 (why: rationale.md#grok-briefing).

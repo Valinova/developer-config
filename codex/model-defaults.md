@@ -18,18 +18,18 @@ wins among valid combinations under that policy.
   explicit override with `fork_turns="none"` and a brief, or a supported
   partial-history fork. Machine defaults in `~/.codex/config.toml` are setup
   mechanics; see SETUP.md.
+- **Sol (`gpt-6-sol`) at `high` is the native subagent default**, set as
+  `[agents] default_subagent_model` / `default_subagent_reasoning_effort` in
+  `~/.codex/config.toml`; pass `model="gpt-6-astra"` for an Astra pass.
 - When a workflow calls for a cross-family Claude pass, use `claude -p` —
-  never substitute another Codex subagent. Review seat: Opus 5.5 for contained
-  work; Fable 5.1 with nested Opus discovery subagents for complex or
-  cross-cutting work. `claude -p --model opus` implements only when the user
-  names it.
+  never substitute another Codex subagent.
 
 ## Cross-family Grok ACP dispatch
 
 Only when the user names Grok for a dispatch, delegate one leaf task through Grok Build's native
 ACP server. This is an external Grok process supervised by Codex, not a Codex
-native subagent and not `grok -p` or Pi; it does not change Codex's
-orchestrator or native Astra seat:
+native subagent and not `grok -p` or Pi; it does not change Codex's own
+seats:
 
 ```bash
 ~/.claude/scripts/grok-acp-exec.py <task-name> /tmp/grok-<task-name>-brief.md \
