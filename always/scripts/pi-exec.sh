@@ -113,12 +113,14 @@ mkdir -p "$(dirname "$LOG_PATH")" "$(dirname "$REGISTRY")"
 # ---- registry helpers ----
 
 # pi's first JSON event is {"type":"session","id":"<uuid>",...} — the session
-# id pi-resume.sh will pass back via --session.
+# id pi-resume.sh will pass back via --session. Best effort, never fatal: under
+# `set -euo pipefail` a no-match grep would abort register_close before it
+# writes the close line (same fix as claude-exec.sh).
 extract_session_id() {
   head -5 "$LOG_PATH" 2>/dev/null \
     | grep -oE '"type":"session"[^}]*"id":"[0-9a-f-]{36}"' \
     | head -1 \
-    | grep -oE '[0-9a-f-]{36}'
+    | grep -oE '[0-9a-f-]{36}' || true
 }
 
 register_start() {
