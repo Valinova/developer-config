@@ -206,7 +206,7 @@ workflow was invoked (why: rationale.md#pipeline-proportionality):
 | Change | Rev depth |
 |---|---|
 | Complex or cross-cutting | Full rev: code-simplifier, judgment lenses where they earn fan-out, other-family validation per "External calls" |
-| Contained, well-specified | One cross-family pass at the implementer's rung; no lens fan-out |
+| Contained, well-specified | One cross-family pass at the reviewer family's lower rung ("Effort"); no lens fan-out |
 | Mini PR, or a fix-verify iteration loop | A light cross-family validation of the fix and its test; no simplifier or lenses |
 
 Classify by risk and affected contracts, not size: a change that fits the
@@ -222,13 +222,15 @@ an explicit user request or an unresolved critical blocker that makes ready
 status inaccurate; name the exception in the final report. A blocker is not
 completed delivery.
 
-**Announce-then-proceed preamble.** Under granted autonomy, state first
-whether an external call is warranted and why; only if one is, add the
-complexity read, seat, and rung per call. Name mode and stage only inside a
-running delivery workflow. Then continue without waiting unless the action
-itself requires permission. This is the user's refinement loop, so it runs
-even when the answer is "none". Interactive directed work gets no preamble —
-a call there is suggested and confirmed, never announced and taken. Silence means default; a non-default choice made silently is a
+**Announce-then-proceed preamble.** Under granted autonomy without an
+invoked skill, state first whether an external call is warranted and why;
+only if one is, add the complexity read, seat, and rung per call. For an
+invoked workflow, announce its gates and each reviewer's seat and rung. Name
+mode and stage only inside a running delivery workflow. Then continue without
+waiting unless the action itself requires permission. This is the user's
+refinement loop, so it runs even when the answer is "none". Interactive work
+without an invoked workflow gets no preamble — a call there is suggested and
+confirmed, never announced and taken. Silence means default; a non-default choice made silently is a
 defect, not discretion. In non-interactive runs, the same block goes at the
 top of the final report.
 

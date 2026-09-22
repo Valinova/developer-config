@@ -33,9 +33,9 @@ the plan-commit portion of stage 2 instead of rerunning `agentplan`.
 
 ## Stages
 
-1. Verify the branch per `git-operations.md` "Direction and approval". If the
-   requested PR needs a branch the user has not named, ask; invoking this
-   workflow does not authorize creating or switching one.
+1. Verify branch authority per `git-operations.md` "Direction and approval":
+   ask whether to create or switch only when not already authorized, and name
+   the branch yourself.
 2. Planning, by mode. Full: if no still-valid reviewed plan exists, run
    `agentplan`, then commit the revised plan file before implementation.
    Discover: `agentplan` scope-only, probe with the user, then `agentplan`

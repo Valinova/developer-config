@@ -19,7 +19,7 @@ per "Announce-then-proceed preamble":
   `code-simplifier` skill and the principles audit; judgment lenses only where
   they earn fan-out ("Subagent fan-out").
 - **Contained, well-specified:** one cross-family principles-audit pass at the
-  implementer's rung; no simplifier, no lens fan-out.
+  reviewer family's lower rung ("Effort"); no simplifier, no lens fan-out.
 - **Mini PR or fix-verify iteration:** a light cross-family validation of the
   fix and its test; no simplifier or lenses.
 
@@ -34,8 +34,8 @@ When a caller invokes this skill as its already-selected cross-family reviewer
 (today: Claude through `claude -p` from Codex, Grok Build, or Hermes), run the
 review at the depth and scope the caller's brief names, return complete
 findings, and stop. Do not dispatch another reviewer, edit files, stage, or
-commit. Discovery subagents are allowed only when the caller's brief
-authorizes them.
+commit. Discovery nesting follows `model-selection.md` "Subagent fan-out";
+omission does not forbid it.
 
 ## Sequence
 
@@ -45,7 +45,8 @@ For a normal invocation, verify the branch against the user's direction
 1. **Review.** Dispatch one cross-family reviewer at the harness's reviewer
    seat (`model-selection.md` "External calls"), rung per "Effort", at the
    chosen depth over the committed diff. It returns one findings list. The
-   orchestrator never reviews its own diff.
+   orchestrator never reviews its own diff. After an implementer override,
+   pick the reviewer by the actual author's family under "External calls".
 2. **Agree.** Read the findings once; keep what is valuable and give each
    dropped finding a one-line reason in the final report. No second review, no
    re-triage loop. Escalate only unresolved critical choices under principles

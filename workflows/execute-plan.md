@@ -37,7 +37,9 @@ For each bounded pass:
 
 Before a phase that deletes or re-keys what an earlier phase built, run the one
 seam review of the built seam ("Delivery pipeline modes") at the harness's
-reviewer seat, then continue.
+reviewer seat, then continue. After an implementer override, pick the
+reviewer by the actual author's family under `model-selection.md` "External
+calls".
 
 Keep writing passes sequential unless their file allowlists are disjoint.
 Continue through every phase; noncritical choices take defaults recorded in

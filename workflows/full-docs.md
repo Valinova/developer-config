@@ -21,5 +21,7 @@ then the audit scope, and the parent pipeline mode only when composed.
 2. **Implement** every clear, valuable improvement the audit finds.
 3. **Validate.** One cross-family reviewer at the harness's reviewer seat
    reviews the complete documentation diff. Apply only findings the
-   orchestrator and reviewer both deem valuable.
+   orchestrator and reviewer both deem valuable. After an implementer
+   override, pick the reviewer by the actual author's family under
+   `model-selection.md` "External calls".
 4. Leave the resulting edits unstaged for the user's final review.
