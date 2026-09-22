@@ -5,6 +5,14 @@ agent (Claude Code) on each machine implements and verifies this contract with
 judgment a script can't apply. The contract is the canonical definition of
 "correctly wired"; if the machine disagrees with this file, the machine is wrong.
 
+## Updating a machine that is already set up
+
+`git pull`, then ask an agent to "check SETUP.md compliance". The checker
+reports everything a change left behind: dangling links from removed skills
+(delete them), new links to create, and machine-local values the contract
+changed (e.g. Codex `[agents]` and Grok `[subagents.models]`). Fix what it
+reports and re-run until `check-wiring.py` exits 0.
+
 ## Contract
 
 The repo is cloned at `~/Development/developer-config` on every machine
@@ -374,6 +382,9 @@ a second owner; a deliberate override must be labeled as one).
       every machine (Hermes installed or not). Do NOT pre-create it as an empty
       dir; an empty `~/.hermes/` just reads as a stray Hermes install. Absent is
       compliant.
+- [ ] No dangling symlinks into this repo remain in `~/.claude/`, `~/.codex/`,
+      `~/.pi/agent/`, or `~/.grok/` (a removed skill leaves one; delete it).
+- [ ] `crontab -l` includes the `reap-orphan-mcp.sh` line ("MCP servers load on demand").
 - [ ] `~/.claude/rules/` is empty or absent (the script covers the
       `~/.claude/CLAUDE.md` symlink itself, not this directory)
 
