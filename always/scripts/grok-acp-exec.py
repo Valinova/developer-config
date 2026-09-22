@@ -346,7 +346,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("task", help="artifact-safe task name")
     parser.add_argument("brief", type=Path, help="task brief file")
     parser.add_argument("--cwd", type=Path, default=Path.cwd())
-    parser.add_argument("--model", default="grok-4.6")
+    parser.add_argument("--model", default="grok-4.7")
     parser.add_argument("--effort", default="high")
     parser.add_argument(
         "--sandbox", choices=("workspace", "read-only", "strict"), default="workspace"

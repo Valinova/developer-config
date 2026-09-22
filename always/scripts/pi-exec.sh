@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# pi-exec.sh — standard wrapper for delegating tasks to `pi -p` (grok-4.6).
+# pi-exec.sh — standard wrapper for delegating tasks to `pi -p` (grok-4.7).
 #
 # Mirrors codex-exec.sh: background dispatch by default, durable registry
 # events, a 45s first-event health check, and a post-run diff summary.
@@ -38,7 +38,7 @@ TASK=""
 BRIEF=""
 MODE="background"
 PROVIDER="xai"
-MODEL="grok-4.6"
+MODEL="grok-4.7"
 THINKING="high"
 
 usage() {
@@ -52,7 +52,7 @@ Arguments:
 Options:
   --foreground      Block until pi completes. Default is background dispatch.
   --provider NAME   Provider. Default: xai.
-  --model SLUG      Model to run. Default: grok-4.6.
+  --model SLUG      Model to run. Default: grok-4.7.
   --thinking LEVEL  Thinking level (off|minimal|low|medium|high|xhigh|max). Default: high.
 EOF
   exit 1

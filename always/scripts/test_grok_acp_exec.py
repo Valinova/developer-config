@@ -128,7 +128,7 @@ class GrokAcpExecTests(unittest.TestCase):
 
     def test_command_is_leaf_sandboxed_and_denies_git_writes(self):
         command = MODULE.build_command(
-            "/bin/grok", Path("/repo"), "grok-4.6", "high", "workspace", 20
+            "/bin/grok", Path("/repo"), "grok-4.7", "high", "workspace", 20
         )
 
         self.assertIn("--no-subagents", command)

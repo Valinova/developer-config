@@ -28,7 +28,7 @@ TASK=""
 BRIEF=""
 MODE="background"
 PROVIDER="xai"
-MODEL="grok-4.6"
+MODEL="grok-4.7"
 THINKING="high"
 
 usage() {
@@ -43,7 +43,7 @@ with the follow-up brief. Run from the same repo as the original dispatch
 Options:
   --foreground      Block until pi completes.
   --provider NAME   Provider. Default: xai.
-  --model SLUG      Model to run. Default: grok-4.6.
+  --model SLUG      Model to run. Default: grok-4.7.
   --thinking LEVEL  Thinking level (off|minimal|low|medium|high|xhigh|max). Default: high.
 EOF
   exit 1

@@ -191,8 +191,8 @@ def audit_merge(harness, root):
     if harness == "Codex":
         instructions = config.get("developer_instructions")
         checks = [
-            ('[agents] default_subagent_model = "gpt-6-astra"',
-             config_value(config, "agents", "default_subagent_model") == "gpt-6-astra"),
+            ('[agents] default_subagent_model = "gpt-6-sol"',
+             config_value(config, "agents", "default_subagent_model") == "gpt-6-sol"),
             ('[agents] default_subagent_reasoning_effort = "high"',
              config_value(config, "agents", "default_subagent_reasoning_effort") == "high"),
             ("developer_instructions: codex/model-defaults.md reference",
@@ -202,8 +202,8 @@ def audit_merge(harness, root):
         checks = [("[compat.claude] {} = false".format(key),
                    config_value(config, "compat", "claude", key) is False)
                   for key in ("skills", "agents")]
-        checks.extend(('[subagents.models] {} = "grok-4.6"'.format(key),
-                       config_value(config, "subagents", "models", key) == "grok-4.6")
+        checks.extend(('[subagents.models] {} = "grok-4.7"'.format(key),
+                       config_value(config, "subagents", "models", key) == "grok-4.7")
                       for key in ("explore", "plan", "general-purpose"))
         checks.extend(("[mcp_servers.convex] " + key,
                        config_value(config, "mcp_servers", "convex", key) == expected)

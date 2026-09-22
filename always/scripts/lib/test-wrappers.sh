@@ -395,7 +395,7 @@ t="$ID-p1"
 run p1 bash "$PE" "$t" "$BRIEF" --foreground
 assert_eq "$RC" "0" "pi fg rc"
 assert_eq "$(cat "$FAKE_DIR/pi.argv")" "$(printf '%s\n' -p --mode json --provider xai \
-  --model grok-4.6 --thinking high "do the thing")" "pi default argv"
+  --model grok-4.7 --thinking high "do the thing")" "pi default argv"
 assert_eq "$(reg "$PI_REG" "$t")" "\
 ts=TS agent=pi source=claude-code task=$t event=start cwd=$REPO_TOP status=running log_file=/tmp/pi-$t.log
 ts=TS agent=pi source=claude-code task=$t event=session_captured session_id=$PI_SID
@@ -413,7 +413,7 @@ assert_eq "$(cat "$FAKE_DIR/pi.argv")" "$(printf '%s\n' -p --mode json --provide
 run p1-resume bash "$PR" "$t" "$BRIEF" --foreground --thinking max
 assert_eq "$RC" "0" "pi resume rc"
 assert_eq "$(cat "$FAKE_DIR/pi.argv")" "$(printf '%s\n' -p --mode json --session "$PI_SID" \
-  --provider xai --model grok-4.6 --thinking max "do the thing")" "pi resume argv"
+  --provider xai --model grok-4.7 --thinking max "do the thing")" "pi resume argv"
 assert_eq "$(reg "$PI_REG" "$t" | tail -2)" "\
 ts=TS agent=pi source=claude-code task=$t event=resume_started status=running session_id=$PI_SID
 ts=TS agent=pi source=claude-code task=$t event=resume_closed status=closed session_id=$PI_SID" "pi resume lines"

@@ -24,3 +24,6 @@ jobs:
       - run: bash always/scripts/lib/test-codex-registry.sh
       - run: bash always/scripts/lib/test-wrappers.sh
       - run: python3 always/scripts/test_foreground_dispatch_guard.py
+      - uses: oven-sh/setup-bun@v2
+      - run: bun pi/tests/destructive-guard.test.ts
+      - run: bun pi/tests/bash-timeout-guard.test.ts

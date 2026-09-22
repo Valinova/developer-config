@@ -22,7 +22,7 @@ class MergeTests(unittest.TestCase):
 
     def test_routing_must_be_an_active_instruction(self):
         config = (
-            '[agents]\ndefault_subagent_model = "gpt-6-astra"\n'
+            '[agents]\ndefault_subagent_model = "gpt-6-sol"\n'
             'default_subagent_reasoning_effort = "high"\n'
         )
         for prefix in (
@@ -39,9 +39,9 @@ class MergeTests(unittest.TestCase):
     def test_invalid_config_fails_without_a_traceback(self):
         for text in (
             'developer_instructions = "Read codex/model-defaults.md"\n'
-            '[agents]\ndefault_subagent_model = "gpt-6-astra"\n'
+            '[agents]\ndefault_subagent_model = "gpt-6-sol"\n'
             'default_subagent_reasoning_effort = "high"\ninvalid toml',
-            '[agents]\ndefault_subagent_model = "gpt-6-astra"\n'
+            '[agents]\ndefault_subagent_model = "gpt-6-sol"\n'
             'default_subagent_model = "other"\n',
         ):
             with self.subTest(text=text):
@@ -50,15 +50,15 @@ class MergeTests(unittest.TestCase):
     def test_equivalent_toml_syntax_is_accepted(self):
         self.assertFalse(self.audit(
             "developer_instructions = 'Read codex/model-defaults.md before dispatch'\n"
-            "agents = { default_subagent_model = 'gpt-6-astra', "
+            "agents = { default_subagent_model = 'gpt-6-sol', "
             "default_subagent_reasoning_effort = 'high' }\n"
         ))
 
     def test_grok_requires_a_configured_mcp_command(self):
         config = (
             '[compat.claude]\nskills = false\nagents = false\n'
-            '[subagents.models]\nexplore = "grok-4.6"\n'
-            'plan = "grok-4.6"\ngeneral-purpose = "grok-4.6"\n'
+            '[subagents.models]\nexplore = "grok-4.7"\n'
+            'plan = "grok-4.7"\ngeneral-purpose = "grok-4.7"\n'
             '[mcp_servers.convex]\n'
         )
         self.assertTrue(self.audit(config, "Grok"))
