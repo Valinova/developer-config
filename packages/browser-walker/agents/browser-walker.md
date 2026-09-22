@@ -20,6 +20,21 @@ tools:
   - mcp__playwright__browser_take_screenshot
   - mcp__playwright__browser_console_messages
   - mcp__playwright__browser_select_option
+  - mcp__playwright__browser_close
+  - mcp__plugin_playwright_playwright__browser_navigate
+  - mcp__plugin_playwright_playwright__browser_navigate_back
+  - mcp__plugin_playwright_playwright__browser_snapshot
+  - mcp__plugin_playwright_playwright__browser_click
+  - mcp__plugin_playwright_playwright__browser_type
+  - mcp__plugin_playwright_playwright__browser_fill_form
+  - mcp__plugin_playwright_playwright__browser_evaluate
+  - mcp__plugin_playwright_playwright__browser_wait_for
+  - mcp__plugin_playwright_playwright__browser_file_upload
+  - mcp__plugin_playwright_playwright__browser_press_key
+  - mcp__plugin_playwright_playwright__browser_take_screenshot
+  - mcp__plugin_playwright_playwright__browser_console_messages
+  - mcp__plugin_playwright_playwright__browser_select_option
+  - mcp__plugin_playwright_playwright__browser_close
 model: opus
 ---
 
@@ -41,9 +56,8 @@ unavailable, report the blocker. Use the caller's supplied session setup.
 2. Open the dev URL and follow the named flow through its expected outcome.
 3. Check that each meaningful action produces the expected visible result.
    Record reproduction steps and any relevant console errors when it fails.
-4. Use targeted browser queries. Take a snapshot or screenshot only when it
-   answers a specific question; keep large evidence dumps out of the report.
-5. Close the browser session when the walk is complete.
+4. Follow `principles.md` §9 browser economy, and close the browser when the
+   walk is complete.
 
 Explore and report. Leave implementation changes to the caller. Stay within
 the requested flow and its authorized data changes. Stop and report when an
