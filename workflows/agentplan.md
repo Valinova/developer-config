@@ -39,9 +39,7 @@ existing plan artifact.
    - whether the implementer may fan out the mechanical tail
      (`codex-delegation.md` "Nested delegation"; `model-selection.md`
      "Leaf fan-out");
-   - its minimal test set per the principles §4 "Plan-time rule" — the owner
-     and failure path each test proves; "no new test — covered by <file>" is
-     a valid answer, and a new test file ships only when the plan justifies it.
+   - its minimal test set per `testing.md` "Plan-time rule".
 4. Run the plan review: one cross-family reviewer at the harness's reviewer
    seat, weight and rung per "External calls" and "Effort" — a full
    adversarial plan review in Full mode, scope-only in Discover

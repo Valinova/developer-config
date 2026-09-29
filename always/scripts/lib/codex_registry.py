@@ -35,7 +35,10 @@ environment — never interpolated into source or into a JSON string by hand.
 
 Line grammar (canonical, written by every new line):
   {"ts":...,"agent":"codex","source":"hermes"|"claude-code","task":...,
-   "event":...,"status":...,"log_path":...,...}
+   "event":...,"status":...,...}
+`start`, `close`, and every `resume_*` line add "log_path"; `session_captured`
+adds only "session_id". The shared wrappers write "source":"claude-code" for
+every caller.
 
 `log_path` is the canonical log-path key. Historical Claude-side lines used
 `log_file`; readers here normalize it to `log_path` in memory. Registry content
@@ -57,7 +60,8 @@ from pathlib import Path
 
 DEFAULT_REGISTRY = Path.home() / ".hermes/state/codex-sessions.jsonl"
 
-#: Hard wall-clock cap on a single codex run (90 minutes).
+#: Exported as CODEX_DEFAULT_TIMEOUT_SEC (90 minutes), but no wrapper enforces
+#: it: codex runs have no wall-clock cap.
 DEFAULT_TIMEOUT_SEC = 5400
 #: Seconds a background dispatch may go without emitting a JSON event before it
 #: is considered hung on stdin and killed.

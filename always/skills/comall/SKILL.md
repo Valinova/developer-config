@@ -13,8 +13,8 @@ unrelated parallel WIP — before including it, instead of committing blindly.
 2. Split the changes into coherent groupings per `git-operations.md`
    "Commits"; when one file mixes concerns, put it in the most fitting commit
    and move on.
-3. Run the repository's required pre-commit verification before the first
-   commit.
+3. Run the repository's required pre-commit verification per `principles.md`
+   §4 "Pre-commit gate".
 4. Give every commit a descriptive message: a subject saying what changed and
    where, plus a short body saying why — enough for `git blame` and history
    archaeology to stand alone. Never a bare "update", "fixes", or "wip".

@@ -70,11 +70,11 @@ decides the rung per diff. **Nobody pushes under a live editing lane:** a courie
 2. Review `git diff --cached` (staged), `git diff` (unstaged), and untracked files separately. The child must not change the index; a non-empty staged section alone is not a violation if it predates dispatch.
 3. Run the declared success criteria **and the project's full pre-commit gate in your own shell, reading the exit code**, before committing. A leaf's report that the gate is green is a claim, never evidence (why: rationale.md#pre-commit-gate).
 4. If fixes are needed, write a follow-up brief and either resume the codex session (preserves context) or dispatch a new one.
-5. Git is the invoker's alone, following `git-operations.md` and only as the user or workflow authorized: stage via `git diff-index` against the pre-dispatch tree, per `git-operations.md`; commit on Codex's behalf, push, and handle checkout/stash/branch creation before and after the run.
+5. Git is the invoker's alone, following `git-operations.md` and only as the user or workflow authorized: stage explicit paths per `git-operations.md` "Commits", checked against the pre-dispatch snapshot; commit on Codex's behalf, push, and handle checkout/stash/branch creation before and after the run.
 
 ## Session registry (all callers)
 
-Every wrapper appends lifecycle events (`start` / `session_captured` / `close`, `resume_*` for resumes) to the shared, never-auto-pruned registry `~/.hermes/state/codex-sessions.jsonl` — the wrappers `mkdir -p` it, Hermes install or not; `/tmp/codex-<task>.*` files are per-run ephemera only. Line grammar, extraction regexes, and dispatch-hygiene constants are owned by `always/scripts/lib/codex_registry.py`; read `coding-orchestration.md` "Session registry" before touching it.
+Every wrapper appends lifecycle events (`start` / `session_captured` / `close`, `resume_*` for resumes) to the shared, never-auto-pruned registry `~/.hermes/state/codex-sessions.jsonl` — the wrappers `mkdir -p` it, Hermes install or not; `/tmp/codex-<task>.*` files are per-run ephemera only. Line grammar, extraction regexes, and dispatch-hygiene constants are owned by `always/scripts/lib/codex_registry.py`; read its docstring before touching it.
 
 ## Caller: Claude Code, Grok Build, and Hermes (shell wrappers)
 

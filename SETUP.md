@@ -126,9 +126,9 @@ are Grok 4.7 (they cannot be Claude or Codex), Codex implement via the existing 
 Claude via `claude -p`. Grok does **not** expand `@import`, so there is no
 `grok-root.md`. Home doctrine is `~/.grok/rules/*.md` (verbatim, every file;
 later-alphabetical wins on conflict, which is why the links are numbered). That
-set is principles, `dispatch-bootstrap.md`, and the Grok projection; it
-deliberately omits `claude-conventions.md`, and model-selection and
-codex-delegation are read on dispatch per the bootstrap rule, not linked.
+set is the `~/.grok/rules/` rows in "Contract"; it deliberately omits
+`claude-conventions.md`, and model-selection and codex-delegation are read on
+dispatch per the bootstrap rule, not linked.
 
 Grok's TUI mutates `~/.grok/config.toml` (hints, UI, marketplace), so that file
 is a documented merge rather than a symlink, same reason as Codex. Merge without
@@ -339,15 +339,15 @@ carries no `agents/` directory at all and is likewise discoverable.
 
 ```
 claude-root.md                      the ~/.claude/CLAUDE.md loader — pure @imports of the
-                                    three always-loaded Claude-side files below, holds no rules itself
+                                    always-loaded Claude-side files below, holds no rules itself
 instructions/principles.md          every agent, every repo  (Claude via claude-root import;
                                     Codex via ~/.codex/AGENTS.md; Grok via ~/.grok/rules/00-principles.md;
-                                    Hermes references it directly)
+                                    Hermes embeds it in SOUL via sync-soul-principles.py)
 instructions/git-operations.md      git, branch, worktree, and commit operations — permissions,
                                     backstop tiers, commit hygiene, rebase policy, durable worktrees
                                     (Claude via claude-root import; Grok via
-                                    ~/.grok/rules/10-git-operations.md; Codex, Pi, and Hermes
-                                    reach it through the principles §7 pointer)
+                                    ~/.grok/rules/10-git-operations.md; Hermes embeds it in SOUL
+                                    next to principles; Codex and Pi reach it through the §7 pointer)
 instructions/testing.md             test strategy, authoring gate, refused shapes, pruning —
                                     every agent reads it on demand via the principles §4 pointer
 instructions/claude-conventions.md  Claude Code only

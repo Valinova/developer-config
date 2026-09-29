@@ -34,7 +34,7 @@ versioned slugs:
 | **Codex (Astra)** | `openai-codex/gpt-6-astra` |
 | **Codex (Sol)** | `openai-codex/gpt-6.1-sol` |
 | **Fable 5.1** | `anthropic/claude-fable-5-1` |
-| **DeepSeek V4 Flash** | `deepseek/deepseek-flash` |
+| **DeepSeek V4.1 Flash** | `deepseek/deepseek-flash` |
 
 This is an ID map, not a roster or authorization to use a seat. For an
 explicitly authorized model absent here, resolve its exact ID in Pi's
@@ -42,24 +42,16 @@ authenticated `/model` list before dispatch; do not guess a versioned slug.
 
 ### Provider routing is sealed
 
-The provider prefix names an **authenticated Pi provider**, not the model's
-vendor. Two prohibitions, neither a preference:
-
-- **DeepSeek only through `deepseek`.**
-- **OpenAI models only through the `openai-codex` subscription** — never
-  `openrouter` or the metered `openai` API, unless the user explicitly
-  instructs that route for that dispatch.
-
-Stated as prohibitions because Pi does not error on an unknown provider/model
-pair: it falls through to OpenRouter and bills the metered key. A
-vendor-prefixed or stale ID therefore fails **silently onto a paid route** —
-a mid-run 402, not a dispatch error. The worked example: `openai/gpt-6-astra`
-is OpenRouter's slug, while the subscription route is
+Which provider each model must go through, and why a wrong pair silently
+bills OpenRouter, is `model-selection.md` "Harness seats". In Pi the prefix
+names an **authenticated Pi provider**, not the model's vendor:
+`openai/gpt-6-astra` is OpenRouter's slug, while the subscription route is
 `openai-codex/gpt-6-astra`; and `deepseek-v4-flash` does not exist in the
-`deepseek` provider, whose model is `deepseek-flash`. If a needed ID is absent
-from the table above, confirm the pair resolves inside the provider these
-rules name — Pi's authenticated `/model` list or
-`~/.pi/agent/models-store.json` — before dispatch.
+`deepseek` provider, whose model is `deepseek-flash`. A mismatch surfaces as a
+mid-run 402, not a dispatch error. If a needed ID is absent from the table
+above, confirm the pair resolves inside the owning provider — Pi's
+authenticated `/model` list or `~/.pi/agent/models-store.json` — before
+dispatch.
 
 **Hard constraints, restated because a prohibition must not depend on a
 lookup:** never Haiku, never Sonnet, and Pi does not farm `claude -p`.
@@ -88,29 +80,28 @@ The Codex delegation pattern (`instructions/codex-delegation.md`) works for
 ~/.claude/scripts/pi-resume.sh <task-name> /tmp/pi-<task-name>-followup.md [same flags]
 ```
 
-Wrapper defaults: `xai` / `grok-4.7` / thinking `high`; select each dispatch under `model-selection.md` and resolve Pi IDs through the map above. Registry: `~/.hermes/state/pi-sessions.jsonl` (separate file, created on first dispatch — it does not exist until then; shell-wrapper line grammar, i.e. the `log_file` + `source` shape, not the Hermes-helper `log_path` shape). Logs `/tmp/pi-<task>.log`, post-run summary `/tmp/pi-<task>.post-run.md`. Resume is cwd-keyed — run `pi-resume.sh` from the same repo as the dispatch.
+Wrapper defaults: `xai` / `grok-4.7` / thinking `high`; select each dispatch under `model-selection.md` and resolve Pi IDs through the map above. Registry: `~/.hermes/state/pi-sessions.jsonl` (separate file, created on first dispatch — it does not exist until then; Pi's own line shape: `start` carries `log_file`, not the Codex registry's `log_path`). Logs `/tmp/pi-<task>.log`, post-run summary `/tmp/pi-<task>.post-run.md`. Resume is cwd-keyed — run `pi-resume.sh` from the same repo as the dispatch.
 
 **Waiting.** Same shape as Codex: dispatch `pi-exec.sh` alone in its own
 `run_in_background` call, then attach `pi-wait.sh <task> <timeout>` in a
 separate background call — it exits when the run closes, and that exit is the
 completion notification. Its default timeout is 3600 s; pass a longer one (or
 `0`) for runs that may exceed an hour. There is no `pi-status.sh`: a heartbeat
-wake checks `/tmp/pi-<task>.post-run.md` (present once closed) or runs
-`pi-wait.sh <task> 1`. Confirm the route from the log, not the flags:
+wake runs `pi-wait.sh <task> 1`, which reads only the current run (a resume
+leaves the previous post-run file in place until it closes). Confirm the route from the log, not the flags:
 `grep -oE '"(provider|model)":"[^"]+"' /tmp/pi-<task>.log | sort | uniq -c`.
 
 **Mechanical tail on DeepSeek** (user-named, 2026-09-22):
 `pi-exec.sh <task> <brief> --provider deepseek --model deepseek-flash --thinking high`
-resolves to DeepSeek V4.1 Flash. A brief that allows nesting must pin every
+resolves to the DeepSeek row of the ID map. A brief that allows nesting must pin every
 nested `Agent` to `deepseek/deepseek-flash` at `high`, with disjoint file
 lists per nested agent.
 
-**Nested dispatch inside a delegated run.** A Pi leaf that nests reads this
-card, and the "Pi seat" default (Grok) is the model it reaches for. A pin in
-the brief loses to that unless it is stated as an override. In a brief that
-allows nesting, write it as: "Every nested `Agent` call's arguments set
-`model: "<provider/id>"` and `thinking: "<level>"` exactly as given here; this
-overrides the Pi seat default in `pi/model-defaults.md`." Then verify at the
+**Nested dispatch inside a delegated run.** A Pi leaf that nests falls back
+to its own seat choice unless the brief's pin is stated as an override. In a
+brief that allows nesting, write it as: "Every nested `Agent` call's arguments
+set `model: "<provider/id>"` and `thinking: "<level>"` exactly as given here;
+this overrides any seat default." Then verify at the
 first wait, not at the end:
 `grep -oE '"name":"Agent","arguments":\{[^}]*"model":"[^"]+"' /tmp/pi-<task>.log`
 lists each nested dispatch's model. A mismatch is a brief-compliance finding:

@@ -5,11 +5,8 @@ description: Thoroughly reviews the current branch and implements clear fixes, o
 
 # Codex Clear
 
-Review the current branch thoroughly. Use native subagents when parallel
-lenses would materially improve the result. Before dispatch, read
-`~/Development/developer-config/codex/model-defaults.md` and its required
-canonical policy sections to choose the model and effort.
-
-Implement all clear fixes, optimizations, cleanup, and simplification. Run relevant verification. Do not commit or push unless the user explicitly requested it.
-
-After the clear work is complete, report any nuanced decisions that genuinely require discussion.
+Follow `codex-branch-review`
+(`~/Development/developer-config/codex/skills/codex-branch-review/SKILL.md`)
+at its default scope, the current branch. One difference: defer every nuanced
+decision instead of escalating, and after the clear work is complete, report
+those that genuinely require discussion.

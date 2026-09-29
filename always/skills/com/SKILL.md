@@ -7,7 +7,7 @@ description: Commits only the changes that are already staged, using the reposit
 
 1. Inspect the staged diff and current status.
 2. Do not stage additional files or include unrelated work.
-3. Run the repository's required pre-commit verification unless the same staged state has already passed it.
+3. Run the repository's required pre-commit verification per `principles.md` §4 "Pre-commit gate".
 4. Commit the staged changes with a descriptive message grouped by functionality or file.
 5. Follow commit-message conventions in the active project instructions. Otherwise, use a conventional prefix such as `fix:`, `feat:`, or `refactor:`.
 6. Do not push unless the user explicitly requested it.

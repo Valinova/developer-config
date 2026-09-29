@@ -24,8 +24,8 @@ rationale.md#prompt-cache-heartbeat).
   completion notification is itself the next request.
 - **How:** `ScheduleWakeup`, `delaySeconds: 3000`, `noop: true`. Each wake
   checks the run's status (`codex-status.sh <task>`, `claude-status.sh
-  <task>`, or for Pi the post-run file per `pi/model-defaults.md` "Waiting") and either
+  <task>`, or for Pi per `pi/model-defaults.md` "Waiting") and either
   reschedules or stops the loop (`stop: true`) and proceeds.
 - **Always remove it.** One heartbeat per named run; stop it the turn the run
   closes, fails, or is abandoned. If you cannot name the run it waits on, stop
-  it. Never poll work the harness already notifies on.
+  it. Beyond this heartbeat, never poll work the harness already notifies on.

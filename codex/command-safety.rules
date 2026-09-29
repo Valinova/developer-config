@@ -1,6 +1,7 @@
 # Canonical Codex command rules. Link from ~/.codex/rules/command-safety.rules.
 # Only the unrecoverable is blocked here, mirroring the Claude deny tier in
-# instructions/git-operations.md. Everything else is judged by the agent from
+# instructions/git-operations.md. Prefix rules catch the common spellings only;
+# other forms fall to the instructions. Everything else is judged by the agent from
 # the instructions (ask when unclear or when work could be lost); see permissions.md.
 
 prefix_rule(

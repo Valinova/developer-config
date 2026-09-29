@@ -55,7 +55,7 @@ I often work in parallel in the same worktree. Uncommitted changes that don't tr
 
 - A test earns its place only if it would catch a real regression; coverage percentage means nothing. Shared test-harness or mock edits need at least one **consumer** suite outside the original happy path.
 - **Test the stable boundary.** Business rules are tested through the real server functions (queries, mutations, handlers) against a real test DB, mocking only external services. Unit tests are for pure logic that has real failure modes (money, tax, dates, parsers, state machines). Wiring gets no dedicated test. UI churn is covered by browser walks, not scripted E2E.
-- **A test counts only after it has been seen failing** — on the pre-fix code for a bug, or before the code exists for new logic. For new logic, list the failure modes before writing the code; no failure modes means it is wiring. A test that restates code written just before it is the default failure of agent-written tests.
+- **A test counts only after it has been seen failing for the intended reason** — for a bug, on the pre-fix code; for new logic, before the code exists or, when written after, by breaking the code on purpose. For new logic, list the failure modes before writing the code; no failure modes means it is wiring. A test that restates code written just before it is the default failure of agent-written tests.
 - A test that would break under a behaviour-preserving refactor, or that needs a production seam no real caller uses, is at the wrong boundary. Move it; don't land it.
 
 ### Ship gate: beneficial + no open regression (plan and finalize)

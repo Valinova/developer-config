@@ -38,9 +38,9 @@ write it yet:
 4. **Does it need a production seam** (an export, flag, wrapper, or injection
    hook no production caller uses)? Then move the test to the real boundary.
 5. **Has it been seen failing?** A test counts only after it fails for the
-   intended reason: on the pre-fix code for a bug, or before the code exists
-   for new logic. A test written after the code that passes on its first run
-   proves nothing yet — break the code on purpose, watch it fail, restore.
+   intended reason: for a bug, on the pre-fix code; for new logic, either
+   before the code exists or, when written after it, by breaking the code on
+   purpose, watching it fail, and restoring it.
 
 A test that would break under a behaviour-preserving refactor asserts
 implementation. Rewrite it at the owning boundary before landing it.
@@ -53,7 +53,7 @@ the bug crossed.
 (why: rationale.md#test-shapes)
 
 - *Derive, don't mirror.* Expectations come from the canonical owner/config; never re-type a roster, enum, prompt sentence, byte size, CSS class, or log string as a literal. Assert the invariant (closure, membership, partition, gating), not the text. Only a self-declared drift pin with no importable owner may be literal.
-- *Mock boundaries, run owners.* Mock only real process boundaries (DB/HTTP/SDK/telemetry/router/i18n/timers); everything in-process runs real — no hand-rolled store/engine shims, no in-test reimplementation of a production rule, no mock that implements the behaviour being asserted. `toHaveBeenCalledWith` is contract testing against a boundary and theater against a pure function two imports away — judge the collaborator, not the matcher.
+- *Mock boundaries, run owners.* Mock only real process boundaries (external DB/HTTP/SDK/telemetry/router/i18n/timers — never the application's own test DB, which the server-boundary row runs real); everything in-process runs real — no hand-rolled store/engine shims, no in-test reimplementation of a production rule, no mock that implements the behaviour being asserted. `toHaveBeenCalledWith` is contract testing against a boundary and theater against a pure function two imports away — judge the collaborator, not the matcher.
 - *Never assert a result against itself.* Totals vs their own components, `toEqual(canonicalBuilder(sameInput))`, determinism self-compares, fixture echo, in-test helpers tested by the same file, expected values produced by the code under test. Hand-derive or table-drive a fixed expectation.
 - *One owner, one file; fold before minting.* New cases go in the existing file on that owner; a new test FILE needs a stated reason (different environment, incompatible hoisted mocks, separate owner). No PR/phase tokens in filenames; no regular/batch twins on one owner — table-drive with `describe` rows. Single-`it()` files are a smell by default.
 - *Table-drive repetition.* N near-identical `it()`s over one arranged result → `it.each` with titled rows.

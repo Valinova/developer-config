@@ -17,7 +17,7 @@
 //     cookies and app state survive between steps.
 //
 // Usage (from any script):
-//   import { openWalk } from `${os.homedir()}/Development/developer-config/always/scripts/lib/playwright-walk.mjs`
+//   const { openWalk } = await import(pathToFileURL(`${os.homedir()}/Development/developer-config/always/scripts/lib/playwright-walk.mjs`).href)
 //   (the repo clone path is the same on every machine; nothing links this file)
 //   const walk = await openWalk({ task: 'ctxbd-smoke' })
 //   await walk.page.goto('http://localhost:7777/sign-in')
@@ -42,7 +42,7 @@ export function resolveGlobalPlaywright() {
   )
   const pkg = listing?.[0]?.dependencies?.playwright
   if (!pkg?.path) {
-    throw new Error('playwright is not installed globally; run: pnpm add -g playwright && playwright install chromium')
+    throw new Error('playwright is not installed globally; run the pinned install command in developer-config SETUP.md')
   }
   return join(pkg.path, 'index.mjs')
 }

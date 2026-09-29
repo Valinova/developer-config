@@ -86,12 +86,10 @@ packages/         Opt-in bundles (browser-walker agent); see SETUP.md.
 │ codex-deleg  │ │ defaults.md  │ │  always/+pi│ │  (model-sel./codex- │
 │ on dispatch  │ │ always/+codex│ │            │ │  deleg on dispatch) │
 │ skills:      │ │              │ │            │ │ skills: always/+    │
-│  always/+    │ │ Astra orch;  │ │ local model│ │  grok/ (overrides   │
-│  claude/     │ │ Sol impl;    │ │ per machine│ │  bundled execute-   │
-│ Fable orch;  │ │ claude -p    │ │ (two-family│ │  plan). Native Grok │
-│ Opus impl;   │ │  (Claude)    │ │  rule)     │ │ 4.7 spawn_subagent; │
-│ Sol 6.1 rev. │ │  reviews     │ │            │ │ Codex wrappers;     │
-└──────────────┘ └──────────────┘ └────────────┘ │ claude -p for Claude│
+│  always/+    │ │              │ │            │ │  grok/ (overrides   │
+│  claude/     │ │              │ │            │ │  bundled execute-   │
+└──────────────┘ └──────────────┘ └────────────┘ │  plan). Codex       │
+                                                 │ wrappers; claude -p │
                                                  └─────────────────────┘
 
   WORKFLOW COMPOSITION (same shape in Claude, Codex, Pi, Grok Build; mechanics differ)
@@ -104,12 +102,7 @@ packages/         Opt-in bundles (browser-walker agent); see SETUP.md.
                                            ▼
    /longrun = agentplan → execute-plan → rev → docs → (push → PR) → babysit
    (each stage independently invokable; rev/babysit never recurse into longrun)
-   Two families: Claude side (Fable orch, Opus executes, Sol 6.1 reviews;
-   Astra when cross-cutting) and Codex side (Astra orch, Sol 6.1 executes,
-   Claude reviews). Pi, Hermes, and Grok
-   Build run each machine's local default model under the same two-family
-   rule; Grok 4.7, DeepSeek, open-source models, and Luna are user-named
-   overrides anywhere.
+   Seats and overrides: instructions/model-selection.md "Harness seats".
 ```
 
 ## How it all fits together

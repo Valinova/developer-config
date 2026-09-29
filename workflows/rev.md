@@ -15,15 +15,9 @@ for the agreed fixes.
 
 Pick the lightest matching row of the rev-depth table in `model-selection.md`
 "Delivery pipeline modes" and announce it, with the reviewer seat and rung,
-per "Announce-then-proceed preamble":
-
-- **Complex or cross-cutting (full):** the reviewer runs the shared
-  `code-simplifier` skill and the principles audit; judgment lenses only where
-  they earn fan-out ("Subagent fan-out").
-- **Contained, well-specified:** one cross-family principles-audit pass at the
-  reviewer family's default rung ("Effort"); no simplifier, no lens fan-out.
-- **Mini PR or fix-verify iteration:** a light cross-family validation of the
-  fix and its test; no simplifier or lenses.
+per "Announce-then-proceed preamble". The table owns what each row runs; in
+this workflow the full row's simplifier is the shared `code-simplifier` skill,
+and the full and contained rows' pass is the principles audit.
 
 The principles audit is the engineering principles and the repo's
 `AGENTS.md`/`CLAUDE.md` guidance: correctness and regressions, with emphasis on

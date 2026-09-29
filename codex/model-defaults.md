@@ -18,11 +18,6 @@ wins among valid combinations under that policy.
   explicit override with `fork_turns="none"` and a brief, or a supported
   partial-history fork. Machine defaults in `~/.codex/config.toml` are setup
   mechanics; see SETUP.md.
-- **Sol 6.1 (`gpt-6.1-sol`) at `high` is the native subagent default**, set as
-  `[agents] default_subagent_model` / `default_subagent_reasoning_effort` in
-  `~/.codex/config.toml`; pass `reasoning_effort="medium"` for contained or
-  mechanical work, and `model="gpt-6-astra"` only for complex cross-cutting
-  work or when the user names Astra.
 - When a workflow calls for a cross-family Claude pass, use `claude -p` —
   never substitute another Codex subagent.
 

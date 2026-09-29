@@ -8,9 +8,8 @@ description: Reviews documentation created or modified on the current branch, co
 Review all documentation created or modified on the current branch.
 
 **Seat.** When this stage is farmed out (a delegated lane, or the docs stage
-inside `longrun`), it runs on the harness's implement seat at a task-chosen
-rung under `instructions/model-selection.md` "Harness seats" and "Effort"; in
-Claude Code that is Opus 5.5, never Fable. Under a distilled brief that names
+inside `longrun`), seat and rung come from `instructions/model-selection.md`
+"Harness seats" and "Effort". Under a distilled brief that names
 the sources, the allowlist and what to verify against the code, the fold is
 mechanical work. The orchestrator's own pass over the resulting diff is the
 judgment step.
