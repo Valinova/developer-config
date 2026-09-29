@@ -4,6 +4,16 @@ Always loaded so a session knows the moment it must delegate and what to read
 first. `model-selection.md` (seats, effort, review, pipeline) and
 `codex-delegation.md` (briefs, wrappers) are read on dispatch, not every turn.
 
+**A check killed for memory is a memory problem, not a code failure.** On
+WSL, earlyoom kills heavy check processes first (`tsgo`, `vitest`, `eslint`,
+`turbo`, `bun`, `node`) when the machine runs out of memory. If a
+gate, typecheck, lint, or test dies with `Killed`, exit 137 or 143, or stops
+with no output, run `journalctl -u earlyoom -n 5` and `free -h`. When earlyoom
+killed it, tell the user plainly that the run was killed for memory, and that
+its result says nothing about the code. Don't change code in response. Wait
+until other sessions' heavy work has settled (check `free -h` every few
+minutes), then retry once. Never retry in a loop.
+
 **Hard delegation triggers — delegate, don't do it yourself:**
 
 - **Any read or search across more than a couple of files** (repo recon, log
