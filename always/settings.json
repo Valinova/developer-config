@@ -45,6 +45,7 @@
       "/tmp"
     ]
   },
+  "model": "opus",
   "hooks": {
     "PreToolUse": [
       {
@@ -72,7 +73,8 @@
     "codex@openai-codex": true,
     "code-simplifier@claude-plugins-official": false,
     "convex@claude-plugins-official": false,
-    "playwright@claude-plugins-official": true
+    "playwright@claude-plugins-official": true,
+    "sentry@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {
     "openai-codex": {
@@ -95,7 +97,7 @@
       "effortLevel": "medium"
     }
   },
-  "autoCompactWindow": 500000,
+  "autoCompactWindow": 400000,
   "tui": "default",
   "voice": {
     "enabled": false,
