@@ -28,7 +28,7 @@ set -euo pipefail
 TASK=""
 BRIEF=""
 MODE="background"
-MODEL="gpt-6-astra"
+MODEL="gpt-6.1-sol"
 EFFORT="high"
 SERVICE_TIER="default"
 
@@ -42,7 +42,7 @@ Arguments:
 
 Options:
   --foreground    Block until codex completes. Default is background dispatch.
-  --model SLUG    Model to run. Default: gpt-6-astra.
+  --model SLUG    Model to run. Default: gpt-6.1-sol.
   --effort LEVEL  Reasoning effort (none|low|medium|high|xhigh|max). Default: high.
   --service-tier TIER
                   Service tier for this run. Default: default.
@@ -157,7 +157,7 @@ write_post_run_summary() {
 
 # Deterministic model overrides for delegated tasks. Model / effort / tier come
 # from flags (--model / --effort / --service-tier) — consumers pass what they need
-# per run, otherwise these defaults apply (gpt-6-astra / high / default). These are
+# per run, otherwise these defaults apply (gpt-6.1-sol / high / default). These are
 # real `-c` config overrides (strict-config validated), not guidance.
 CODEX_MODEL_OVERRIDES=(
   -c "model=${MODEL}"

@@ -30,15 +30,15 @@ Every session starts in one of two families, by harness:
 
 | Side | Orchestrator | Executes | Adversarial review |
 |------|--------------|----------|--------------------|
-| **Claude Code** (and `claude -p` from anywhere) | Fable 5.1 — the session model is the user's `/model` pick; Opus for simpler sessions is fine | Opus 5.5 via native `Agent` (`model: "opus"`) or `claude-exec.sh --model opus` | GPT-6 Astra via the Codex wrappers |
-| **Codex** | GPT-6 Astra | GPT-6 Sol (`gpt-6-sol`) native subagents at `high`; Astra when the work is long-horizon, cross-cutting, or a Sol pass failed the gate | Claude via `claude -p`: Opus 5.5 contained, Fable 5.1 + nested Opus complex |
+| **Claude Code** (and `claude -p` from anywhere) | Fable 5.1 — the session model is the user's `/model` pick; Opus for simpler sessions is fine | Opus 5.5 via native `Agent` (`model: "opus"`) or `claude-exec.sh --model opus` | GPT-6.1 Sol via the Codex wrappers; Astra when complex or cross-cutting |
+| **Codex** | GPT-6 Astra | GPT-6.1 Sol (`gpt-6.1-sol`) native subagents at `medium`–`high`; Astra when the work is long-horizon, cross-cutting, or a Sol pass failed the gate | Claude via `claude -p`: Opus 5.5 contained, Fable 5.1 + nested Opus complex |
 
 **Pi, Hermes, Grok Build:** their default model is whatever each machine's
 local config sets — out of doctrine. When they review or implement
 cross-family, the same two-family rule applies (never the author's family).
 
 **Overrides (user-named only):** cross-family implement — from Claude Code
-→ Sol (Codex wrappers, `--model gpt-6-sol`), from Codex → Opus
+→ Sol (Codex wrappers, `--model gpt-6.1-sol`), from Codex → Opus
 (`claude -p --model opus`); anywhere, Grok 4.7, DeepSeek, open-source models,
 and GPT-6 Luna, at `high` unless the user says otherwise.
 
@@ -52,8 +52,11 @@ On the Claude side Opus 5.5 executes everything the orchestrator does not —
 implement, explore/recon, retrieval, browser walks, docs fold, contained
 review, mechanical tails. Fable is never an implementer by default.
 
-Codex dispatch uses `gpt-6-astra` and `gpt-6-sol`; `gpt-6-luna` only as a
-user-named override. Older model lines are retired from this repo; their
+Codex dispatch uses `gpt-6.1-sol` and `gpt-6-astra`; `gpt-6-luna` only as a
+user-named override. **Sol 6.1 is the Codex workhorse**: every Codex
+delegation — native subagent, wrapper implement, wrapper review — defaults to
+it. Astra, like Fable, is for orchestrating, for complex cross-cutting or
+long-horizon work, or when the user names it. Older model lines are retired from this repo; their
 availability in a harness does not authorize their use.
 
 **Overrides run only when the user names them for that dispatch** — never a
@@ -67,13 +70,13 @@ Briefing Grok and routing an implement to a Grok leaf:
 `medium` or `high` for everything: **`high` is the ceiling** — `xhigh` only
 when the user names it, never `max`. Step up one rung only for long multistep
 terminal/agent work or a brief with open unknowns. The Codex ladder is Sol
-`high` → Astra `medium` → Astra `high`: when Sol at `high` isn't enough,
-switch to Astra rather than raising Sol's rung.
+`medium` → Sol `high` → Astra `medium` → Astra `high`: when Sol at `high`
+isn't enough, switch to Astra rather than raising Sol's rung.
 
 | Family | Default | Step up |
 |---|---|---|
 | Opus 5.5 | `medium` | `high` |
-| GPT-6 Sol | `high` | → Astra `medium` |
+| GPT-6.1 Sol | `high` (`medium` for contained or mechanical work) | → Astra `medium` |
 | GPT-6 Astra | `medium` | `high` |
 | Fable 5.1 | `medium` | `high` |
 
@@ -119,7 +122,8 @@ rationale.md#cross-family-review).
 
 - **Never the author's family.** Codex-authored work goes to Claude — Opus
   5.5 when contained, Fable 5.1 with nested Opus discovery when complex or
-  cross-cutting. Claude-authored work (Opus or Fable) goes to Astra. After an
+  cross-cutting. Claude-authored work (Opus or Fable) goes to Sol 6.1 when contained,
+  Astra when complex or cross-cutting. After an
   implementer override, the reviewer follows the actual author's family.
 - **Rung per "Effort":** the family default for contained work, its step-up
   for complex or cross-cutting work (a reviewer is the check on everything

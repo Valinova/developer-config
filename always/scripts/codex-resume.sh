@@ -39,7 +39,7 @@ set -euo pipefail
 TASK=""
 BRIEF=""
 MODE="background"
-MODEL="gpt-6-astra"
+MODEL="gpt-6.1-sol"
 EFFORT="high"
 SERVICE_TIER="default"
 
@@ -58,7 +58,7 @@ Arguments:
 
 Options:
   --foreground              Block until codex completes.
-  --model SLUG              Model to run. Default: gpt-6-astra.
+  --model SLUG              Model to run. Default: gpt-6.1-sol.
   --effort LEVEL            Reasoning effort (none|low|medium|high|xhigh|max). Default: high.
   --service-tier TIER       Service tier for this resumed run. Default: default.
                             Pass "priority" for the Fast (2x) tier.
@@ -172,7 +172,7 @@ register_entry() {
 # Always redirect stdin from /dev/null for the same reason as codex-exec.sh.
 
 # Mirror codex-exec.sh: model / effort / tier come from flags (--model / --effort /
-# --service-tier), else these defaults (gpt-6-astra / high / default). Consumers that
+# --service-tier), else these defaults (gpt-6.1-sol / high / default). Consumers that
 # want a non-default tier should pass the same choice on resume. Real `-c` overrides.
 CODEX_MODEL_OVERRIDES=(
   -c "model=${MODEL}"

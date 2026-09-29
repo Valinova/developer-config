@@ -295,7 +295,7 @@ t="$ID-x1"
 run x1 bash "$XE" "$t" "$BRIEF" --foreground
 assert_eq "$RC" "0" "codex fg rc"
 assert_eq "$(cat "$FAKE_DIR/codex.argv")" "$(printf '%s\n' exec --sandbox workspace-write \
-  -c model=gpt-6-astra -c model_reasoning_effort=high -c service_tier=default --json "do the thing")" "codex default argv"
+  -c model=gpt-6.1-sol -c model_reasoning_effort=high -c service_tier=default --json "do the thing")" "codex default argv"
 assert_eq "$(reg "$CODEX_REG" "$t")" "\
 ts=TS agent=codex source=claude-code task=$t event=start cwd=$REPO_TOP status=running log_path=/tmp/codex-$t.log
 ts=TS agent=codex source=claude-code task=$t event=session_captured status=running session_id=$CODEX_SID
@@ -313,7 +313,7 @@ assert_eq "$(cat "$FAKE_DIR/codex.argv")" "$(printf '%s\n' exec --sandbox worksp
 run x1-resume bash "$XR" "$t" "$BRIEF" --foreground --effort xhigh
 assert_eq "$RC" "0" "codex resume rc"
 assert_eq "$(cat "$FAKE_DIR/codex.argv")" "$(printf '%s\n' exec resume \
-  -c model=gpt-6-astra -c model_reasoning_effort=xhigh -c service_tier=default --json "$CODEX_SID" "do the thing")" "codex resume argv"
+  -c model=gpt-6.1-sol -c model_reasoning_effort=xhigh -c service_tier=default --json "$CODEX_SID" "do the thing")" "codex resume argv"
 assert_eq "$(reg "$CODEX_REG" "$t" | tail -2)" "\
 ts=TS agent=codex source=claude-code task=$t event=resume_started status=running session_id=$CODEX_SID log_path=/tmp/codex-$t-resume.log reason=
 ts=TS agent=codex source=claude-code task=$t event=resume_closed status=closed session_id=$CODEX_SID log_path=/tmp/codex-$t-resume.log reason=" "codex resume lines"

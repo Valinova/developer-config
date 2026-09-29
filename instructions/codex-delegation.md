@@ -103,7 +103,7 @@ sustained memory pressure a `ScheduleWakeup` poll replaces the waiter since it
 holds no process. `codex-status.sh` is the mandatory liveness check before
 concluding a run is dead: STALE means "look at the log tail", not "kill it".
 
-Model, effort, and service tier are passed **per run as flags** — no env vars. The consumer decides each in its own prompt; unset, they default to `gpt-6-astra` / `high` / `default` tier — used mostly for reviews from Claude Code; pass `--model gpt-6-sol` for a Sol implement pass:
+Model, effort, and service tier are passed **per run as flags** — no env vars. The consumer decides each in its own prompt; unset, they default to `gpt-6.1-sol` / `high` / `default` tier — reviews from Claude Code and user-named implement passes alike; pass `--effort medium` for contained work and `--model gpt-6-astra` for complex cross-cutting work:
 
 - `--model SLUG` — the permitted Codex slug under `model-selection.md` "Roster"; passed through without roster validation.
 - `--effort LEVEL` — passed through verbatim without validation. The CLI decides wire support; `model-selection.md` "Effort" decides which rung to request. Wrapper defaults are not a task's effort floor.

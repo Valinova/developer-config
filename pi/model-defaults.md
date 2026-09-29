@@ -32,7 +32,7 @@ versioned slugs:
 |--------|-------|
 | **Grok 4.7** | `xai/grok-4.7` |
 | **Codex (Astra)** | `openai-codex/gpt-6-astra` |
-| **Codex (Sol)** | `openai-codex/gpt-6-sol` |
+| **Codex (Sol)** | `openai-codex/gpt-6.1-sol` |
 | **Fable 5.1** | `anthropic/claude-fable-5-1` |
 | **DeepSeek V4 Flash** | `deepseek/deepseek-flash` |
 
@@ -89,6 +89,34 @@ The Codex delegation pattern (`instructions/codex-delegation.md`) works for
 ```
 
 Wrapper defaults: `xai` / `grok-4.7` / thinking `high`; select each dispatch under `model-selection.md` and resolve Pi IDs through the map above. Registry: `~/.hermes/state/pi-sessions.jsonl` (separate file, created on first dispatch — it does not exist until then; shell-wrapper line grammar, i.e. the `log_file` + `source` shape, not the Hermes-helper `log_path` shape). Logs `/tmp/pi-<task>.log`, post-run summary `/tmp/pi-<task>.post-run.md`. Resume is cwd-keyed — run `pi-resume.sh` from the same repo as the dispatch.
+
+**Waiting.** Same shape as Codex: dispatch `pi-exec.sh` alone in its own
+`run_in_background` call, then attach `pi-wait.sh <task> <timeout>` in a
+separate background call — it exits when the run closes, and that exit is the
+completion notification. Its default timeout is 3600 s; pass a longer one (or
+`0`) for runs that may exceed an hour. There is no `pi-status.sh`: a heartbeat
+wake checks `/tmp/pi-<task>.post-run.md` (present once closed) or runs
+`pi-wait.sh <task> 1`. Confirm the route from the log, not the flags:
+`grep -oE '"(provider|model)":"[^"]+"' /tmp/pi-<task>.log | sort | uniq -c`.
+
+**Mechanical tail on DeepSeek** (user-named, 2026-09-22):
+`pi-exec.sh <task> <brief> --provider deepseek --model deepseek-flash --thinking high`
+resolves to DeepSeek V4.1 Flash. A brief that allows nesting must pin every
+nested `Agent` to `deepseek/deepseek-flash` at `high`, with disjoint file
+lists per nested agent.
+
+**Nested dispatch inside a delegated run.** A Pi leaf that nests reads this
+card, and the "Pi seat" default (Grok) is the model it reaches for. A pin in
+the brief loses to that unless it is stated as an override. In a brief that
+allows nesting, write it as: "Every nested `Agent` call's arguments set
+`model: "<provider/id>"` and `thinking: "<level>"` exactly as given here; this
+overrides the Pi seat default in `pi/model-defaults.md`." Then verify at the
+first wait, not at the end:
+`grep -oE '"name":"Agent","arguments":\{[^}]*"model":"[^"]+"' /tmp/pi-<task>.log`
+lists each nested dispatch's model. A mismatch is a brief-compliance finding:
+decide keep-or-stop with the user; don't let it pass silently. (2026-09-22: a
+DeepSeek leaf nested on `xai/grok-4.7` despite a pin; the user accepted Grok
+for mechanical work, so either is fine when named.)
 
 Differences from Codex that change the brief:
 
