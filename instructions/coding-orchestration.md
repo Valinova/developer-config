@@ -15,47 +15,28 @@ transports and farm contracts, not shared model policy. The `/longrun` family li
 
 ## Path 1: Hermes → Codex CLI subprocess (coding execution — PRIMARY)
 
-Hermes delegates coding tasks by invoking `codex exec` via the terminal tool. Codex CLI owns its own auth lifecycle (`~/.codex/auth.json`).
+Hermes delegates coding tasks to `codex exec` through the shared Codex wrappers, run via the terminal tool. Codex CLI owns its own auth lifecycle (`~/.codex/auth.json`).
 
 **When:** All Hermes-initiated coding work — features, refactors, bug fixes, implementation phases.
 
 **Model and effort:** Select from `model-selection.md` "Harness seats", "Roster", and "Effort"; pass those choices explicitly.
 
 **How it works:**
-1. Hermes writes a brief to `/tmp/brief.md` (follows `codex-delegation.md` grammar)
-2. Hermes launches `codex exec -m <chosen-model> -c model_reasoning_effort=<chosen-effort> --skip-git-repo-check --sandbox workspace-write "$(cat /tmp/brief.md)" </dev/null` via `terminal(background=true, notify_on_complete=true)`, routed through the dispatch guard below.
+1. Hermes writes a brief to `/tmp/codex-<task>-brief.md` (follows `codex-delegation.md` grammar)
+2. From the repo root, Hermes runs `~/.claude/scripts/codex-exec.sh <task> <brief> --model <chosen-model> --effort <chosen-effort>`, then `codex-wait.sh <task>` via `terminal(background=true, notify_on_complete=true)`, routed through the dispatch guard below. The wrappers, resume, and waiter recovery are `codex-delegation.md` "Caller: Claude Code, Grok Build, and Hermes".
 3. Codex CLI reads/writes files in the repo, manages its own session
-4. On completion: Hermes runs `git status` + `git diff --stat`, verifies (typecheck/lint/test), commits
+4. On completion: Hermes reads `/tmp/codex-<task>.post-run.md`, runs `git status` + `git diff --stat`, verifies (typecheck/lint/test), commits
 5. Hermes reports summary to the user
 
 **Why subprocess, not native HTTP:** Codex CLI and Hermes share the same ChatGPT OAuth subscription. Native HTTP delegation (`delegation.provider: openai-codex`) would create a second token store (`~/.hermes/auth.json`) competing for the same refresh token — causing `refresh_token_reused` errors. The subprocess approach uses one token consumer (Codex CLI) with one auth file. No conflict.
 
-**Scripts:**
-- `~/.hermes/scripts/codex_delegate.py` — session-aware dispatcher (initial dispatch)
-- `~/.hermes/scripts/codex_resume.py` — session resume (review → fix iteration)
-- `~/.hermes/scripts/codex_exec.sh` — full git lifecycle executor (crons, headless)
-
-**Invocation** (the Hermes caller of the `codex-delegation.md` brief contract):
-
-```bash
-python3 ~/.hermes/scripts/codex_delegate.py \
-  --task <name> --brief /tmp/brief.md --cwd /path/to/repo
-```
-Returns JSON on stdout: `{task, agent, status, session_id, log_path, post_run_path, exit_code, ...}`.
-
-Resume (review → fix flow):
-```bash
-python3 ~/.hermes/scripts/codex_resume.py \
-  --task <name> --brief /tmp/followup-brief.md --cwd /path/to/repo
-```
-
-`codex_exec.sh` key options: `--repo` / `--brief` (required), `--branch` (defaults `auto-exec/YYYY-MM-DD`), `--model` (defaults `gpt-6-astra`), `--reasoning` (defaults `high`), `--no-push` / `--no-commit` / `--no-stash-wip`, `--output-json`. Note it stashes uncommitted WIP by default — pass `--no-stash-wip` when Codex must see unstaged work.
+`~/.hermes/scripts/codex_exec.sh` is retired — it stashed uncommitted WIP by default, carried its own model default, and committed/pushed itself — and `codex_delegate.py` / `codex_resume.py` are superseded by the shared wrappers.
 
 ## Session registry
 
-Every Codex wrapper (Hermes helpers and the Claude/Grok shell wrappers alike) appends lifecycle events to the canonical, durable registry at `~/.hermes/state/codex-sessions.jsonl` — on start, on session_id capture, and on close. It is shared across callers and never auto-pruned; `/tmp/codex-<task>.*` files are per-run ephemera only. On machines without a Hermes install, `~/.hermes/state/` is simply the registry directory — the wrappers `mkdir -p` it.
+Every Codex wrapper appends lifecycle events to the canonical, durable registry at `~/.hermes/state/codex-sessions.jsonl` — on start, on session_id capture, and on close. It is shared across callers and never auto-pruned; `/tmp/codex-<task>.*` files are per-run ephemera only. On machines without a Hermes install, `~/.hermes/state/` is simply the registry directory — the wrappers `mkdir -p` it.
 
-**One writer schema, one owner.** Both families write through the shared library at `developer-config/always/scripts/lib/codex_registry.py` (shell face: `codex-registry.sh`) — it owns the line grammar, the thread-id / agent-message extraction regexes, the post-run summary, and the dispatch-hygiene constants (90min timeout, 45s stall check). Every new line carries **`log_path`** plus `"source":"hermes"` or `"source":"claude-code"`, with the same event vocabulary (`start` / `session_captured` / `close`, `resume_*` for resumes). Historical Claude-side lines used **`log_file`**; the library's readers normalize those to `log_path` in memory, and registry content is never rewritten. Hermes depends on developer-config for this lib, never the reverse — the Claude wrappers must work on a machine with no Hermes install (`$CODEX_REGISTRY_LIB` overrides the lib lookup; `$CODEX_REGISTRY_PATH` overrides the registry path).
+**One writer schema, one owner.** The wrappers write through the shared library at `developer-config/always/scripts/lib/codex_registry.py` (shell face: `codex-registry.sh`) — it owns the line grammar, the thread-id / agent-message extraction regexes, the post-run summary, and the dispatch-hygiene constants (90min timeout, 45s stall check). Every new line carries **`log_path`** and `"source":"claude-code"` — the shared wrappers set it for every caller, Hermes included; `"source":"hermes"` marks lines from the retired Hermes helpers — with the same event vocabulary (`start` / `session_captured` / `close`, `resume_*` for resumes). Historical Claude-side lines used **`log_file`**; the library's readers normalize those to `log_path` in memory, and registry content is never rewritten. Hermes depends on developer-config for this lib, never the reverse — the Claude wrappers must work on a machine with no Hermes install (`$CODEX_REGISTRY_LIB` overrides the lib lookup; `$CODEX_REGISTRY_PATH` overrides the registry path).
 
 ## Path 2: Hermes → Claude Code subprocess
 
@@ -82,7 +63,7 @@ When the user is in an interactive Claude Code session (terminal or IDE), Claude
 **How it works:**
 1. Claude Code (Opus under the Fable orchestrator) produces the plan or diff
 2. Claude Code writes the review or implement brief
-3. Claude Code calls `~/.claude/scripts/codex-exec.sh` — a standalone shell wrapper that invokes `codex exec --sandbox workspace-write --json` directly (it does NOT call `codex_delegate.py`; it shares the registry library, `always/scripts/lib/codex_registry.py`, with the Hermes helpers — see `codex-delegation.md`)
+3. Claude Code calls `~/.claude/scripts/codex-exec.sh` — a standalone shell wrapper that invokes `codex exec --sandbox workspace-write --json` directly, the same wrapper Hermes uses in Path 1 (see `codex-delegation.md`)
 4. Codex CLI executes the task, returns result to Claude Code
 5. Claude Code continues the session
 
@@ -90,7 +71,7 @@ When the user is in an interactive Claude Code session (terminal or IDE), Claude
 
 ## Path 4: Crons → Codex CLI — decommissioned
 
-Live crons run `~/.hermes/scripts/agent-run.sh` with `claude -p`, invoking Codex inside that run as the cross-family reviewer; do not build crons on `codex_exec.sh` directly.
+Live crons run `~/.hermes/scripts/agent-run.sh` with `claude -p`, invoking Codex inside that run as the cross-family reviewer.
 
 ## What is NOT used
 
@@ -164,7 +145,7 @@ All dispatches follow `codex-delegation.md` for briefs, provenance, verification
 Enforcement is mechanical (why: rationale.md#dispatch-loop):
 
 - **Mechanical enforcement (authoritative): a `pre_tool_call` hook** — `~/.hermes/scripts/dispatch_guard_hook.py`, registered via a `hooks:` block in `~/.hermes/config.yaml`. It blocks a duplicate dispatch against an in-flight `--resume` session, normalized-argv duplicates, >10 LLM-CLI dispatches per rolling 10 minutes, >4 concurrent, and a hard ceiling of 60/day. Decisions logged to `~/.hermes/logs/dispatch-guard-audit.jsonl`. `max_turns` stays at 1000 deliberately — rate, not turn count, is the guarded axis. A guard denial means stop and report; never retry or route around it.
-- **All background LLM CLI invocations (`claude -p`, `codex exec`) from Hermes go through `~/.hermes/scripts/llm_dispatch.sh`.** Semantics: signature lock per normalized command + session-ID lock for `--resume`; a duplicate dispatch while running waits on / reads the original's output instead of spawning; a completed result is returned from disk; >3 attempts per signature per day trips a loud circuit breaker. See `~/.hermes/scripts/README-dispatch-guard.md`. This is the idempotency primitive, not the enforcement layer — it only helps when the caller routes through it.
+- **All background LLM CLI invocations (`claude -p`, and the Codex wrappers) from Hermes go through `~/.hermes/scripts/llm_dispatch.sh`.** Semantics: signature lock per normalized command + session-ID lock for `--resume`; a duplicate dispatch while running waits on / reads the original's output instead of spawning; a completed result is returned from disk; >3 attempts per signature per day trips a loud circuit breaker. See `~/.hermes/scripts/README-dispatch-guard.md`. This is the idempotency primitive, not the enforcement layer — it only helps when the caller routes through it.
 - No `approvals.deny` backstop, and none is possible: its globs cannot distinguish background from foreground. Any doc claiming a deny backstop is wrong.
 - Agent rule on top: after dispatching a background process, the next action is poll/wait/report — never re-dispatch an identical command. If a re-dispatch seems necessary, read the output file and `process list` first; identical-command re-issue is the loop signal.
 

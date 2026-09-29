@@ -13,8 +13,8 @@ contracts.
 
 - The session model is the machine's local config (`model-selection.md`
   "Harness seats"). Claude is `claude -p` only (Anthropic sub) — never
-  Hermes-native Anthropic, which bills the API. Codex is `codex exec`
-  (ChatGPT sub).
+  Hermes-native Anthropic, which bills the API. Codex goes through
+  the shared `~/.claude/scripts/codex-*.sh` wrappers (ChatGPT sub).
 - DeepSeek via `delegate_task` only for trivial retrieval/summaries.
 
 ## Machine-local vs owned here

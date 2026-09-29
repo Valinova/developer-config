@@ -441,6 +441,12 @@ hand-edit it** — change `principles.md`, then re-run the script. Everything
 outside the markers is Hermes-only (identity, hard constraints, autonomy
 envelope) and the script leaves it untouched.
 
+Hermes dispatches Codex through the `~/.claude/scripts/` wrappers, so a Hermes
+host needs those contract rows too. **Pending host migration:**
+`llm_dispatch.sh`, `dispatch_guard_hook.py`, and `agent-run.sh` still live only
+in the untracked `~/.hermes/scripts/`; move them into `hermes/scripts/` and
+symlink them back like `sync-soul-principles.py`, adding their contract rows.
+
 Two things make Hermes drift quietly, so re-check it whenever doctrine changes:
 `~/.hermes/skills/` is otherwise gitignored (local/agent skills have no history);
 the `/longrun` family is the exception — those five skills (`agentplan`,

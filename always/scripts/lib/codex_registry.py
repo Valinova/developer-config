@@ -2,12 +2,11 @@
 """
 codex_registry.py — canonical primitives shared by every codex dispatch wrapper.
 
-Two wrapper families dispatch `codex exec` and write to ONE registry at
-~/.hermes/state/codex-sessions.jsonl:
-
-  - Hermes   (~/.hermes/scripts/codex_exec.sh, codex_delegate.py, codex_resume.py)
-  - Claude   (developer-config/always/scripts/codex-{exec,resume,wait,status}.sh,
-              deployed as ~/.claude/scripts/*)
+Every caller (Claude Code, Grok Build, Hermes) dispatches `codex exec` through
+developer-config/always/scripts/codex-{exec,resume,wait,status}.sh (deployed as
+~/.claude/scripts/*) and writes to ONE registry at
+~/.hermes/state/codex-sessions.jsonl. Lines with source "hermes" come from the
+retired Hermes helpers (codex_exec.sh, codex_delegate.py, codex_resume.py).
 
 They had drifted on the three things they share: the registry line grammar, the
 thread-id / final-message extraction, and the dispatch-hygiene constants.
@@ -54,7 +53,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-# ─── Constants (the dispatch-hygiene numbers both families rely on) ───
+# ─── Constants (the dispatch-hygiene numbers every wrapper relies on) ───
 
 DEFAULT_REGISTRY = Path.home() / ".hermes/state/codex-sessions.jsonl"
 

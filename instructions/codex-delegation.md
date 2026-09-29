@@ -76,14 +76,11 @@ decides the rung per diff. **Nobody pushes under a live editing lane:** a courie
 
 Every wrapper appends lifecycle events (`start` / `session_captured` / `close`, `resume_*` for resumes) to the shared, never-auto-pruned registry `~/.hermes/state/codex-sessions.jsonl` — the wrappers `mkdir -p` it, Hermes install or not; `/tmp/codex-<task>.*` files are per-run ephemera only. Line grammar, extraction regexes, and dispatch-hygiene constants are owned by `always/scripts/lib/codex_registry.py`; read `coding-orchestration.md` "Session registry" before touching it.
 
-## Caller: Hermes (Python helpers)
-
-`~/.hermes/scripts/codex_delegate.py`, `codex_resume.py`, and `codex_exec.sh` — invocation, options, and the JSON return are in `coding-orchestration.md` "Path 1".
-
-## Caller: Claude Code and Grok Build (shell wrappers)
+## Caller: Claude Code, Grok Build, and Hermes (shell wrappers)
 
 Use the wrappers in `~/.claude/scripts/` — never raw `codex exec`. Grok Build
-has no second wrapper set; it invokes the same scripts.
+and Hermes have no second wrapper set; they invoke the same scripts (Hermes
+through its dispatch guard, `coding-orchestration.md` "Path 1").
 
 ```bash
 ~/.claude/scripts/codex-exec.sh <task-name> /tmp/codex-<task-name>-brief.md [--model SLUG] [--effort LEVEL] [--service-tier TIER]  # dispatch (background default; --foreground for <~2min tasks)

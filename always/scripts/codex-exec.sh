@@ -3,7 +3,7 @@
 # codex-exec.sh — standard wrapper for delegating tasks to codex exec.
 #
 # Why the stdin redirect, durable registry and 45s health check:
-# instructions/codex-delegation.md "Caller: Claude Code and Grok Build".
+# instructions/codex-delegation.md "Caller: Claude Code, Grok Build, and Hermes".
 #
 # Usage:
 #   codex-exec.sh <task-name> <brief-path> [--foreground] [--model SLUG] [--effort LEVEL] [--service-tier TIER]
