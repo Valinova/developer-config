@@ -51,15 +51,12 @@ I often work in parallel in the same worktree. Uncommitted changes that don't tr
 
 ### Tests: value, not coverage
 
-- A test earns its place only if it would catch a real regression; coverage percentage means nothing. Prove the production failure path and the non-regression that matters, nothing more. Shared test-harness or mock edits need at least one **consumer** suite outside the original happy path.
-- **Less test, more coverage — the shapes to refuse** (why: rationale.md#test-shapes):
-  - *Derive, don't mirror.* Expectations come from the canonical owner/config; never re-type a roster, enum, prompt sentence, byte size, CSS class, or log string as a literal. Assert the invariant (closure, membership, partition, gating), not the text. Only a self-declared drift pin with no importable owner may be literal.
-  - *Mock boundaries, run owners.* Mock only real process boundaries (DB/HTTP/SDK/telemetry/router/i18n/timers); everything in-process runs real — no hand-rolled store/engine shims, no in-test reimplementation of a production rule. `toHaveBeenCalledWith` is contract testing against a boundary and theater against a pure function two imports away — judge the collaborator, not the matcher.
-  - *Never assert a result against itself.* Totals vs their own components, `toEqual(canonicalBuilder(sameInput))`, determinism self-compares, fixture echo, in-test helpers tested by the same file. Hand-derive or table-drive a fixed expectation.
-  - *One owner, one file; fold before minting.* New cases go in the existing file on that owner; a new test FILE needs a stated reason (different environment, incompatible hoisted mocks, separate owner). No PR/phase tokens in filenames; no regular/batch twins on one owner — table-drive with `describe` rows. Single-`it()` files are a smell by default.
-  - *Table-drive repetition.* N near-identical `it()`s over one arranged result → `it.each` with titled rows.
-  - *No source-text assertions.* `readFileSync` + `toContain`/regex over production source executes nothing. Drift guards are lint rules or render assertions, not tests.
-- **Plan-time rule (agentplan / execute-plan / longrun).** Each phase names its minimal test set and the owner + failure path each test proves. "No new test — covered by <file>" is a valid, stated answer. A new test *file* is justified in the plan or it does not ship. Reviewers reject the six shapes above at phase review, not at the next audit.
+`~/Development/developer-config/instructions/testing.md` owns test strategy — read it before writing, changing, reviewing, or deleting tests. The core, always in force:
+
+- A test earns its place only if it would catch a real regression; coverage percentage means nothing. Shared test-harness or mock edits need at least one **consumer** suite outside the original happy path.
+- **Test the stable boundary.** Business rules are tested through the real server functions (queries, mutations, handlers) against a real test DB, mocking only external services. Unit tests are for pure logic that has real failure modes (money, tax, dates, parsers, state machines). Wiring gets no dedicated test. UI churn is covered by browser walks, not scripted E2E.
+- **A test counts only after it has been seen failing** — on the pre-fix code for a bug, or before the code exists for new logic. For new logic, list the failure modes before writing the code; no failure modes means it is wiring. A test that restates code written just before it is the default failure of agent-written tests.
+- A test that would break under a behaviour-preserving refactor, or that needs a production seam no real caller uses, is at the wrong boundary. Move it; don't land it.
 
 ### Ship gate: beneficial + no open regression (plan and finalize)
 
@@ -97,6 +94,7 @@ Git, branch, worktree, and commit operations — permissions, the backstop hook,
 - A browser session is expensive; climb the ladder first: typecheck → unit/integration tests → read the code path → curl the endpoint or check server logs. Escalate to a real browser only when the thing under test is genuinely browser-only — a visual/layout bug, an interaction (click/hover/drag) flow, hydration, something observable only when rendered. (why: rationale.md#browser-cost)
 - **Ask before starting a browser session** for verification unless I explicitly asked you to drive, run, or screenshot the app. "Confirm this works" does not mean Playwright — say what you'll do and why the browser is the necessary medium.
 - When you do use it: the fewest snapshots/screenshots that answer the question, targeted queries over full-page dumps, and close the browser when done.
+- **Run ephemera never land in the worktree.** Browser profiles, driver scripts, dev-server logs/pids, screenshots, and probe outputs go in the session scratchpad (or `/tmp/<task>/` on harnesses without one) — never inside the repo, gitignored or not. Delete them when the run ends; what's worth keeping goes into the report or memory, not a leftover folder. (why: rationale.md#run-ephemera)
 
 ## 10. React: reach for useEffect last
 

@@ -22,12 +22,14 @@ The repo is cloned at `~/Development/developer-config` on every machine
 |---|---|---|
 | `~/.claude/CLAUDE.md` | symlink | `claude-root.md` |
 | `~/.codex/AGENTS.md` | symlink | `instructions/principles.md` |
-| `~/.codex/config.toml` native subagent defaults | merge | Set `[agents]` to GPT-6 Sol / high and tell Codex to read `codex/model-defaults.md` before dispatch; preserve every unrelated setting |
+| `~/.codex/config.toml` approvals and native subagent defaults | merge | Set `approval_policy = "on-request"`, `approvals_reviewer = "auto_review"`, `[agents]` to GPT-6.1 Sol / high, and the dispatch instruction below; preserve every unrelated setting |
+| `~/.codex/rules/command-safety.rules` | symlink | `codex/command-safety.rules` (hard blocks for the unrecoverable only) |
 | `~/.pi/agent/AGENTS.md` | symlink | `instructions/principles.md` |
 | `~/.claude/settings.json` | symlink | `always/settings.json` |
 | `~/.claude/mcp/playwright.json` | symlink | `always/mcp/playwright.json` (on-demand MCP server definition — see "MCP servers load on demand") |
 | `~/.claude/mcp/playwright-browser.json` | symlink | `always/mcp/playwright-browser.json` (headless Chromium options, the default) |
 | `~/.claude/mcp/playwright-browser-headed.json` | symlink | `always/mcp/playwright-browser-headed.json` (headed variant, selected per session via `PLAYWRIGHT_MCP_BROWSER_CONFIG`) |
+| global `playwright` (`pnpm add -g playwright@1.62.1 && playwright install chromium`) | install | scripted browser walks import it through `always/scripts/lib/playwright-walk.mjs` (headless, artifacts outside the repo); the MCP rows above are the separate per-session server |
 | shell rc (`~/.bashrc` / `~/.zshrc`) | merge | `alias claude-pw='claude --mcp-config ~/.claude/mcp/playwright.json'` and `alias claude-pw-headed='PLAYWRIGHT_MCP_BROWSER_CONFIG=~/.claude/mcp/playwright-browser-headed.json claude --mcp-config ~/.claude/mcp/playwright.json'`; preserve everything else |
 | `~/.pi/agent/settings.json` | symlink | `pi/settings.json` |
 | `~/.pi/agent/subagents.json` | symlink | `pi/subagents.json` (Tintin defaults disabled) |
@@ -63,7 +65,7 @@ starting harnesses, and never installs packages or changes live files.
 
 Use symlinks for repo-owned files so edits land in git. The existing plain-copy
 exception for Claude settings is described below. Machine-owned merges are the
-listed Codex defaults/routing, Grok compatibility/models/MCP, and Pi MCP entries;
+listed Codex approvals/defaults/routing, Grok compatibility/models/MCP, and Pi MCP entries;
 preserve all unrelated configuration.
 
 The hook scripts — `always/scripts/supervised-git-backstop.py` (plus its test,
@@ -88,10 +90,21 @@ model routing out of that file. Merge these values into `~/.codex/config.toml` w
 unrelated instruction or setting:
 
 ```toml
+approval_policy = "on-request"
+approvals_reviewer = "auto_review"
+
 [agents]
-default_subagent_model = "gpt-6-sol"
+default_subagent_model = "gpt-6.1-sol"
 default_subagent_reasoning_effort = "high"
 ```
+
+Link `~/.codex/rules/command-safety.rules` to `codex/command-safety.rules`, preserving
+Codex's unrelated `default.rules` allowances. [Command approval](codex/permissions.md)
+explains automatic review, when to ask, and restart requirements. Keep the
+existing sandbox/network profile; automatic review does not itself add
+containment. Do not pair it with `never`, which rejects escalations before
+review. These values affect newly loaded configuration;
+verify effective permissions after restarting the client.
 
 Also append this sentence to the existing top-level `developer_instructions`
 string, or create that string if it is absent:
@@ -100,7 +113,7 @@ string, or create that string if it is absent:
 > `~/Development/developer-config/codex/model-defaults.md` and apply it unless
 > an explicit user or per-dispatch model/reasoning choice overrides it.
 
-The TOML values are mechanical defaults, not an effort floor; the card routes
+The agent TOML values are mechanical defaults, not an effort floor; the card routes
 each dispatch through `instructions/model-selection.md`. After pulling a change
 to these values, each machine updates its own `[agents]` and Grok
 `[subagents.models]` values (`check-wiring.py` asserts them). It is a merge rather
@@ -212,11 +225,14 @@ the official plugin instead.
 `always/settings.json` and `pi/settings.json` are symlinked, so the harnesses
 rewrite them in place: Claude Code's `/model` and `/effort` rewrite (or delete)
 `model` and `effortLevel`; plugin installs and cloud sync rewrite
-`enabledPlugins`, `extraKnownMarketplaces`, and the UI toggles; Pi's `/model`
+`enabledPlugins`, `extraKnownMarketplaces`, `autoCompactWindow`, and the UI toggles; Pi's `/model`
 and thinking toggles rewrite `defaultProvider`, `defaultModel`,
 `defaultThinkingLevel`, `lastChangelogVersion`, and `theme`. **This drift is
 expected — do not "reconcile" it**, and never read a HEAD value of those keys
-as a cross-machine default. The repo owns only `permissions` and `hooks` in
+as a cross-machine default. Agents never ask about, flag, review, or edit
+those keys: they reflect the config on the user's machine at that moment. In a
+diff review they are not findings; when the user asks for a commit that
+includes the file, commit them as they stand. The repo owns only `permissions` and `hooks` in
 `always/settings.json` and `packages` in `pi/settings.json`; a plain-copy
 `~/.claude/settings.json` is compared on those blocks alone.
 
@@ -237,6 +253,13 @@ block in `~/.claude.json`), and every enabled plugin that ships an
 tool schemas defer only the schema text, never the process. A server that
 spawns its own child processes (Playwright launches a Chromium) multiplies by the number of open
 sessions (why: rationale.md#mcp-on-demand).
+
+Scripted walks (any harness's agent driving the app from short Node scripts) do
+not use the MCP server at all: they import the machine's global `playwright`
+through `always/scripts/lib/playwright-walk.mjs` by its repo path, run headless
+unless the user asked to watch, and keep every artifact in one dir outside the
+repo (the session scratchpad when passed, else `/tmp/walk-<task>/`). That keeps
+walks off every repo's dependency tree and off the session's MCP process list.
 
 The rule, for every MCP server on every machine:
 
@@ -325,6 +348,8 @@ instructions/git-operations.md      git, branch, worktree, and commit operations
                                     (Claude via claude-root import; Grok via
                                     ~/.grok/rules/10-git-operations.md; Codex, Pi, and Hermes
                                     reach it through the principles §7 pointer)
+instructions/testing.md             test strategy, authoring gate, refused shapes, pruning —
+                                    every agent reads it on demand via the principles §4 pointer
 instructions/claude-conventions.md  Claude Code only
 instructions/dispatch-bootstrap.md  Claude Code + Grok Build always-loaded: hard delegation
                                     triggers, the read-on-dispatch rule,

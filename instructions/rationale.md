@@ -50,20 +50,6 @@ backgrounded `pnpm gate | tail` reported the pipeline's last stage, not the
 gate's, pushing a red commit. A gate result is an exit code the invoker read,
 not a claim.
 
-### test-shapes
-
-A 2026-08-20 whole-suite audit (1,189 files) found ~15% of files violating one
-of the six refused test shapes. Each shape is therefore a named finding class
-with real instances, not theory. What each shape costs: a test that must
-change whenever the implementation changes passes forever and catches
-nothing; a mirrored literal makes the test a second owner of a production
-fact and forces a test edit per production edit; a hand-rolled shim or
-in-test reimplementation of a production rule passes while production drifts;
-self-referential assertions let consistent-but-wrong pass; near-identical
-`it()`s inflate count and wall-clock without signal; source-text assertions
-pass broken code and break on reformat. A test that would never catch a
-regression is just more code to maintain.
-
 ### fail-loud
 
 An obvious failure surfaced at dev time is cheaper than a silent wrong answer
@@ -80,6 +66,16 @@ The cost of a browser session is not the tool schemas (they load on demand);
 it is per call — every snapshot, screenshot, or network dump is thousands of
 tokens.
 
+### run-ephemera
+
+A 2026-09-17 charter walk left `.claude-walk/` in a worktree: 8 Chromium
+persistent profiles (one per retry) plus scripts and logs — 5.7k untracked
+files, 263 MB, flooding source control for a week. Gitignoring it would only
+hide the growth. The stated reason for in-repo placement ("scripts must live
+in the repo to resolve modules") was false: a script can import a package by
+absolute path from anywhere, which is what `playwright-walk.mjs` now does with
+the machine's global install.
+
 ### entropy
 
 Entropy is the accumulation of small "fine for now" compromises. Every change
@@ -94,6 +90,36 @@ which is why a repeatedly violated UI rule graduates into a mechanical check
 (§11). `<details>` is not where unjustifiable content hides. A raw UUID means
 nothing to a user. A second route or `-v2` component rendering the same data
 is a fork that rots both halves.
+
+## testing.md
+
+### test-strategy
+
+Recent models write many unit tests after the code, and most restate the code
+just written: they pass on the first run, catch almost nothing, and break on
+every refactor, so the agent spends its time fixing tests instead of the
+feature. The usual counter (make scripted E2E the only mechanism) does not fit
+here: the UIs change too fast for E2E specs to stay green, and only
+kushki-procurement-cvx had a Playwright suite as of 2026-09-24, run by neither
+`check` nor CI. Business rules, permissions, and money outcomes are the stable,
+costly layer, so the server boundary with a real test DB is the default. It
+keeps most of E2E's realism without the UI churn. The "seen failing" and
+"failure modes first" gates come from the same feedback: a test that has never
+failed has not been shown to detect anything.
+
+### test-shapes
+
+A 2026-08-20 whole-suite audit (1,189 files) found ~15% of files violating one
+of the six refused test shapes. Each shape is therefore a named finding class
+with real instances, not theory. What each shape costs: a test that must
+change whenever the implementation changes passes forever and catches
+nothing; a mirrored literal makes the test a second owner of a production
+fact and forces a test edit per production edit; a hand-rolled shim or
+in-test reimplementation of a production rule passes while production drifts;
+self-referential assertions let consistent-but-wrong pass; near-identical
+`it()`s inflate count and wall-clock without signal; source-text assertions
+pass broken code and break on reformat. A test that would never catch a
+regression is just more code to maintain.
 
 ## git-operations.md
 
@@ -134,6 +160,9 @@ lower on merge-readiness evals, where out-of-scope changes grow with effort —
 so `high` is the ceiling. Sol above `high` is cheap and gains a little (max
 ≈ Astra `medium` on FrontierCode Extended, 3.5 below it on DeepSWE), which
 is why the Codex step is Sol `high` → Astra `medium`, not a higher Sol rung.
+These measurements are Sol 6. On 2026-09-29 Sol 6.1 replaced it as the
+default for every Codex delegation, with its sweet spot at `medium`–`high` by
+task; Astra's margin over it shows only on deeply complex work.
 
 ### session-effort
 
@@ -147,8 +176,8 @@ at are transient TUI state, never the intended baseline.
 
 Genuine cross-family review catches what same-family review misses: a
 Claude pass over Fable-orchestrated code reliably finds nothing. So
-Claude-authored work (Opus implements under Fable) goes to Astra at the
-gates, and Codex-authored work to Opus or, when complex, Fable.
+Claude-authored work (Opus implements under Fable) goes to Sol 6.1 at the
+gates (Astra when complex or cross-cutting), and Codex-authored work to Opus or, when complex, Fable.
 
 ### coderabbit
 
