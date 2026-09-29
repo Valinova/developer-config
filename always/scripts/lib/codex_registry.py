@@ -60,9 +60,6 @@ from pathlib import Path
 
 DEFAULT_REGISTRY = Path.home() / ".hermes/state/codex-sessions.jsonl"
 
-#: Exported as CODEX_DEFAULT_TIMEOUT_SEC (90 minutes), but no wrapper enforces
-#: it: codex runs have no wall-clock cap.
-DEFAULT_TIMEOUT_SEC = 5400
 #: Seconds a background dispatch may go without emitting a JSON event before it
 #: is considered hung on stdin and killed.
 HEALTH_CHECK_SEC = 45
@@ -342,7 +339,6 @@ def main(argv=None) -> int:
     p = sub.add_parser("constants")
     # Shell-quoted: the registry path may contain spaces and this is eval'd.
     p.set_defaults(fn=lambda a: (print(
-        f"CODEX_DEFAULT_TIMEOUT_SEC={DEFAULT_TIMEOUT_SEC}\n"
         f"CODEX_HEALTH_CHECK_SEC={HEALTH_CHECK_SEC}\n"
         f"CODEX_REGISTRY={shlex.quote(str(registry_path()))}"), 0)[1])
 

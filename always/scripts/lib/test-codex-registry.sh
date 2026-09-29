@@ -143,13 +143,13 @@ SHIM_OUT="$(
     set -eu
     source "$1"
     registry_append task shim event start status running log_path /tmp/x.log
-    echo "$CODEX_DEFAULT_TIMEOUT_SEC $CODEX_HEALTH_CHECK_SEC"
+    echo "$CODEX_HEALTH_CHECK_SEC"
     echo "$(extract_session_id "$2")"
     echo "$(count_json_events "$2")"
     echo "$(current_run_lines shim | wc -l | tr -d " ")"
   ' _ "$SH_LIB" "$LOG"
 )"
-assert_eq "$(printf '%s\n' "$SHIM_OUT" | sed -n 1p)" "5400 45" "constants"
+assert_eq "$(printf '%s\n' "$SHIM_OUT" | sed -n 1p)" "45" "constants"
 assert_eq "$(printf '%s\n' "$SHIM_OUT" | sed -n 2p)" "12345678-1234-1234-1234-123456789abc" "shim thread-id"
 assert_eq "$(printf '%s\n' "$SHIM_OUT" | sed -n 3p)" "5" "shim json event count"
 assert_eq "$(printf '%s\n' "$SHIM_OUT" | sed -n 4p)" "1" "shim current-run"
