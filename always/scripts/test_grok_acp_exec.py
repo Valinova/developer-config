@@ -126,6 +126,23 @@ class GrokAcpExecTests(unittest.TestCase):
             self.assertIn("session/prompt", methods)
             self.assertEqual(stderr.read_text(), "")
 
+    def test_early_stop_fails_loud_and_keeps_partial_text(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            fake = root / "fake_agent.py"
+            fake.write_text(
+                textwrap.dedent(FAKE_AGENT).replace("end_turn", "max_turn_requests"),
+                encoding="utf-8",
+            )
+            client = MODULE.AcpClient(
+                [sys.executable, str(fake)], root, root / "e.jsonl", root / "s.log", 5
+            )
+
+            with self.assertRaises(MODULE.RunIncomplete) as caught:
+                client.run("do the task")
+            self.assertEqual(caught.exception.stop_reason, "max_turn_requests")
+            self.assertEqual(caught.exception.partial, "hello world")
+
     def test_command_is_leaf_sandboxed_and_denies_git_writes(self):
         command = MODULE.build_command(
             "/bin/grok", Path("/repo"), "grok-4.7", "high", "workspace", 20

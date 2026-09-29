@@ -87,6 +87,15 @@ def build_command(
     return command
 
 
+class RunIncomplete(AcpError):
+    """The prompt ended with a stop reason other than end_turn (e.g. the turn cap)."""
+
+    def __init__(self, stop_reason, partial):
+        super().__init__(f"run stopped early (stopReason={stop_reason}); partial result kept")
+        self.stop_reason = stop_reason
+        self.partial = partial
+
+
 class AcpClient:
     def __init__(
         self,
@@ -159,7 +168,7 @@ class AcpClient:
             if not isinstance(session_id, str) or not session_id:
                 raise AcpError("session/new returned no sessionId")
             self.session_id = session_id
-            self._request(
+            outcome = self._request(
                 "session/prompt",
                 {
                     "sessionId": session_id,
@@ -167,7 +176,11 @@ class AcpClient:
                 },
                 deadline,
             )
-            return "".join(self._message_chunks)
+            text = "".join(self._message_chunks)
+            stop_reason = outcome.get("stopReason")
+            if stop_reason != "end_turn":
+                raise RunIncomplete(stop_reason, text)
+            return text
         except (KeyboardInterrupt, RunInterrupted):
             self._cancel()
             raise RunInterrupted("Grok ACP run interrupted")
@@ -351,6 +364,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--sandbox", choices=("workspace", "read-only", "strict"), default="workspace"
     )
+    # Runaway circuit breaker, not a work quota: a run that hits it exits 1 (RunIncomplete).
     parser.add_argument("--max-turns", type=int, default=30)
     parser.add_argument("--timeout-seconds", type=float, default=1800)
     parser.add_argument("--artifacts-dir", type=Path, default=Path("/tmp"))
@@ -400,6 +414,11 @@ def main() -> int:
         print(f"grok-acp-exec.py: stderr: {stderr_path}", file=sys.stderr)
         print(f"grok-acp-exec.py: result: {result_path}", file=sys.stderr)
         return 0
+    except RunIncomplete as error:
+        result_path.parent.mkdir(parents=True, exist_ok=True)
+        result_path.write_text(error.partial.rstrip() + "\n", encoding="utf-8")
+        print(f"grok-acp-exec.py: {error}: {result_path}", file=sys.stderr)
+        return 1
     except AcpTimeout as error:
         print(f"grok-acp-exec.py: {error}", file=sys.stderr)
         return 124
