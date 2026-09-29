@@ -12,6 +12,11 @@ SPEC = importlib.util.spec_from_file_location(
 MODULE = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(MODULE)
 
+CODEX_PERMISSIONS = (
+    'approval_policy = "on-request"\n'
+    'approvals_reviewer = "auto_review"\n'
+)
+
 
 class MergeTests(unittest.TestCase):
     def audit(self, text, harness="Codex"):
@@ -22,7 +27,7 @@ class MergeTests(unittest.TestCase):
 
     def test_routing_must_be_an_active_instruction(self):
         config = (
-            '[agents]\ndefault_subagent_model = "gpt-6-sol"\n'
+            CODEX_PERMISSIONS + '[agents]\ndefault_subagent_model = "gpt-6.1-sol"\n'
             'default_subagent_reasoning_effort = "high"\n'
         )
         for prefix in (
@@ -39,9 +44,9 @@ class MergeTests(unittest.TestCase):
     def test_invalid_config_fails_without_a_traceback(self):
         for text in (
             'developer_instructions = "Read codex/model-defaults.md"\n'
-            '[agents]\ndefault_subagent_model = "gpt-6-sol"\n'
+            '[agents]\ndefault_subagent_model = "gpt-6.1-sol"\n'
             'default_subagent_reasoning_effort = "high"\ninvalid toml',
-            '[agents]\ndefault_subagent_model = "gpt-6-sol"\n'
+            '[agents]\ndefault_subagent_model = "gpt-6.1-sol"\n'
             'default_subagent_model = "other"\n',
         ):
             with self.subTest(text=text):
@@ -49,10 +54,27 @@ class MergeTests(unittest.TestCase):
 
     def test_equivalent_toml_syntax_is_accepted(self):
         self.assertFalse(self.audit(
-            "developer_instructions = 'Read codex/model-defaults.md before dispatch'\n"
-            "agents = { default_subagent_model = 'gpt-6-sol', "
+            CODEX_PERMISSIONS + "developer_instructions = 'Read codex/model-defaults.md before dispatch'\n"
+            "agents = { default_subagent_model = 'gpt-6.1-sol', "
             "default_subagent_reasoning_effort = 'high' }\n"
         ))
+
+    def test_codex_command_review_cannot_silently_be_disabled(self):
+        config = (
+            CODEX_PERMISSIONS
+            + 'developer_instructions = "Read codex/model-defaults.md"\n'
+            + '[agents]\ndefault_subagent_model = "gpt-6.1-sol"\n'
+            + 'default_subagent_reasoning_effort = "high"\n'
+        )
+        self.assertFalse(self.audit(config))
+        for old, new in (
+            ('approval_policy = "on-request"', 'approval_policy = "never"'),
+            ('approval_policy = "on-request"', ''),
+            ('approvals_reviewer = "auto_review"', 'approvals_reviewer = "user"'),
+            ('approvals_reviewer = "auto_review"', ''),
+        ):
+            with self.subTest(setting=new or old):
+                self.assertTrue(self.audit(config.replace(old, new)))
 
     def test_grok_requires_a_configured_mcp_command(self):
         config = (

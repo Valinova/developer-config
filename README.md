@@ -44,8 +44,9 @@ always/
   mcp/            On-demand MCP server definitions (Playwright).
   settings.json   User-global ~/.claude/settings.json.
 claude/skills/    Claude stubs over workflows/.
-codex/            model-defaults.md (Codex dispatch card); skills/: stubs over
-                  workflows/ plus Codex-only skills.
+codex/            model-defaults.md (Codex dispatch card), permissions.md and
+                  command-safety.rules (automatic review; unrecoverable-only blocks); skills/:
+                  stubs over workflows/ plus Codex-only skills.
 grok/             model-defaults.md (Grok Build card); skills/: stubs over workflows/.
 pi/               model-defaults.md (Pi card), settings, subagents, role agents,
                   extensions + tests; skills/: stubs over workflows/ plus convex-mcp.
@@ -89,7 +90,7 @@ packages/         Opt-in bundles (browser-walker agent); see SETUP.md.
 │  claude/     │ │ Sol impl;    │ │ per machine│ │  bundled execute-   │
 │ Fable orch;  │ │ claude -p    │ │ (two-family│ │  plan). Native Grok │
 │ Opus impl;   │ │  (Claude)    │ │  rule)     │ │ 4.7 spawn_subagent; │
-│ Astra review │ │  reviews     │ │            │ │ Codex wrappers;     │
+│ Sol 6.1 rev. │ │  reviews     │ │            │ │ Codex wrappers;     │
 └──────────────┘ └──────────────┘ └────────────┘ │ claude -p for Claude│
                                                  └─────────────────────┘
 
@@ -103,8 +104,9 @@ packages/         Opt-in bundles (browser-walker agent); see SETUP.md.
                                            ▼
    /longrun = agentplan → execute-plan → rev → docs → (push → PR) → babysit
    (each stage independently invokable; rev/babysit never recurse into longrun)
-   Two families: Claude side (Fable orch, Opus executes, Astra reviews) and
-   Codex side (Astra orch, Sol executes, Claude reviews). Pi, Hermes, and Grok
+   Two families: Claude side (Fable orch, Opus executes, Sol 6.1 reviews;
+   Astra when cross-cutting) and Codex side (Astra orch, Sol 6.1 executes,
+   Claude reviews). Pi, Hermes, and Grok
    Build run each machine's local default model under the same two-family
    rule; Grok 4.7, DeepSeek, open-source models, and Luna are user-named
    overrides anywhere.

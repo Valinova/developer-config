@@ -38,7 +38,10 @@ LINKS = {
         "mcp/playwright-browser.json": "always/mcp/playwright-browser.json",
         "mcp/playwright-browser-headed.json": "always/mcp/playwright-browser-headed.json",
     },
-    "Codex": {"AGENTS.md": "instructions/principles.md"},
+    "Codex": {
+        "AGENTS.md": "instructions/principles.md",
+        "rules/command-safety.rules": "codex/command-safety.rules",
+    },
     "Pi": {
         "AGENTS.md": "instructions/principles.md",
         "settings.json": "pi/settings.json",
@@ -191,8 +194,12 @@ def audit_merge(harness, root):
     if harness == "Codex":
         instructions = config.get("developer_instructions")
         checks = [
-            ('[agents] default_subagent_model = "gpt-6-sol"',
-             config_value(config, "agents", "default_subagent_model") == "gpt-6-sol"),
+            ('approval_policy = "on-request"',
+             config.get("approval_policy") == "on-request"),
+            ('approvals_reviewer = "auto_review"',
+             config.get("approvals_reviewer") == "auto_review"),
+            ('[agents] default_subagent_model = "gpt-6.1-sol"',
+             config_value(config, "agents", "default_subagent_model") == "gpt-6.1-sol"),
             ('[agents] default_subagent_reasoning_effort = "high"',
              config_value(config, "agents", "default_subagent_reasoning_effort") == "high"),
             ("developer_instructions: codex/model-defaults.md reference",
