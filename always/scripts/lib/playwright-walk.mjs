@@ -26,6 +26,7 @@
 
 import { execFileSync } from 'node:child_process'
 import { mkdirSync } from 'node:fs'
+import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { pathToFileURL } from 'node:url'
 
@@ -38,7 +39,9 @@ export function walkDir(task, base = process.env.WALK_DIR) {
 
 export function resolveGlobalPlaywright() {
   const listing = JSON.parse(
-    execFileSync('pnpm', ['ls', '-g', '--long', '--json', 'playwright'], { encoding: 'utf8' })
+    // Run outside the caller's repo: a project packageManager pin makes pnpm print a
+    // warning onto stdout ahead of the JSON.
+    execFileSync('pnpm', ['ls', '-g', '--long', '--json', 'playwright'], { encoding: 'utf8', cwd: tmpdir() })
   )
   const pkg = listing?.[0]?.dependencies?.playwright
   if (!pkg?.path) {
