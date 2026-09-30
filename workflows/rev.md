@@ -22,7 +22,10 @@ and the full and contained rows' pass is the principles audit.
 The principles audit is the engineering principles and the repo's
 `AGENTS.md`/`CLAUDE.md` guidance: correctness and regressions, with emphasis on
 simplicity, intentionality, canonical ownership, and removal of unnecessary
-scope. The chosen depth and scope travel in the reviewer's brief.
+scope. Test changes are judged against `testing.md` "Shapes to refuse": a
+new test file without a stated reason, or a case that restates a registry,
+roster, or i18n literal, is a finding. The chosen depth and scope travel in the
+reviewer's brief.
 
 ## External-review-only mode
 
