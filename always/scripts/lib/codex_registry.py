@@ -2,11 +2,12 @@
 """
 codex_registry.py — canonical primitives shared by every codex dispatch wrapper.
 
-Every caller (Claude Code, Grok Build, Hermes) dispatches `codex exec` through
+Every caller (Claude Code, Grok Build, Hermes) dispatches `codex exec`, legacy helpers aside, through
 developer-config/always/scripts/codex-{exec,resume,wait,status}.sh (deployed as
 ~/.claude/scripts/*) and writes to ONE registry at
 ~/.hermes/state/codex-sessions.jsonl. Lines with source "hermes" come from the
-retired Hermes helpers (codex_exec.sh, codex_delegate.py, codex_resume.py).
+deprecated Hermes helpers (codex_exec.sh, codex_delegate.py);
+the Hermes PR-burndown scripts still call codex_delegate.py.
 
 They had drifted on the three things they share: the registry line grammar, the
 thread-id / final-message extraction, and the dispatch-hygiene constants.
@@ -60,6 +61,9 @@ from pathlib import Path
 
 DEFAULT_REGISTRY = Path.home() / ".hermes/state/codex-sessions.jsonl"
 
+#: Legacy Hermes timeout default (codex_exec.sh, codex_delegate.py); the shared
+#: wrappers do not use it.
+DEFAULT_TIMEOUT_SEC = 5400
 #: Seconds a background dispatch may go without emitting a JSON event before it
 #: is considered hung on stdin and killed.
 HEALTH_CHECK_SEC = 45
@@ -339,6 +343,7 @@ def main(argv=None) -> int:
     p = sub.add_parser("constants")
     # Shell-quoted: the registry path may contain spaces and this is eval'd.
     p.set_defaults(fn=lambda a: (print(
+        f"CODEX_DEFAULT_TIMEOUT_SEC={DEFAULT_TIMEOUT_SEC}\n"
         f"CODEX_HEALTH_CHECK_SEC={HEALTH_CHECK_SEC}\n"
         f"CODEX_REGISTRY={shlex.quote(str(registry_path()))}"), 0)[1])
 

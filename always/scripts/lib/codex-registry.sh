@@ -13,6 +13,7 @@
 # Provides:
 #   $CODEX_REGISTRY_LIB          absolute path to codex_registry.py
 #   $CODEX_REGISTRY              registry path (honours $CODEX_REGISTRY_PATH)
+#   $CODEX_DEFAULT_TIMEOUT_SEC   90min legacy Hermes default (codex_exec.sh, codex_delegate.py)
 #   $CODEX_HEALTH_CHECK_SEC      45s no-JSON-event stall threshold
 #   registry_append KEY VALUE ...          append one canonical line
 #   extract_session_id <log>               thread_id from a --json log
