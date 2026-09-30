@@ -13,8 +13,8 @@ Owns how git, branch, worktree, and commit operations are run on every surface, 
 
 ## The mechanical floor
 
-For Codex, [command approval](../codex/permissions.md) describes the native automatic
-reviewer and `codex/command-safety.rules`, which hard-blocks only the Deny tier below;
+For Codex, command approval (`~/Development/developer-config/codex/permissions.md`) describes the native automatic
+reviewer and `codex/command-safety.rules`, which hard-blocks the Deny tier's unrecoverable operations below in Codex's literal-prefix form;
 everything else rests on the ask-when-unclear rules in this file. `approval_policy =
 "never"` prevents review and must not be mistaken for missing task authority.
 
@@ -26,7 +26,7 @@ in `always/settings.json`, not a Codex hook. Its docstring and
 |---|---|---|
 | **Deny** — every mode, including bypass | Bare force-push (`--force-with-lease` passes). The `permissions.deny` list beside it holds only the unrecoverable — `rm -rf` of a root, force-push or `push --delete` of the default branch — never reflog-recoverable ops. | Blocked outright. |
 | **Directed** | `git stash`, `git restore`, `git checkout -- <path>`, `git clean -f`, `git worktree remove`, recursive `rm` outside temp roots — when I named it. | Done: answer the hook's prompt (it asks only in supervised modes) and move on. |
-| **Undirected** | The same family when I did **not** name it. | Get my ok in conversation first, recovery path named — in every mode, especially bypass, where the ask tier is inert. |
+| **Undirected** | The same family when I did **not** name it. | Otherwise ask first and name the recovery path — in every mode, especially bypass, where the ask tier is inert; approved-task exceptions are defined under 'Updating a branch'. |
 
 ## Commits
 

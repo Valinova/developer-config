@@ -58,8 +58,12 @@ seats:
 - Run the wrapper in a long-lived exec session. It streams raw ACP traffic to
   `/tmp/grok-acp-<task>.events.jsonl`, Grok stderr to
   `/tmp/grok-acp-<task>.stderr.log`, and the final answer to
-  `/tmp/grok-acp-<task>.result.md`. Timeout or cancellation first sends
-  `session/cancel`, then terminates only the process created for that task.
+  `/tmp/grok-acp-<task>.result.md`. An ACP response whose `stopReason` is
+  not `end_turn` (e.g. the `--max-turns` circuit breaker) exits 1, still writes
+  its partial text to that result file (not stdout), and prints the stop reason
+  to stderr. Timeout or cancellation first sends `session/cancel`, then
+  terminates only the process created for that task, and exits 124 or 130
+  without writing a result.
 - One wrapper invocation is one fresh Grok session. Parallel work uses distinct
   task names and non-overlapping file allowlists. There is deliberately no
   resume, registry, background daemon, nested-agent support, or Pi fallback in
