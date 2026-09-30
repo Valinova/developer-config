@@ -29,7 +29,7 @@ For each bounded pass:
    (`model-selection.md` "Effort"; the lane that can carry that rung per
    "Fresh window or inherited context").
 3. Review the exact implementer diff for correctness, plan compliance, and the
-   user-supplied North Star.
+   user-supplied North Star; check test changes against `testing.md`.
 4. Apply the principles §2–§3 simplicity gate to the diff: remove anything
    that does not trace to the plan or earn its place.
 5. Run the phase verification and the repository's full pre-commit check

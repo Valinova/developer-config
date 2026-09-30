@@ -119,7 +119,10 @@ in-test reimplementation of a production rule passes while production drifts;
 self-referential assertions let consistent-but-wrong pass; near-identical
 `it()`s inflate count and wall-clock without signal; source-text assertions
 pass broken code and break on reformat. A test that would never catch a
-regression is just more code to maintain.
+regression is just more code to maintain. A 2026-09-30 branch review still
+found one behaviour tested 3–6x across files, pinned defaults, and a
+wall-clock race guard: the doctrine existed, but no review step read past
+"Shapes to refuse".
 
 ## git-operations.md
 

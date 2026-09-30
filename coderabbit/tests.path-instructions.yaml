@@ -1,0 +1,29 @@
+# Canonical CodeRabbit test-review instructions, derived from instructions/testing.md.
+# General on purpose: no repo names, paths or domain facts (this repo is public).
+# Repo-specific rules come from that repo's own AGENTS.md.
+# Two uses:
+#   - PR review: copy into a repo's .coderabbit.yaml (a repo file replaces any
+#     org central config, and CodeRabbit can't read this repo across orgs).
+#   - Local CLI: coderabbit review --committed --base origin/<default> \
+#       -c <this file> AGENTS.md
+# Edit here first, then re-copy.
+reviews:
+  path_instructions:
+    - path: "**/{*.test.*,*.spec.*,*_test.*,test_*.*}"
+      instructions: |
+        Review changed tests for concrete regression value, not style or length.
+        Flag only: demonstrated duplication (cite the stronger existing test that
+        already asserts it); assertions that mirror an implementation constant or
+        stored intermediate value instead of observable behaviour; mocks or manual
+        state transitions that bypass the behaviour the test claims; a negative
+        case rejected by an unrelated guard; real elapsed-time waits that decide
+        pass/fail; a test asserting a known-bad outcome; a test for code that runs
+        once (a backfill or migration shim) with no stated retirement; a test
+        that reaches the real network or real credentials, or leaves background
+        work running past its end; a new test with no seen-failing evidence in
+        the PR or commit message.
+        Preserve distinct protocol, storage, security, money and migration
+        contracts, controlled-clock delays, and deliberate race or stale-input
+        fixtures.
+        One comment per underlying issue. Request another test only for a named,
+        distinct failure nothing covers.

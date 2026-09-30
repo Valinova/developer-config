@@ -45,7 +45,6 @@
       "/tmp"
     ]
   },
-  "model": "opus",
   "hooks": {
     "PreToolUse": [
       {
@@ -108,5 +107,6 @@
   "preferredNotifChannel": "terminal_bell",
   "switchModelsOnFlag": false,
   "agentPushNotifEnabled": true,
-  "voiceEnabled": false
+  "voiceEnabled": false,
+  "model": "opus"
 }

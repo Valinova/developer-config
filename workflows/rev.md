@@ -24,7 +24,13 @@ The principles audit is the engineering principles and the repo's
 simplicity, intentionality, canonical ownership, and removal of unnecessary
 scope. Test changes are judged against `testing.md` "Shapes to refuse": a
 new test file without a stated reason, or a case that restates a registry,
-roster, or i18n literal, is a finding. The chosen depth and scope travel in the
+roster, or i18n literal, is a finding. When tests or shared test harnesses or
+mocks change, the reviewer reads `testing.md` in full and compares each
+changed contract with coverage across files; a finding names the concrete
+failure missed or the stronger test already covering it. It checks the
+recorded seen-failing evidence and the sibling consumers of a shared harness
+change; missing evidence means unverified, not never-failed. It reviews the
+diff, not the unchanged suite. The chosen depth and scope travel in the
 reviewer's brief.
 
 ## External-review-only mode
