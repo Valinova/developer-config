@@ -25,7 +25,9 @@ set -u
 
 LIB_DIR=$(cd "$(dirname "$0")" && pwd)
 SCRIPTS=$(dirname "$LIB_DIR")
-T=$(mktemp -d "${TMPDIR:-/tmp}/wrapper-test.XXXXXX")
+# Strip a trailing slash (macOS TMPDIR has one): the wrappers print normalized paths.
+TMP_BASE=${TMPDIR:-/tmp}
+T=$(mktemp -d "${TMP_BASE%/}/wrapper-test.XXXXXX")
 ID="wrtest-$$"
 FAKE="$T/fakebin"
 SAFE="$T/safebin"
