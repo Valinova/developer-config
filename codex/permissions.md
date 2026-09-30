@@ -7,8 +7,10 @@ approvals_reviewer = "auto_review"
 
 Sandbox escalations go to the native automatic reviewer instead of the user, so
 authorized work keeps moving. `command-safety.rules` blocks only the
-unrecoverable, mirroring the Claude deny tier: `rm -rf /` and the common
-spellings of a bare force push; the instructions cover the other forms.
+Deny tier's unrecoverable operations, in Codex's literal-prefix form: `rm -rf`
+or `rm -fr` of the root, home or
+parent directory, the common spellings of a bare force push, and
+`push --delete` of the default branch; the instructions cover the other forms.
 Nothing else is gated mechanically, on purpose — command gates slowed routine
 work without adding judgment. Link the file at
 `~/.codex/rules/command-safety.rules`; keep Codex's accumulated allowances in

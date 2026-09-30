@@ -5,11 +5,11 @@
 # the instructions (ask when unclear or when work could be lost); see permissions.md.
 
 prefix_rule(
-    pattern = ["rm", ["-rf", "-fr"], "/"],
+    pattern = ["rm", ["-rf", "-fr"], ["/", "/*", "~", "~/*", "$HOME", "$HOME/*", "..", "../*"]],
     decision = "forbidden",
-    justification = "Never recursively delete the filesystem root. Select the exact task-owned directory instead.",
-    match = ["rm -rf /", "rm -fr /"],
-    not_match = ["rm -rf /tmp/task-scratch"],
+    justification = "Never recursively delete the filesystem root, the home directory, or the parent directory. Select the exact task-owned directory instead.",
+    match = ["rm -rf /", "rm -fr /", "rm -rf /*", "rm -rf ~", "rm -rf ~/*", "rm -rf $HOME", "rm -rf $HOME/*", "rm -rf ..", "rm -rf ../*"],
+    not_match = ["rm -rf /tmp/task-scratch", "rm -rf ../task-scratch"],
 )
 
 prefix_rule(
@@ -18,4 +18,12 @@ prefix_rule(
     justification = "Never use a bare force push. An authorized feature-branch rewrite must use --force-with-lease; never rewrite or delete the default branch.",
     match = ["git push --force origin feature", "git push -f origin feature"],
     not_match = ["git push --force-with-lease origin feature"],
+)
+
+prefix_rule(
+    pattern = ["git", "push", "--delete", "origin", ["main", "master"]],
+    decision = "forbidden",
+    justification = "Never delete the default branch on the remote.",
+    match = ["git push --delete origin main", "git push --delete origin master"],
+    not_match = ["git push --delete origin feature"],
 )
