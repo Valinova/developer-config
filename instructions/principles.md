@@ -122,6 +122,17 @@ The default audience is a non-technical user. (why: rationale.md#ui-drift)
 - Organized tabs and sections over one long scroll; secondary content is progressively disclosed.
 - Refine the screen; don't mint a parallel one. No second route or `-v2` component rendering the same data; a genuine A/B names the date it collapses back to one.
 
+## 13. Documentation: only what code cannot say
+
+Code is the source of truth. A doc earns its place only if an agent with full read access to the code and no docs would otherwise make a wrong decision.
+
+- A doc states a rule that must keep being observed (a decision procedure, a cross-file invariant, a hazard, a rejected alternative) or a north star the team is steering toward. Write the rule, not the instance.
+- A doc never states what the code does: no inventories, walkthroughs, status, or history. Reusable runbooks and test procedures no script encodes are legitimate.
+- One owner per fact; a doc that disagrees with the code is fixed toward the code.
+- Plans are local and temporary: gitignored, never committed, folded into the owning doc at closeout only where they pass this bar.
+- No backlog in a repo: work goes to the issue tracker; a located gap gets §11's `simplified:` marker.
+- Adding prose means removing prose.
+
 ## Plugin usage
 
 Use plugins or plugin-provided skills only when I request the plugin or skill by name; default to built-in/local tools and repository context. I often run tools such as CodeRabbit separately.

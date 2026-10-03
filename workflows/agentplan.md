@@ -48,8 +48,9 @@ existing plan artifact.
    conclusions; escalate only unresolved critical choices under principles §4.
 6. Return the revised plan.
 
-Persist the plan as a markdown file in the repository: update the existing plan
-artifact if one exists, otherwise write it to the repo's established plan
-location (default `plans/<date>-<slug>.md`). The plan is a working artifact —
-after delivery, `longrun`'s docs stage folds its durable outcomes into
-canonical documentation and deletes it.
+Persist the plan as a local markdown file, never committed (principles §13):
+update the existing plan artifact if one exists, otherwise write it to the
+repo's gitignored plan location (default `docs/plans/<date>-<slug>.md`; if the
+location is not ignored, say so rather than committing). After delivery,
+`longrun`'s docs stage folds what passes the §13 bar into canonical
+documentation and deletes it.

@@ -39,16 +39,16 @@ the plan-commit portion of stage 2 instead of rerunning `agentplan`.
    ask whether to create or switch only when not already authorized, and name
    the branch yourself.
 2. Planning, by mode. Full: if no still-valid reviewed plan exists, run
-   `agentplan`, then commit the revised plan file before implementation.
+   `agentplan`; the plan file stays local and uncommitted (principles §13).
    Discover: `agentplan` scope-only, probe with the user, then `agentplan`
-   again for phases, and commit the plan. Iterative: write a short scope note;
+   again for phases. Iterative: write a short scope note;
    its cross-family scope review is this workflow's plan gate.
 3. Run `execute-plan` through every phase (Iterative: implement with the user
    in bounded passes) and commit.
 4. Run `rev` and commit its reviewed fixes.
-5. Run `docs` to consolidate the branch's documentation — folding any plan's
-   durable outcomes into canonical docs and deleting that plan file when
-   present — then commit (this workflow authorizes it).
+5. Run `docs` to consolidate the branch's documentation — folding what
+   passes the principles §13 bar from the local plan into canonical docs and
+   deleting that plan file — then commit (this workflow authorizes it).
 6. Verify the complete branch and the intended remote/branch target, and
    apply the principles §4 "Ship gate". Then push and open a pull request with
    a descriptive summary, verification results, and all important unresolved
