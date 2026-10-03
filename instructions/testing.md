@@ -54,8 +54,9 @@ description. A reviewer who can't find them treats the test as unjustified.
 A test that would break under a behaviour-preserving refactor asserts
 implementation. Rewrite it at the owning boundary before landing it.
 
-A bug fix gets one regression test at the owner boundary, not one per layer
-the bug crossed.
+A bug whose recurrence would cost something gets one regression test at the
+owner boundary (not one per layer it crossed), unless existing coverage
+already catches it; extend existing cases before adding another test.
 
 A flake is fixed in the test or the code under test. Changing the test
 harness's semantics needs a reproducer showing it differs from production; the

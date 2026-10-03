@@ -18,6 +18,13 @@ function into pass-through wrappers lowers the line count and the lint score
 while making the code worse. A senior engineer's "overcomplicated" is the
 smell test because it is the review that actually happens.
 
+### subtract
+
+Agents tend to add surface when deletion would solve the problem. Earlier
+guidance reinforced that tendency by permitting reserved slots and
+discouraging removal of pre-existing dead code. §2 now makes subtraction an
+explicit decision before adding.
+
 ### parallel-worktree-wip
 
 The user often works in parallel in the same worktree. An agent judged
@@ -99,9 +106,8 @@ Recent models write many unit tests after the code, and most restate the code
 just written: they pass on the first run, catch almost nothing, and break on
 every refactor, so the agent spends its time fixing tests instead of the
 feature. The usual counter (make scripted E2E the only mechanism) does not fit
-here: the UIs change too fast for E2E specs to stay green, and only
-kushki-procurement-cvx had a Playwright suite as of 2026-09-24, run by neither
-`check` nor CI. Business rules, permissions, and money outcomes are the stable,
+here: the UIs change too fast for E2E specs to stay green, and an existing
+Playwright suite was run by neither the project check nor CI. Business rules, permissions, and money outcomes are the stable,
 costly layer, so the server boundary with a real test DB is the default. It
 keeps most of E2E's realism without the UI churn. The "seen failing" and
 "failure modes first" gates come from the same feedback: a test that has never
