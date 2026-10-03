@@ -44,13 +44,14 @@ and GPT-6 Luna, at `high` unless the user says otherwise.
 
 ## Roster
 
-Only the families above are in play. Haiku is never used. Sonnet is out of the
-default roster — admissible only as an explicit override for a remedial
-browser walk (see "Subagent fan-out"), never chosen on an agent's own judgment.
+Only the families above are in play. Haiku is never used. Sonnet 5.5 takes
+purely mechanical or exploratory work only: retrieval, recon, a mechanical tail
+with an exact spec, a scripted browser walk. Never implementation that needs
+judgment, review, or planning; the orchestrator spot-checks its pointers.
 
-On the Claude side Opus 5.5 executes everything the orchestrator does not —
-implement, explore/recon, retrieval, browser walks, docs fold, contained
-review, mechanical tails. Fable is never an implementer by default.
+On the Claude side Opus 5.5 executes everything else the orchestrator does
+not — implement, docs fold, contained review, and any exploration or
+mechanical work that needs judgment. Fable is never an implementer by default.
 
 Codex dispatch uses `gpt-6.1-sol` and `gpt-6-astra`; `gpt-6-luna` only as a
 user-named override. **Sol 6.1 is the Codex workhorse**: every Codex
@@ -100,7 +101,9 @@ below.
 
 An external call dispatches another model for independent judgment — a plan
 or diff review, `rev`, an escalation, any cross-family opinion. Local checks,
-tests, and the pre-commit gate are not external calls and always run.
+tests, and the pre-commit gate are not external calls; run them when required
+by the task and verification policy. Reviewer briefs verify by reading and run
+no suites.
 
 - **Interactive / iterative work with the user:** no external call unless the
   user asks. Suggest one when the risk warrants it; the user's yes is the go.
@@ -132,8 +135,11 @@ rationale.md#cross-family-review).
 
 Pi, Hermes, and Grok Build follow the same two-family rule. If the seat is
 unavailable under the harness's access rules, stop and say so; the user
-decides the substitute. Reuse valid findings; ordinary
-fixes get regression checks, not another pass. The final report states what
+decides the substitute. Reuse valid findings. Verify ordinary fixes locally; another review runs only
+when a separate gate requires it. A confirmed finding earns an in-scope fix or
+an out-of-scope report under principles.md §3. A review finding alone does not
+justify a test: a bug must have a costly recurrence, and new logic follows
+testing.md's authoring gate. The final report states what
 each pass changed; a pass that changed nothing is reported as such, never
 hidden — that is the signal to lower the default next time.
 
@@ -189,7 +195,7 @@ workflow was invoked (why: rationale.md#pipeline-proportionality):
 |---|---|
 | Complex or cross-cutting | Full rev: code-simplifier, judgment lenses where they earn fan-out, other-family validation per "External calls" |
 | Contained, well-specified | One cross-family pass at the reviewer family's default rung ("Effort"); no lens fan-out |
-| Mini PR, or a fix-verify iteration loop | A light cross-family validation of the fix and its test; no simplifier or lenses |
+| Mini PR, or a fix-verify iteration loop | A light cross-family validation of the fix and its verification evidence; no simplifier or lenses |
 
 Classify by risk and affected contracts, not size: a change that fits the
 complex row wins regardless of diff size. The light row covers a bounded
@@ -236,8 +242,8 @@ beyond eight requires genuine value and a user check-in first.
 
 Browser-driving subagents (Playwright walks, UI verification, screenshot
 loops) are mechanical work: in subscription Claude lanes they take the
-**Opus 5.5** seat (why: rationale.md#opus-browser-walks); Sonnet is admissible
-there for a purely remedial walk, only as an explicit override. Pi uses its
+**Opus 5.5** seat (why: rationale.md#opus-browser-walks); Sonnet 5.5 may take
+a purely scripted walk. Pi uses its
 local default. The per-call economy rule in
 `principles.md` §9 still governs.
 
