@@ -222,7 +222,7 @@ confirmed, never announced and taken. Silence means default; a non-default choic
 defect, not discretion. In non-interactive runs, the same block goes at the
 top of the final report.
 
-CodeRabbit is not a local step; its PR-side review is consumed by `babysit`,
+CodeRabbit's PR-side review is consumed by `babysit` (complex code that no CodeRabbit PR will see, and that hasn't been reviewed locally, gets a local pass at push time: `git-operations.md` "Direction and approval"),
 which settles it together with CI, at most one push per round, with a
 two-round cost circuit breaker. The cap never implies merge-ready: apply
 babysit's final verification and report incomplete delivery when its ship

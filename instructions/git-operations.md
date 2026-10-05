@@ -10,6 +10,12 @@ Owns how git, branch, worktree, and commit operations are run on every surface, 
 - **Branch switches and worktrees: ask first, every time.** My naming the exact branch or worktree IS the answer — the guard is against ones *you* chose. Directing implementation or a PR does **not** imply branch/worktree approval, and intent with a veto window ("say the word if…") is not approval. When work needs one I haven't named, ask **whether** to create it and wait for my reply; for a worktree, propose the path in the same ask. (why: rationale.md#branch-switches)
 - **Branch names are the agent's to pick, never a question.** Once a branch is authorized, name it yourself. When I've directed Linear for the task and it's available, use the ticket's branch name from Linear. Otherwise `<type>/<short-kebab-slug>` describing the change (`fix/`, `feat/`, `docs/`, `chore/`). Never a harness or model prefix (`codex/`, `claude/`, `grok/`).
 - **Remote operations: ask and verify first.** Before any push, remote URL/config change, or other remote-writing operation: state exactly what will run, confirm with me unless I directed that push (approval for one *undirected* operation does not roll forward), and verify the target (current branch, remote URL, ahead/behind vs base). Read-only remote ops (fetch, `gh pr view`) need no asking. (why: rationale.md#remote-ops)
+- **Local CodeRabbit only for complex, unreviewed code that no CodeRabbit PR will see.** Run one local pass before a push only when all three hold:
+  - the push carries complex code: cross-cutting logic, a shared owner or contract, money, auth, data writes. Not docs, config, a scaffold, or a small contained change.
+  - that code has had no local review: no `rev`, cross-family review, or `code-simplifier` pass on this diff.
+  - no CodeRabbit PR review will see it: the change isn't going through a PR in a repo with CodeRabbit configured and auto-review on.
+
+  Then, with the `coderabbit` CLI installed, run `coderabbit review --committed --base origin/<default> --agent -c ~/Development/developer-config/coderabbit/tests.path-instructions.yaml AGENTS.md` once over everything the push sends, never per commit (each run is billed). Triage findings as PR findings; the repo's own gate still decides. A first push into an empty repo has no base to diff, so skip it and say so. No CLI: say so in the report.
 
 ## The mechanical floor
 

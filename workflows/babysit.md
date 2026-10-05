@@ -15,7 +15,10 @@ operations; implementer leaves make no git writes (`codex-delegation.md`
 "Sandbox note").
 
 CI checks and the CodeRabbit review together are CI/CD. A round treats them
-as one signal and combines any needed changes into at most one push.
+as one signal and combines any needed changes into at most one push. A PR
+with neither (no checks configured, CodeRabbit auto-review off) has nothing
+to babysit: say so and stop. The repo's own gate and the local CodeRabbit
+pass at push time (`git-operations.md` "Direction and approval") stand in.
 
 ## Round
 
