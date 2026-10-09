@@ -1,0 +1,7 @@
+interface:
+  display_name: "Simplicity Audit"
+  short_description: "Audit a target for the smallest clear design"
+  default_prompt: "Use $simplicity-audit to audit this target against the smallest clear design the codebase supports."
+
+policy:
+  allow_implicit_invocation: false
