@@ -16,6 +16,18 @@ pointers I would otherwise restate — never PR status, shipped work, pending-it
 lists, or anything git, a PR, or the code can answer. A ruling about code goes
 in the repo (a comment at the site, or `AGENTS.md` for a recurring trap).
 
+## Edit tracked files with the Edit tool, never an in-place shell rewrite
+
+A shell command that rewrites a tracked file in place (`sed -i`, `perl -pi`,
+`cp`/`mv` over it, a heredoc overwrite), above all a multi-command chain of
+them, can trip Claude Code's own command safety check, which prompts even
+under bypass; neither of our hooks is involved. The orchestrator can answer
+that prompt; a subagent cannot, so its pass stalls silently until a human
+notices (an hour lost on 2026-10-09 to a seen-red break done with `sed -i`
+plus `cp` restores). Break the owner with Edit, run the test, restore with
+Edit. Every implementer brief restates it; a recurrence graduates to a
+PreToolUse deny per principles §11.
+
 ## Prompt-cache heartbeat during long waits
 
 The session prompt cache lapses after an hour idle; a warm ping is cheaper
