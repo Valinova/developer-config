@@ -120,7 +120,7 @@ A user-named override lane (`model-selection.md` "Roster"). Delegated `pi -p` ru
 
 ## Claude delegation (`claude -p`)
 
-The lane for same-family delegation at a chosen effort from a Claude Code orchestrator — native `Agent` subagents inherit the session's effort and window; `claude -p` starts from zero plus the brief and takes `--effort` as a flag (`model-selection.md` "The lane follows the effort" / "Fresh window or inherited context"). Deliberately simpler than the Codex wrappers (why: rationale.md#claude-exec-simplicity).
+The lane for reaching a Claude seat from outside Claude Code (Codex, Pi, Hermes, Grok). From a Claude Code orchestrator the same-family lane is the native `Agent`, which takes `model` and `effort`; `claude-exec.sh` is used there only for a run that must outlive the session (`model-selection.md` "Fresh window or inherited context"). Deliberately simpler than the Codex wrappers (why: rationale.md#claude-exec-simplicity).
 
 ```bash
 ~/.claude/scripts/claude-exec.sh <task-name> /tmp/claude-<task-name>-brief.md [--effort LEVEL] [--model SLUG] [--resume] [--foreground]

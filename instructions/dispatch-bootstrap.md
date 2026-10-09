@@ -21,8 +21,8 @@ minutes), then retry once. Never retry in a loop.
   a retrieval subagent that returns a distilled brief (≤ ~3K tokens) with
   file:line pointers.
 - **Any edit touching more than a couple of files**, or any implement pass
-  with a brief → the harness's implementer lane (Claude Code: `claude-exec.sh`
-  or a native Opus `Agent`, Codex wrappers for a user-named Sol or Astra
+  with a brief → the harness's implementer lane (Claude Code: a fresh native
+  Opus `Agent` at the task's rung, Codex wrappers for a user-named Sol or Astra
   implement; Grok Build: `grok/model-defaults.md`), never the orchestrator
   editing file by file in its own window.
 - Heuristic: extracting facts → delegate (above all any tool result you expect

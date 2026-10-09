@@ -216,9 +216,19 @@ the window fills, regardless of how cheaply that window is billed (lost in
 the middle; NoLiMa; Chroma's context-rot study; Anthropic's context
 engineering guidance — verify citations before quoting). The two axes are
 independent, and with Fable 5.1's cache pricing only the degradation axis
-should drive the fresh-window decision. A `claude -p` dispatch pays a fixed
+should drive the fresh-window decision. A `claude -p` process pays a fixed
 cold-start floor of roughly 40K tokens (harness prompt + instruction
 imports), which is why it never pays off for minute-scale tasks.
+
+### native-agent-lane
+
+Until 2026-10 a native `Agent` inherited the session's rung and window, so
+delegating at a different effort meant a `claude -p` process. The `Agent`
+tool now takes `model` and `effort`, and a non-fork agent starts from a fresh
+window, which covers everything the `claude -p` lane was chosen for inside a
+session. What the wrapper still has that the tool does not: a registry,
+`--resume`, and a run that survives the session ending. That is the residual
+in-session case; every other reason to use it from Claude Code is gone.
 
 ### grok-briefing
 

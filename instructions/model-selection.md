@@ -32,7 +32,7 @@ Every session starts in one of two families, by harness:
 
 | Side | Orchestrator | Executes | Adversarial review |
 |------|--------------|----------|--------------------|
-| **Claude Code** (and `claude -p` from anywhere) | Fable 5.1 — the session model is the user's `/model` pick; Opus for simpler sessions is fine | Opus 5.5 via native `Agent` (`model: "opus"`) or `claude-exec.sh --model opus` | GPT-6.1 Sol via the Codex wrappers; Astra when complex or cross-cutting |
+| **Claude Code** (and `claude -p` from anywhere) | Fable 5.1 — the session model is the user's `/model` pick; Opus for simpler sessions is fine | Opus 5.5 via a fresh native `Agent` (`model: "opus"`, `effort` per "Effort") | GPT-6.1 Sol via the Codex wrappers; Astra when complex or cross-cutting |
 | **Codex** | GPT-6 Astra | GPT-6.1 Sol (`gpt-6.1-sol`) native subagents at `medium`–`high`; Astra when the work is long-horizon, cross-cutting, or a Sol pass failed the gate | Claude via `claude -p`: Opus 5.5 contained, Fable 5.1 + nested Opus complex |
 
 **Pi, Hermes, Grok Build:** their default model is whatever each machine's
@@ -95,9 +95,10 @@ verbatim, so both are closed by doctrine, not by tooling.
 transient TUI state: never read them as the baseline, reconcile them to this
 table, or flag the drift (why: rationale.md#session-effort).
 
-**The lane follows the effort**: a task whose rung differs from the session's
-needs a lane that takes effort as a flag — "Fresh window or inherited context"
-below.
+**The rung is passed, never inherited.** Every lane takes effort as a
+parameter (`Agent` `effort`, the wrappers' `--effort`); the orchestrator sets
+it from the table above on each dispatch. This table is the explicit
+instruction the `Agent` tool's `effort` parameter requires.
 
 ## External calls
 
@@ -278,20 +279,24 @@ combined-diff provenance check.
 ### Fresh window or inherited context: decide by the input, not the cache
 
 Only context degradation drives this decision, never cache cost
-(why: rationale.md#context-degradation).
+(why: rationale.md#context-degradation). From Claude Code the same-family lane
+is the native `Agent` (why: rationale.md#native-agent-lane):
 
-- A **native Claude subagent** inherits the session window and rung, with no
-  effort override. It is right when the session context *is* the input: a
-  review lens over what was just discussed, a retrieval pass the orchestrator
-  will read.
-- A **`claude -p` process** (`claude-exec.sh`) starts from zero plus the brief
-  and takes `--effort` as a flag. It is right when a brief *can* be the input
-  — any bounded, well-specified pass, concentrated implementation above all —
-  and whenever the task's rung differs from the session's (for the Codex family, the
-  Codex wrappers or `spawn_agent(reasoning_effort=…)`). Its cold-start floor
-  means it never pays off for minute-scale tasks.
+- **Fork** (`subagent_type: "fork"`) inherits the session window and rung. It
+  is right when the session context *is* the input: a review lens over what
+  was just discussed, a retrieval pass the orchestrator will read.
+- **Fresh `Agent`** (any other type) starts from zero plus the prompt and
+  takes `model` and `effort`. It is the default for any bounded,
+  well-specified pass, concentrated implementation above all; the prompt is
+  the brief and carries the distilled context.
+- **`claude-exec.sh`** is for callers outside Claude Code (Codex, Pi, Hermes,
+  Grok) and, from Claude Code, only for a run that must outlive the session:
+  hours-long or resumable work, where its registry and `--resume` matter. Its
+  cold-start floor means it never pays off for minute-scale tasks. The Codex
+  family's equivalents are the Codex wrappers or
+  `spawn_agent(reasoning_effort=…)`.
 - The orchestrator's window size is the tiebreaker. The larger it grows, the
-  more every bounded task belongs in a fresh process with the distilled brief,
+  more every bounded task belongs in a fresh agent with the distilled brief,
   and the orchestrator keeps its window for what only it can do: review.
 
 The orchestrator decides rung and lane per task, states them and why in the
