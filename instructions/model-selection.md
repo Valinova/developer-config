@@ -15,7 +15,9 @@ lifecycle, sandbox limits: `codex/`, `grok/`, `pi/`, and
 lifecycle, Hermes paths, auth doctrine) live in `coding-orchestration.md`.
 
 Interactive Claude Code and `claude -p` ride the Anthropic subscription.
-Native Anthropic on Pi or inside Hermes bills the API (extra usage).
+Hermes conversation does not: native `provider: anthropic` bills the API
+(extra usage), and `claude-subscription-directsdk-experimental` is not an
+automatic route (tried, not reliable). Claude farm-out stays `claude -p`.
 
 The same subscription-over-metered rule seals **provider routing** on the
 harnesses sharing Pi's provider store (Pi, Hermes, Grok Build): a model goes
