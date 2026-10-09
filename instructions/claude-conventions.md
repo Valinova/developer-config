@@ -8,10 +8,6 @@ never load this file). Reasoning behind them: `rationale.md` (not loaded).
 - **Don't auto-generate a claude.ai artifact** (why: rationale.md#artifacts). Default to a plain answer in the terminal; one-off analyses, summaries, and explanations stay as text.
 - When a visual deliverable *is* warranted (a mock, a dashboard, a diagram, a viz), ask before building: (1) do I want a rendered artifact, or just the answer? (2) where should it live — an ephemeral artifact on claude.ai, or a **file in the repo** (a real component, a checked-in mock/doc)? Repo-bound work is a Write/Edit, not an artifact. Skip the ask only when I explicitly say "make an artifact" / "render it" / "mock this up as a page," or asked to *share* a standalone visual page.
 
-## Explanations
-
-Explain behaviour, tradeoffs, and verification; omit prose that merely defends brevity. Explanation I asked for is given in full.
-
 ## Prompt-cache heartbeat during long waits
 
 The session prompt cache lapses after an hour idle; a warm ping is cheaper
