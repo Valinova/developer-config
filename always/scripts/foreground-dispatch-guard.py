@@ -20,8 +20,12 @@ the job and hung the wrapper, 2026-07-16) — do not move this check into the
 wrappers.
 
 Matching requires the wrapper name at a command position (start of string,
-or after ; | & ( or newline), so prose mentions and `grep codex-exec.sh ...`
-don't trip it. codex-wait.sh alone is deliberately not guarded: killing a
+or after ; | & ( or newline), prefixed only by an optional quote and path,
+and followed by whitespace, a quote, or the end — the shape of a real
+invocation. Prose mentions (backticks, parentheses, `name:` at a heredoc
+line start) and `grep codex-exec.sh ...` don't trip it; a heredoc line that
+reads exactly like an invocation still does. codex-wait.sh alone is
+deliberately not guarded: killing a
 wait only loses the notification; the detached worker is unharmed.
 
 Background calls are guarded too, differently (2026-07-27 incident: a
@@ -38,7 +42,8 @@ import re
 import sys
 
 DISPATCH_AT_COMMAND_POSITION = re.compile(
-    r"(?:^|[;&|(]|\n)\s*\S*(?:(?:codex|pi)-(?:exec|resume)|claude-exec)\.sh\b"
+    r"(?:^|[;&|(]|\n)\s*[\"']?(?:[\w.~$/-]*/)?"
+    r"(?:(?:codex|pi)-(?:exec|resume)|claude-exec)\.sh(?=[\s\"']|$)"
 )
 
 # Anything after the dispatch invocation that starts another command keeps the

@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """Expectation table for foreground-dispatch-guard.py.
 
-Pins the hook's CURRENT behaviour, including two known false positives on
-commit-message text (marked below): a dispatcher name at a heredoc line start
-or right after `(` inside quotes is matched as a command position.
+A dispatcher name counts as a command only with a path-or-quote prefix and
+an argument-like suffix (whitespace, quote, or end), so prose mentions inside
+heredocs, backticks and parentheses are not dispatches. The one residual false
+positive is a heredoc line that reads exactly like an invocation
+(`codex-exec.sh now detaches`); it is textually indistinguishable.
 """
 import json
 import pathlib
@@ -38,11 +40,14 @@ CASES = [
     (True, "claude-exec.sh t /tmp/b.md &", "deny"),
     (True, "codex-exec.sh t /tmp/b.md\nclaude-wait.sh t", "deny"),
     (True, "codex-wait.sh t 3600", "allow"),
-    # --- dispatcher names inside commit messages (current behaviour) ---
+    (False, '"$HOME/.claude/scripts/codex-exec.sh" t /tmp/b.md', "deny"),
+    # --- dispatcher names inside prose are not dispatches ---
     (False, HEREDOC_MIDLINE, "allow"),
-    (False, HEREDOC_LINESTART, "deny"),  # known false positive: line start
-    (False, 'git commit -m "(claude-exec.sh) tidy usage"', "deny"),  # known false positive: after (
+    (False, HEREDOC_LINESTART, "allow"),
+    (False, 'git commit -m "(claude-exec.sh) tidy usage"', "allow"),
     (False, 'git commit -m "tidy claude-exec.sh usage"', "allow"),
+    (False, "python3 - <<'EOF'\nx = 'takes `effort`; `claude-exec.sh` is used there'\nEOF", "allow"),
+    (False, "cat <<'EOF'\n- **`claude-exec.sh`** is for callers outside\nEOF", "allow"),
 ]
 
 
