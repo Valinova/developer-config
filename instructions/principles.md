@@ -10,12 +10,13 @@ it happens. Project `AGENTS.md` / `CLAUDE.md` overrides or extends these.
 - Genuinely ambiguous ask: present the interpretations and ask. Trivial ambiguity, or one clearly right option: take the default and say so. Questions are for trade-offs that are mine to weigh (§4's escalation bar is the autonomous mirror).
 - If a simpler approach than the one asked for exists, say so before implementing.
 - Exploratory questions ("what could we do?") get 2–3 sentences: a recommendation and the main trade-off. Don't implement until I agree.
-- **Visual-first.** When explaining a flow, architecture, or set of options, lead with a diagram (ASCII or mermaid), then concise prose with objective trade-offs. LLM-facing documents use whatever format their reader reads best.
+- **Sketch first, then brief.** When explaining a flow, architecture, state, or set of options, lead with a sketch (ASCII or mermaid), then the fewest sentences that carry the trade-offs. A reply states the answer, the evidence, and any decision that is mine; it does not narrate your reasoning or restate the ask. Explanation I ask for is given in full. LLM-facing documents use whatever format their reader reads best.
 
 ## 2. Simplicity first
 
 Your default as a coding agent is to add; ours is to subtract — a senior engineer's smallest change that solves the problem. Deletion is a result: before adding, ask what the change lets you remove, and for a code change report net lines. (why: rationale.md#subtract)
 
+- **Design before changing.** For anything non-trivial, first name the smallest clear design in concepts (owners, states, decisions, failure paths) that meets the real requirement today, then make the change that moves toward it. The existing shape is evidence, not a requirement.
 - Write the minimum code that solves the stated problem: no features, abstractions, config surfaces, or error handling for scenarios not asked for or that can't happen. Cut unused surface, not craft.
 - **Decision ladder:** take the first option that satisfies the contract — an existing owner in this codebase → stdlib → native platform feature (HTML element, CSS, DB constraint) → an installed dependency → plain logic → only then minimum custom code.
 - **Lock shape early, build behaviour late.** In a contract (schema, API, stored record), settle now only what is both expensive to change later (names, keys, identity, edges) and needed by this change. An empty slot for a future behaviour is still surface. Test: can the next change refine this without a migration?
