@@ -39,7 +39,8 @@ always/
                   guards, wiring and private-terms checkers, reap-orphan-mcp.sh.
   commands/       Slash-command / prompt entry points: shared/, claude/, pi/.
   skills/         Harness-neutral skills linked into Claude, Codex, Pi, and Grok
-                  Build: code-simplifier, com, comall, docs, no-use-effect.
+                  Build: clearcut-review, code-simplifier, com, comall, docs,
+                  no-use-effect, simplicity-audit.
   mcp/            On-demand MCP server definitions (Playwright).
   settings.json   User-global ~/.claude/settings.json.
 claude/skills/    Claude stubs over workflows/.
