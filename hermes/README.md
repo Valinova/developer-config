@@ -7,6 +7,6 @@ Hermes's consumption layer, owned here so it has history — the live
   `claude -p`); the roster is `instructions/model-selection.md`.
 - `skills/` — the Hermes-owned `/longrun` family (`agentplan`, `execute-plan`,
   `rev`, `babysit`, `longrun`), same names as `claude/`, `pi/`, `codex/`, and
-  `grok/`. The harness-neutral `docs` skill is shared from `always/skills/docs`, not copied.
+  `grok/`. The harness-neutral `docs` and `clearcut-review` skills are shared from `always/skills/`, not copied.
 
 Live path: `~/.hermes/skills/software-development/<name>`, symlinked per SETUP.md.

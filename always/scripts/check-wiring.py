@@ -59,6 +59,7 @@ LINKS = {
     "Hermes": {
         "scripts/sync-soul-principles.py": "hermes/scripts/sync-soul-principles.py",
         "skills/software-development/docs": "always/skills/docs",
+        "skills/software-development/clearcut-review": "always/skills/clearcut-review",
     },
 }
 

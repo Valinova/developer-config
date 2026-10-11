@@ -56,7 +56,7 @@ The repo is cloned at `~/Development/developer-config` on every machine
 | `~/.claude/commands/<f>` | symlink each | `always/commands/{shared,claude}/<f>` (both dirs) |
 | `~/.pi/agent/prompts/<f>` | symlink each | `always/commands/{shared,pi}/<f>` (both dirs) |
 | `~/.hermes/skills/software-development/<name>` | symlink each | `hermes/skills/<name>` (Hermes-owned only: `agentplan`, `execute-plan`, `rev`, `babysit`, `longrun`) |
-| `~/.hermes/skills/software-development/docs` | symlink | `always/skills/docs` (harness-neutral, same file Claude, Codex, Pi, and Grok Build read) |
+| `~/.hermes/skills/software-development/{docs,clearcut-review}` | symlink each | `always/skills/<name>` (harness-neutral, same files Claude, Codex, Pi, and Grok Build read) |
 | `~/.hermes/scripts/sync-soul-principles.py` | symlink | `hermes/scripts/sync-soul-principles.py` (SOUL principles embedder; Hermes hosts only) |
 
 `always/scripts/check-wiring.py` is the enforced form of this table; change both together.
@@ -214,8 +214,7 @@ links it. Each linked `<harness>/skills/<name>/SKILL.md` is a stub whose body be
 its frontmatter is identical across harnesses and points to
 `workflows/<name>.md`.
 
-`codex-branch-review` (which also covers a stated recent range, e.g. the last
-48 hours), `codex-functionality-review`, and `codexclear` are Codex-only.
+`codex-functionality-review` and `codexclear` are Codex-only.
 `convex-mcp` is owned under `pi/skills/convex-mcp` and linked into Pi and Grok
 Build; the name `convex` is left to Convex's project installer. Claude uses
 the official plugin instead.
@@ -310,8 +309,8 @@ directories live under `claude/skills/`, `codex/skills/`, `pi/skills/`, and
 `grok/skills/`. Each live skill path is a per-skill symlink to exactly one of
 those owners.
 
-The shared set is `code-simplifier`, `com`, `comall`, `docs`, `no-use-effect`,
-and `simplicity-audit` — all six linked into
+The shared set is `clearcut-review`, `code-simplifier`, `com`, `comall`, `docs`,
+`no-use-effect`, and `simplicity-audit` — all seven linked into
 Claude, Codex, Pi, and Grok Build. Keep this list current when adding a shared
 skill: a skill nobody enumerates is a skill nobody links (`code-simplifier` sat
 unlinked in every harness for exactly that reason).
@@ -329,7 +328,7 @@ how to write one is `instructions/agent-guidance.md` "Skill descriptions".
 Workflows that carry consequential intent include `agents/openai.yaml` with
 `allow_implicit_invocation: false`; they remain visible for explicit selection
 but cannot activate from conversational similarity. That is every skill under
-`codex/skills/`, plus `com`, `comall`, `docs`, and `simplicity-audit` from `always/skills/`. Standing policies such as `no-use-effect` ship an
+`codex/skills/`, plus `clearcut-review`, `com`, `comall`, `docs`, and `simplicity-audit` from `always/skills/`. Standing policies such as `no-use-effect` ship an
 `agents/openai.yaml` carrying an `interface:` block and deliberately no
 `policy:` block, so they stay implicitly discoverable; `code-simplifier`
 carries no `agents/` directory at all and is likewise discoverable.
@@ -385,7 +384,7 @@ a second owner; a deliberate override must be labeled as one).
   can install configured packages; use `PI_OFFLINE=1` for Pi diagnostics.
 - [ ] `python3 always/scripts/check-wiring.py` exits 0.
       On Hermes installs, this includes `agentplan`, `execute-plan`, `rev`,
-      `babysit`, `longrun`, and shared `docs` under `skills/software-development/`.
+      `babysit`, `longrun`, and shared `docs` and `clearcut-review` under `skills/software-development/`.
 - [ ] `python3 always/scripts/check-workflow-stubs.py` exits 0 (every delivery-skill stub points at an existing `workflows/*.md`).
 - [ ] `~/.codex/AGENTS.md` resolves to a file whose first line is `# Engineering principles`
 - [ ] `~/.codex/config.toml` retains all machine-owned settings after merging.
@@ -450,8 +449,8 @@ Two things make Hermes drift quietly, so re-check it whenever doctrine changes:
 `~/.hermes/skills/` is otherwise gitignored (local/agent skills have no history);
 the `/longrun` family is the exception — those five skills (`agentplan`,
 `execute-plan`, `rev`, `babysit`, `longrun`) are owned here under `hermes/skills/`
-and only *loaded* via symlink; `docs` loads from `always/skills/docs` alongside
-them.
+and only *loaded* via symlink; `docs` and `clearcut-review` load from
+`always/skills/` alongside them.
 Hermes restating doctrine in other local skills is still drift — prefer a
 pointer at this repo.
 Model/effort policy: read `instructions/model-selection.md` "Harness seats",

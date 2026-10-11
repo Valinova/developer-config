@@ -1,0 +1,7 @@
+interface:
+  display_name: "Clearcut Review"
+  short_description: "Review a branch, range, or recent window and make clear-cut fixes"
+  default_prompt: "Use $clearcut-review to review this branch (or a stated commit range or recent window) and make clear-cut fixes."
+
+policy:
+  allow_implicit_invocation: false

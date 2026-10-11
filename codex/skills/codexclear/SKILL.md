@@ -5,8 +5,8 @@ description: Thoroughly reviews the current branch and implements clear fixes, o
 
 # Codex Clear
 
-Follow `codex-branch-review`
-(`~/Development/developer-config/codex/skills/codex-branch-review/SKILL.md`)
+Follow `clearcut-review`
+(`~/Development/developer-config/always/skills/clearcut-review/SKILL.md`)
 at its default scope, the current branch. One difference: defer every nuanced
 decision instead of escalating, and after the clear work is complete, report
 those that genuinely require discussion.
