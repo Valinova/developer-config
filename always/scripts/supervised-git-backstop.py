@@ -17,7 +17,8 @@ Two tiers, because they answer different questions:
 
 Deliberately NOT covered (trimmed 2026-07-28): checkout / switch / worktree
 add / pull / merge / rebase / cherry-pick / reset / commit --amend /
-branch -d / -m, and plain push. All are reflog-recoverable or already on
+branch -d / -m, plain push, and recursive rm (agent judgement over the
+exact `rm -rf <root>` settings deny floor). All are recoverable or already on
 the `permissions.deny` floor, and all are things the user routinely directs —
 prompting on them taxed directed work without protecting anything. The
 governing rule is git-operations.md: explicit direction IS the approval,
@@ -31,13 +32,7 @@ acceptable for a backstop.
 
 import json
 import re
-import shlex
 import sys
-import tempfile
-from pathlib import Path
-
-# Temp roots where recursive rm is routine (scratchpads, /tmp, macOS TMPDIR).
-SCRATCH_ROOTS = tuple(Path(root).resolve() for root in ("/tmp", "/private/tmp", tempfile.gettempdir()))
 
 SEGMENT_SPLIT = re.compile(r"[;&|]|\n")
 
@@ -137,42 +132,6 @@ def forced_push(command: str) -> bool:
     return False
 
 
-RM_AT_COMMAND_POSITION = re.compile(CMD_POSITION + r"rm\s")
-
-
-def recursive_rm_outside_scratch(command: str) -> bool:
-    for segment in SEGMENT_SPLIT.split(command):
-        match = RM_AT_COMMAND_POSITION.search(segment)
-        if not match:
-            continue
-        try:
-            args = shlex.split(segment[match.end():])
-        except ValueError:
-            return True  # Unresolved shell syntax cannot prove a scratch removal.
-        separator = args.index("--") if "--" in args else len(args)
-        options = args[:separator]
-        flags = [a for a in options if a.startswith("-")]
-        if not any(f == "--recursive" or re.fullmatch(r"-[a-zA-Z]*[rR][a-zA-Z]*", f) for f in flags):
-            continue
-        paths = [a for a in options if not a.startswith("-")] + args[separator + 1:]
-        # Resolve traversal and symlinks before granting the temp exemption.
-        if not paths:
-            return True
-        for path in paths:
-            if not Path(path).is_absolute() or re.search(r"[\*?\[\]{}$`<>]", path):
-                return True
-            try:
-                try:
-                    resolved = Path(path).resolve(strict=True)
-                except FileNotFoundError:
-                    resolved = Path(path).resolve()
-            except (OSError, RuntimeError):
-                return True  # A symlink loop or inaccessible path is not proven safe.
-            if not any(root in resolved.parents for root in SCRATCH_ROOTS):
-                return True
-    return False
-
-
 def main() -> None:
     data = json.load(sys.stdin)
     tool_name, permission_mode, tool_input, grok = envelope(data)
@@ -201,9 +160,6 @@ def main() -> None:
         for matcher, reason in ASK_MATCHERS:
             if matcher.search(segment):
                 respond("ask", reason, grok=grok)
-
-    if recursive_rm_outside_scratch(command):
-        respond("ask", "recursive rm outside /tmp and the scratchpad", grok=grok)
 
     sys.exit(0)
 

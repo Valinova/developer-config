@@ -1,25 +1,15 @@
 import assert from "node:assert/strict";
-import { tmpdir } from "node:os";
+import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
 import installGuard, { analyze } from "../extensions/destructive-guard";
 
-const tempTarget = join(tmpdir(), "pi-owned-verification");
-
-assert.equal(analyze(`rm -rf ${tempTarget}`).length, 0, "simple recursive temp removal should pass");
-assert.equal(
-	analyze(`rm --recursive --force ${tempTarget}`).length,
-	0,
-	"long-form recursive temp removal should pass",
-);
-
-assert.equal(analyze(`rm -rf ${tmpdir()}`).length, 1, "temp root itself must stay guarded");
-assert.equal(analyze(`rm -rf ${tmpdir()}/*`).length, 1, "temp globs must stay guarded");
-assert.equal(analyze("rm -rf $TMPDIR/example").length, 1, "unresolved variables must stay guarded");
-assert.equal(analyze(`rm -rf ${tempTarget} /srv/example`).length, 1, "mixed targets must stay guarded");
-assert.equal(analyze(`rm -rf ${tempTarget} -- -real-directory`).length, 1, "dash-prefixed targets after -- must stay guarded");
-assert.equal(analyze(`sudo rm -rf ${tempTarget}`).length, 1, "privileged temp removal must stay guarded");
-assert.equal(analyze("rm -rf /srv/example").length, 1, "non-temp removal must stay guarded");
-assert.equal(analyze(`rm -rf ${tempTarget}/../other`).length, 1, "parent traversal must stay guarded");
+for (const target of ["/", "/*", "~", "~/*", "$HOME", "$HOME/*", "..", "../*", homedir(), `${homedir()}/`]) {
+	assert.equal(analyze(`rm -rf ${target}`).length, 1, `rm -rf ${target} must stay guarded`);
+}
+assert.equal(analyze(`sudo rm -rf ${join(tmpdir(), "x")}`).length, 1, "privileged removal must stay guarded");
+for (const command of ["rm -rf /srv/example", "rm -rf ./dist", "rm -rf /tmp/x", "find . -delete"]) {
+	assert.equal(analyze(command).length, 0, `${command} is left to judgement`);
+}
 
 for (const command of ["git push --force", "git push -vf", "git push origin +main:main", "git -C /repo push -f"]) {
 	assert.equal(analyze(command)[0]?.deny, true, `${command} must be denied in every mode`);
@@ -50,4 +40,4 @@ for (const [command, mode, approved, blocked, expectedPrompts] of [
 	assert.equal(Boolean(result && typeof result === "object" && "block" in result && result.block), blocked, `${mode}: ${command}`);
 	assert.equal(prompts, expectedPrompts, `${mode}: approval prompts for ${command}`);
 }
-console.log("destructive guard: temp exemptions, force-push policy, and approval paths passed");
+console.log("destructive guard: catastrophic rm floor, force-push policy, and approval paths passed");

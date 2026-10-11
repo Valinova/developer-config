@@ -2,8 +2,8 @@
  * destructive-guard.ts — mechanical backstop for UNRECOVERABLE operations (Pi).
  *
  * Scope is deliberately narrow: only operations whose damage cannot be undone.
- *   - rm with recursive/force flags outside the OS temp root, sudo rm in any
- *     form, find -delete
+ *   - recursive/forced rm of a root (/, ~, $HOME, .., their /* forms, the
+ *     home path), sudo rm in any form
  *   - git reset --hard          (destroys uncommitted work)
  *   - git clean -f              (deletes untracked files)
  *   - git push --force / -f / --force-with-lease / --force-if-includes
@@ -18,14 +18,11 @@
  *
  * Deliberately NOT guarded (recoverable, or governed by principles.md §7
  * doctrine instead of mechanics):
- *   plain `rm <file>` (tracked files restore via git), rmdir,
+ *   any other rm or find -delete (tracked files restore via git; the agent
+ *   asks before removing what git can't restore), rmdir,
  *   git reset --soft/--mixed, git clean -n, rebase / checkout / restore
  *   (their approval requirement remains in principles.md §7),
  *   normal git push, git branch -D (reflog).
- *
- * Simple absolute rm targets strictly inside os.tmpdir() are exempt because
- * their contents are disposable. The temp root itself, shell expansions,
- * mixed target sets, and paths resolving outside it still prompt.
  *
  * Detection is heuristic: commands are split on shell operators and the first
  * command token of each segment is classified. Quoted text mentioning e.g.
@@ -33,54 +30,13 @@
  * mode; a missed real command is not.
  */
 
-import { existsSync, realpathSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { dirname, isAbsolute, relative, resolve, sep } from "node:path";
+import { homedir } from "node:os";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
 type Hit = { rule: string; why: string; deny?: true };
 
 const basename = (t: string) => t.split("/").pop() ?? t;
-const TEMP_ROOT = realpathSync(tmpdir());
-const SHELL_SYNTAX = /[\s*?\[\]{}$`'"\\<>|;&()]/;
-
-function isInside(path: string, root: string): boolean {
-	const fromRoot = relative(root, path);
-	return fromRoot !== "" && fromRoot !== ".." && !fromRoot.startsWith(`..${sep}`) && !isAbsolute(fromRoot);
-}
-
-function nearestExistingAncestor(path: string): string {
-	let candidate = path;
-	while (!existsSync(candidate)) {
-		const parent = dirname(candidate);
-		if (parent === candidate) return candidate;
-		candidate = parent;
-	}
-	return candidate;
-}
-
-function isSafeTempTarget(target: string): boolean {
-	if (!isAbsolute(target) || SHELL_SYNTAX.test(target) || target.split(/[\\/]/).includes("..")) return false;
-
-	const resolved = resolve(target);
-	if (!isInside(resolved, resolve(tmpdir()))) return false;
-
-	const existingAncestor = nearestExistingAncestor(resolved);
-	try {
-		const realAncestor = realpathSync(existingAncestor);
-		return realAncestor === TEMP_ROOT || isInside(realAncestor, TEMP_ROOT);
-	} catch {
-		return false;
-	}
-}
-
-function onlySafeTempTargets(args: string[]): boolean {
-	const separator = args.indexOf("--");
-	const targets = separator === -1
-		? args.filter((arg) => !arg.startsWith("-"))
-		: [...args.slice(0, separator).filter((arg) => !arg.startsWith("-")), ...args.slice(separator + 1)];
-	return targets.length > 0 && targets.every(isSafeTempTarget);
-}
+const CATASTROPHIC_TARGETS = new Set(["/", "/*", "~", "~/*", "$HOME", "$HOME/*", "..", "../*", homedir(), `${homedir()}/`]);
 
 export function analyze(command: string): Hit[] {
 	const hits: Hit[] = [];
@@ -121,16 +77,9 @@ export function analyze(command: string): Hit[] {
 			const flags = rest.filter((x) => x.startsWith("-"));
 			const recursive = flags.some((f) => /^--recursive$/.test(f) || /^-[a-zA-Z]*[rR]/.test(f));
 			const force = flags.some((f) => /^--force$/.test(f) || /^-[a-zA-Z]*f/.test(f));
-			const safeTempRemoval = !sudo && (recursive || force) && onlySafeTempTargets(rest);
 			if (sudo) hits.push({ rule: "sudo rm", why: "privileged delete — can destroy anything, unrecoverable" });
-			else if (safeTempRemoval) continue;
-			else if (recursive) hits.push({ rule: "recursive rm", why: "deletes entire trees, unrecoverable" });
-			else if (force) hits.push({ rule: "forced rm", why: "forced delete — unrecoverable for untracked files" });
-			continue;
-		}
-
-		if (cmd === "find") {
-			if (rest.includes("-delete")) hits.push({ rule: "find -delete", why: "bulk delete, unrecoverable" });
+			else if ((recursive || force) && rest.some((x) => CATASTROPHIC_TARGETS.has(x)))
+				hits.push({ rule: "rm of a root", why: "deletes the filesystem, home or parent directory, unrecoverable" });
 			continue;
 		}
 

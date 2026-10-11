@@ -4,7 +4,6 @@ import json
 import pathlib
 import subprocess
 import sys
-import tempfile
 
 HOOK = str(pathlib.Path(__file__).with_name("supervised-git-backstop.py"))
 
@@ -20,14 +19,7 @@ CASES = [
     ("bypassPermissions", "git -C /repo push --force origin main", "deny"),
     ("bypassPermissions", "git -c core.quotePath=false push -vf origin main", "deny"),
     ("acceptEdits", "git -C /repo restore src/a.ts", "ask"),
-    ("acceptEdits", "/bin/rm -rf /srv/example", "ask"),
-    ("acceptEdits", "rm -R /srv/example", "ask"),
-    ("acceptEdits", "rm -rf /tmp/../srv/example", "ask"),
-    ("acceptEdits", "rm -rf /tmp/*", "ask"),
-    ("acceptEdits", "rm -rf /tmp/claude-probe -- -real-directory", "ask"),
     ("acceptEdits", "git clean --force", "ask"),
-    ("acceptEdits", "rm -rf /tmp/", "ask"),
-    ("acceptEdits", "/bin/rm -rf /tmp/claude-probe", "allow"),
     ("acceptEdits", "git -C /repo push --force-with-lease origin feat", "allow"),
     # --- the sanctioned form and normal pushes must pass ---
     ("bypassPermissions", "git push --force-with-lease origin feat", "allow"),
@@ -45,16 +37,8 @@ CASES = [
     ("acceptEdits", "git checkout -- src/a.ts", "ask"),
     ("acceptEdits", "git clean -fx", "ask"),
     ("acceptEdits", "git worktree remove ../wt", "ask"),
-    ("acceptEdits", "rm -rf /srv/example/Development/foo", "ask"),
-    ("acceptEdits", "rm -rf $TARGET", "ask"),
-    ("acceptEdits", "rm -r ../build", "ask"),
-    # --- scratch roots exempt (the false positive we measured) ---
-    ("acceptEdits", "rm -rf /tmp/claude-probe", "allow"),
-    ("acceptEdits", "rm -rf /private/tmp/claude-1000/x", "allow"),
-    ("acceptEdits", "rm -f /tmp/thing", "allow"),  # not recursive
     # --- ask tier is inert in bypass ---
     ("bypassPermissions", "git stash", "allow"),
-    ("bypassPermissions", "rm -rf /srv/example/Development/foo", "allow"),
     # --- trimmed 2026-07-28: must be silent now ---
     ("acceptEdits", "git checkout main", "allow"),
     ("acceptEdits", "git switch -c feat/x", "allow"),
@@ -128,17 +112,6 @@ got = run_grok("acceptEdits", "git stash", tool="read_file")
 ok = got == "allow"
 failures += not ok
 print(f"{'ok  ' if ok else 'FAIL'} [grok non-shell tool ignored] → {got} (want allow)")
-
-with tempfile.TemporaryDirectory() as directory:
-    outside = pathlib.Path(directory) / "outside"
-    outside.symlink_to(pathlib.Path.home(), target_is_directory=True)
-    loop = pathlib.Path(directory) / "loop"
-    loop.symlink_to(loop)
-    for target in (outside / "example", loop / "example"):
-        got = run("acceptEdits", f"rm -rf {target}")
-        ok = got == "ask"
-        failures += not ok
-        print(f"{'ok  ' if ok else 'FAIL'} [scratch symlink escape/loop] → {got} (want ask)")
 
 print(f"\n{failures} failure(s)")
 sys.exit(1 if failures else 0)
