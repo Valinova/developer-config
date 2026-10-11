@@ -31,7 +31,7 @@ in `always/settings.json`, not a Codex hook. Its docstring and
 | Tier | Covers | Rule |
 |---|---|---|
 | **Deny** — every mode, including bypass | Bare force-push (`--force-with-lease` passes). The `permissions.deny` list beside it holds only the unrecoverable — `rm -rf` of a root, force-push or `push --delete` of the default branch — never reflog-recoverable ops. | Blocked outright. |
-| **Directed** | `git stash`, `git restore`, `git checkout -- <path>`, `git clean -f`, `git worktree remove`, recursive `rm` outside temp roots — when I named it. | Done: answer the hook's prompt (it asks only in supervised modes) and move on. |
+| **Directed** | `git stash`, `git restore`, `git checkout -- <path>`, `git clean -f`, `git worktree remove` — when I named it. | Done: answer the hook's prompt (it asks only in supervised modes) and move on. |
 | **Undirected** | The same family when I did **not** name it. | Otherwise ask first and name the recovery path — in every mode, especially bypass, where the ask tier is inert; approved-task exceptions are defined under 'Updating a branch'. |
 
 ## Commits

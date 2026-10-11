@@ -112,7 +112,7 @@ for mechanical work, so either is fine when named.)
 Differences from Codex that change the brief:
 
 - **Pi is NOT sandboxed.** The same no-git-writes Sandbox note, `CHANGED_FILES` report, and post-run provenance checks apply; git centralization is policy, not mechanics.
-- The vendored `destructive-guard` extension (`pi/extensions/destructive-guard.ts`) hard-blocks unrecoverable ops (`rm -rf`, `sudo rm`, `find -delete`, `git reset --hard`, `git clean -f`, force pushes) in non-interactive `pi -p` mode — a blocked command in the log means pi tried one; treat it as a brief-compliance finding, not a wrapper bug.
+- The vendored `destructive-guard` extension (`pi/extensions/destructive-guard.ts`) hard-blocks unrecoverable ops (`rm -rf` of a root, `sudo rm`, `git reset --hard`, `git clean -f`, force pushes) in non-interactive `pi -p` mode — a blocked command in the log means pi tried one; treat it as a brief-compliance finding, not a wrapper bug.
 - The vendored `bash-timeout-guard` extension (`pi/extensions/bash-timeout-guard.ts`) caps bash timeouts so hung commands cannot block forever.
 - All other brief sections (Scope, Allowlist, Do NOT, Success criteria, final SUMMARY block) and post-run discipline apply unchanged.
 - This covers *delegated* pi runs dispatched by an orchestrator. Direct interactive pi use (the user driving the TUI) is out of scope for these rules.

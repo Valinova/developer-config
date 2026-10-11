@@ -82,7 +82,7 @@ A failure is visible and recorded. (why: rationale.md#fail-loud)
 
 - Validate only at real boundaries (user input, external APIs). On failure, throw a loud, typed error rather than catch and continue. Inside a pipeline, record the failed state where its owner shows it and release what it holds. No fallback unless the scenario genuinely warrants it; when in doubt, ask.
 - **Selection and coverage follow domain boundaries** (time window, watermark, dependency state, all matching records), never arbitrary item/pass/time quotas. A numeric ceiling is only an explicitly labeled runaway/cost circuit breaker; when it trips, stop loudly and keep prior work — never truncate silently or call partial work complete.
-- Destructive operations on real data (migrations, bulk `DELETE`/`UPDATE`, overwriting files outside the repo): when in any doubt, ask me and validate before running.
+- Destructive operations on real data (migrations, bulk `DELETE`/`UPDATE`, overwriting files outside the repo): when in any doubt, ask me and validate before running. Removing committed, tracked files is recoverable — use judgement; ask before removing what git can't restore (untracked or uncommitted work, paths outside a repo).
 
 ## 7. Branch, worktree & commit management
 

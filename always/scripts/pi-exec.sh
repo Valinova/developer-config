@@ -9,7 +9,7 @@
 #     mechanics) keeps git centralized: briefs must instruct pi to make NO
 #     git writes at all (no add, no commit); the invoking orchestrator
 #     stages and commits. The vendored destructive-guard extension
-#     hard-blocks only unrecoverable ops (rm -rf, reset --hard, clean -f,
+#     hard-blocks only unrecoverable ops (rm -rf of a root, reset --hard, clean -f,
 #     force push) in non-interactive mode. bash-timeout-guard caps hung
 #     bash timeouts so they cannot block forever.
 #   - pi emits its session id on the FIRST event line
