@@ -1,7 +1,8 @@
 {
   "browser": {
-    "headless": true,
+    "isolated": true,
     "launchOptions": {
+      "headless": true,
       "args": ["--password-store=basic"]
     }
   }

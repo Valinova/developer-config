@@ -5,7 +5,7 @@
       "command": "bash",
       "args": [
         "-c",
-        "exec npx @playwright/mcp@latest --config \"${PLAYWRIGHT_MCP_BROWSER_CONFIG:-$HOME/.claude/mcp/playwright-browser.json}\""
+        "exec pnpm dlx @playwright/mcp --config \"${PLAYWRIGHT_MCP_BROWSER_CONFIG:-$HOME/.claude/mcp/playwright-browser.json}\" --output-dir \"$(mktemp -d \"${TMPDIR:-/tmp}/playwright-mcp.XXXXXX\")\""
       ],
       "env": {}
     }
