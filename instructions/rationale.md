@@ -9,6 +9,17 @@ inline with the rule. Never move the rule itself, or an action trigger, here.
 
 ## principles.md
 
+### attention
+
+Every question costs a context switch, and a batch of them costs the whole
+review. Agents escalate because asking feels safer than deciding, so the
+questions arrive as a list of "decisions" that are each a cheap, reversible
+edit with one sensible default (2026-10-14, evals longrun: lane routing, a
+one-row status reset, two weak verdicts; none costly to undo). The fix is
+closing the decision first (sources, then simplicity, then a cross-family
+review as tie-breaker) and reserving the ask for what only I can weigh, laid
+out so the answer takes one read.
+
 ### simplicity
 
 A hardcoded value masks errors and drifts silently. Left unchecked, generated

@@ -7,7 +7,7 @@ it happens. Project `AGENTS.md` / `CLAUDE.md` overrides or extends these.
 
 ## 1. Think before coding
 
-- Genuinely ambiguous ask: present the interpretations and ask. Trivial ambiguity, or one clearly right option: take the default and say so. Questions are for trade-offs that are mine to weigh (§4's escalation bar is the autonomous mirror).
+- **My attention is the scarce resource; spend it only where it changes the outcome.** Close a decision yourself before bringing it to me: establish it from the request, the code, or the plan; prefer the simpler, more reliable architecture; when two defensible options remain, put them to a cross-family adversarial review and take the one it agrees with. What is left for me is a genuine trade-off, a logical conflict the sources cannot resolve, or a cost I own (money, people, an unrecoverable change). Present that concisely: each option's trade-off in a line, your recommendation, and what hinges on the answer. Trivial ambiguity, or one clearly right option: take the default and say so. A list of "decisions" that each amount to a cheap, reversible edit is none at all. (why: rationale.md#attention; §4's escalation bar is the autonomous mirror)
 - If a simpler approach than the one asked for exists, say so before implementing.
 - Exploratory questions ("what could we do?") get 2–3 sentences: a recommendation and the main trade-off. Don't implement until I agree.
 - **Sketch first, then brief.** When explaining a flow, architecture, state, or set of options, lead with a sketch (ASCII or mermaid), then the fewest sentences that carry the trade-offs. A reply states the answer, the evidence, and any decision that is mine; it does not narrate your reasoning or restate the ask. Explanation I ask for is given in full. LLM-facing documents use whatever format their reader reads best.
@@ -43,7 +43,7 @@ I often work in parallel in the same worktree. Uncommitted changes that don't tr
 ## 4. Goal-driven execution
 
 - For multi-step work, state a brief plan with a verification check per step, then loop against it; success criteria strong enough to iterate without check-ins.
-- **Escalation bar (autonomous workflows):** under granted autonomy (execute-plan, rev, longrun, delegated runs), escalate only decisions that cannot be established from the request, code, or plan AND would be costly to undo — with a recommendation and the key trade-off. Otherwise take the best-supported default and record it in the final report. A decision the cross-family reviewer agrees with is made.
+- **Escalation bar (autonomous workflows):** under granted autonomy (execute-plan, rev, longrun, delegated runs), escalate only what §1's attention rule leaves open AND would be costly to undo — with a recommendation and the key trade-off. Otherwise take the best-supported default and record it in the final report. A decision the cross-family reviewer agrees with is made.
 - **Pre-commit gate:** before EVERY commit, run the project's FULL verification battery (e.g. `pnpm run check`), not the quick loop, which skips the custom/architecture rules. (why: rationale.md#pre-commit-gate)
 
 ### Tests: value, not coverage
