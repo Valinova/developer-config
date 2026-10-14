@@ -6,7 +6,7 @@
 //
 // Contract:
 //   - Playwright comes from the machine's global pnpm install
-//     (`pnpm add -g playwright@<pin> && playwright install chromium`, SETUP.md).
+//     (`pnpm add -g playwright && playwright install chromium`, SETUP.md).
 //     No repo ever adds it as a dependency for walks.
 //   - Every artifact of a walk (profile, screenshots, logs, scripts) lives in one
 //     dir outside any repo: `dir` (e.g. the session scratchpad), else $WALK_DIR,

@@ -29,7 +29,9 @@ The repo is cloned at `~/Development/developer-config` on every machine
 | `~/.claude/mcp/playwright.json` | symlink | `always/mcp/playwright.json` (on-demand MCP server definition — see "MCP servers load on demand") |
 | `~/.claude/mcp/playwright-browser.json` | symlink | `always/mcp/playwright-browser.json` (headless Chromium options, the default) |
 | `~/.claude/mcp/playwright-browser-headed.json` | symlink | `always/mcp/playwright-browser-headed.json` (headed variant, selected per session via `PLAYWRIGHT_MCP_BROWSER_CONFIG`) |
-| global `playwright` (`pnpm add -g playwright@1.62.1 && playwright install chromium`) | install | scripted browser walks import it through `always/scripts/lib/playwright-walk.mjs` (headless, artifacts outside the repo); the MCP rows above are the separate per-session server |
+| `~/.config/pnpm/config.yaml` | merge | `minimumReleaseAge: 2880` (48 h); every unpinned `pnpm add -g` / `pnpm dlx` below then takes the newest version at least that old; preserve every unrelated key |
+| global `playwright` (`pnpm add -g playwright && playwright install chromium`) | install | imported by `always/scripts/lib/playwright-walk.mjs`, which launches the bundled Chromium |
+| global `agent-browser` (`pnpm add -g agent-browser`) | install | drives the system Google Chrome, so skip `agent-browser install` where Chrome exists (`agent-browser doctor` checks) |
 | shell rc (`~/.bashrc` / `~/.zshrc`) | merge | `alias claude-pw='claude --mcp-config ~/.claude/mcp/playwright.json'` and `alias claude-pw-headed='PLAYWRIGHT_MCP_BROWSER_CONFIG=~/.claude/mcp/playwright-browser-headed.json claude --mcp-config ~/.claude/mcp/playwright.json'`; preserve everything else |
 | `~/.pi/agent/settings.json` | symlink | `pi/settings.json` |
 | `~/.pi/agent/subagents.json` | symlink | `pi/subagents.json` (Tintin defaults disabled) |
@@ -253,13 +255,6 @@ tool schemas defer only the schema text, never the process. A server that
 spawns its own child processes (Playwright launches a Chromium) multiplies by the number of open
 sessions (why: rationale.md#mcp-on-demand).
 
-Scripted walks (any harness's agent driving the app from short Node scripts) do
-not use the MCP server at all: they import the machine's global `playwright`
-through `always/scripts/lib/playwright-walk.mjs` by its repo path, run headless
-unless the user asked to watch, and keep every artifact in one dir outside the
-repo (the session scratchpad when passed, else `/tmp/walk-<task>/`). That keeps
-walks off every repo's dependency tree and off the session's MCP process list.
-
 The rule, for every MCP server on every machine:
 
 1. **Nothing heavy at user scope.** User scope is for servers that are cheap
@@ -277,18 +272,16 @@ The rule, for every MCP server on every machine:
    session; if it is heavy, it belongs in rule 2 instead.
 4. **Plugins that bundle an MCP server are enabled only where their server is
    wanted**; an enabled plugin autostarts its server like user scope does.
-5. **One browser walk per machine at a time**, and it runs headless
-   (`always/mcp/playwright-browser.json`). A headed window is a deliberate
-   per-session choice for a human to watch: start the session with
-   `claude-pw-headed`, which points `PLAYWRIGHT_MCP_BROWSER_CONFIG` at the
-   headed options file. The server reads its options once at startup, so a
-   running session cannot switch between headed and headless.
+5. **The Playwright MCP runs headless in an isolated profile**
+   (`always/mcp/playwright-browser.json`), set through `browser.isolated` and
+   `browser.launchOptions.headless`; a bare `browser.headless` key is ignored.
+   `claude-pw-headed` points `PLAYWRIGHT_MCP_BROWSER_CONFIG` at the headed
+   file; the server reads it once at startup. Each server gets its own
+   `mktemp` output dir.
 
 To bring a machine onto this: `claude mcp remove playwright -s user` if the
-entry exists, create the three symlinks from the table, add the alias, and open
-one `claude-pw` session so the MCP downloads its Chromium into
-`~/.cache/ms-playwright`. Zed's Claude agent takes the same
-`--mcp-config ~/.claude/mcp/playwright.json` in its launch args on machines
+entry exists, create the three symlinks from the table, and add the alias.
+Zed's Claude agent takes the same `--mcp-config ~/.claude/mcp/playwright.json` in its launch args on machines
 where a browser from Zed is wanted; that setting is machine-local.
 `always/scripts/reap-orphan-mcp.sh` reaps orphaned Playwright MCP servers older than two hours; Codex workers are excluded.
 It runs from the user crontab every 15 minutes; on a new machine add this line with `crontab -e`:
@@ -463,11 +456,6 @@ Verification item above.
 
 ## Judgment-required extras
 
-- `packages/` — opt-in skill/agent bundles; ask which to install, then wire each
-  into the directory matching what it ships (the only one today,
-  `browser-walker`, declares an agent, so it belongs in `~/.claude/agents/`, not
-  `~/.claude/skills/`). Skip anything an official marketplace plugin now
-  covers — install the plugin instead of vendoring a stale copy.
 - Repo permission grants are machine-local (`<repo>/.claude/settings.local.json`,
   re-created on demand); the root-level settings are canonical and permissive.
 - `~/.claude-local/` — personal overlay, gitignored, layered on top if present.

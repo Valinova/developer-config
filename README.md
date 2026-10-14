@@ -51,7 +51,6 @@ grok/             model-defaults.md (Grok Build card); skills/: stubs over workf
 pi/               model-defaults.md (Pi card), settings, subagents, role agents,
                   extensions + tests; skills/: stubs over workflows/ plus convex-mcp.
 hermes/           model-defaults.md; skills/: the /longrun family stubs; scripts/.
-packages/         Opt-in bundles (browser-walker agent); see SETUP.md.
 coderabbit/       Canonical CodeRabbit path-instruction snippets, copied per repo.
 ```
 

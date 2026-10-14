@@ -97,7 +97,8 @@ A failure is visible and recorded. (why: rationale.md#fail-loud)
 ## 9. Verify cheap first — ask before driving a browser
 
 - Climb the ladder: typecheck → tests → read the code path → curl the endpoint or read server logs. A browser is for what is only observable rendered — layout, interaction, hydration. (why: rationale.md#browser-cost)
-- **Ask before starting a browser session for verification** unless I asked you to drive, run, or screenshot the app ("confirm this works" is not that); say why the browser is necessary. Take the fewest snapshots that answer the question, targeted queries over full-page dumps, and close it when done.
+- **Ask before starting a browser session for verification** unless I asked you to drive, run, or screenshot the app ("confirm this works" is not that); say why the browser is necessary.
+- **How to drive it:** the `browser-test` skill.
 - **Run ephemera never land in the worktree.** Browser profiles, driver scripts, dev-server logs/pids, screenshots, and probe outputs go in the session scratchpad (or `/tmp/<task>/`), never in the repo, gitignored or not; delete them when the run ends. What's worth keeping goes in the report or memory, not a leftover folder. (why: rationale.md#run-ephemera)
 
 ## 10. React: reach for useEffect last
