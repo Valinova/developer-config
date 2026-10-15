@@ -22,6 +22,8 @@ A repo that already has a scripted E2E suite keeps it; a suite that nothing
 runs (neither `check` nor CI) is decoration. Adding an E2E framework to a repo
 is a dependency decision — ask first.
 
+Tests belong to a type-checked, linted project, and the repo's gate (`check`) runs it.
+
 ## Authoring gate
 
 Before adding or changing a test, answer all five; a missing answer means don't
