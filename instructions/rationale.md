@@ -78,6 +78,12 @@ observed in production days later.
 Doing work "just to do stuff" burns tokens and review attention. Idle-pass
 output is worse than no output.
 
+### issue-bar
+
+The 2026-10-16 comment audit filed 34 issues; triage found 7 reachable by a
+user and took two hours. The verification that sorted them (one Opus pass
+reading code) is cheap enough to be the filing step.
+
 ### browser-cost
 
 The cost of a browser session is not the tool schemas (they load on demand);

@@ -73,7 +73,9 @@ what you cannot confirm. Reading only.
   problem, every instance, blast radius, direction; security, money, and data
   first. Shims whose removal needs deployment evidence go in one issue.
   Search the tracker first; an existing issue gets a comment, not a twin.
-  Drop anything without a real blast radius.
+  Each meets the issue bar in `principles.md` §8 (reachability, bucket,
+  verified pointers, fix direction); drop anything without a real blast
+  radius.
 - **Constraint comments** ("do not remove", "talk to X first"): name the
   cheapest type, test, or lint that would enforce the constraint so the
   comment can go. It is a list-B follow-up by default; list A only when the

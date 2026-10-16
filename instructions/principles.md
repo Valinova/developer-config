@@ -79,6 +79,7 @@ A failure is visible and recorded. (why: rationale.md#fail-loud)
 
 - If 20% of the effort captures 80% of the value, that is the default scope; go further only when the foundation needs it (entropy at scale, owner consolidation, regression safety on critical paths).
 - Every proposed piece of work names its blast radius — what breaks or degrades if it isn't done. No blast radius, no work item. (why: rationale.md#idle-pass)
+- **An issue is filed after a reachability pass, and records it:** the live path or evidence (Sentry, logs, a data count) that the defect fires, or "latent" when it needs missing or malformed data; today's blast radius in one sentence; a bucket (`priority:high` wrong output or lost request today, `priority:medium` reachable and contained, `cleanup`, `someday`, `needs-decision`); pointers verified against a named SHA; fix direction and size. Latent gaps are `someday` or a standing check, never `bug`; several in one area fold into one issue. (why: rationale.md#issue-bar)
 - Size a fix to the code's remaining life: a one-shot migration, tear-down, or backfill gets the smallest shape that completes its run; permanent indexes, general contracts, and proof systems are for code that stays. A subagent's recommendation informs this sizing; it is never the plan.
 
 ## 9. Verify cheap first — ask before driving a browser
