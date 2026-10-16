@@ -28,6 +28,15 @@ Apply these lenses, in order of value:
    checks against internal guarantees → replace with loud failure or delete.
 5. **Simplify structure.** Guard clauses over nesting; inline pass-through
    indirection.
+6. **Comments the diff adds or makes stale.** Delete narration, history,
+   restated names, and references to plans, phases, or decision IDs nothing
+   in the repo defines. Fix or delete a claim the change made false. Keep the
+   why the code cannot say: an external constraint, a caller contract, an
+   ownership rule, a `simplified:` marker, a test's regression rationale.
+   Never touch suppressions, pragmas, or machine-read markers. When unsure
+   whether a comment carries a rule, keep it. A "do not remove" or "talk to
+   X first" comment: name the type, test, or lint that would enforce it and
+   escalate, unless that check is one obvious, small addition.
 
 ## Finding grammar
 
@@ -41,6 +50,7 @@ One line per finding, then its disposition (below): `<path>:<line>: <tag>: <what
 | `native:` | a dependency doing what the platform already does | name the feature |
 | `yagni:` | an abstraction with one implementation, config nobody sets, a layer with one caller — investigate; a boundary may still earn its place | the inlined form, or keep with reason |
 | `shrink:` | the same logic in fewer lines | show the shorter form |
+| `comment:` | a comment that narrates, records history, or is false | nothing, or the true one-line claim |
 
 ❌ "This deepClone helper might be more complex than necessary, have you considered…"
 ✅ `src/util/clone.ts:12-38: stdlib: 27-line recursive deepClone. structuredClone(value), same semantics for the plain-data inputs it receives.`
