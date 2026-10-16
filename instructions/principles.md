@@ -7,7 +7,7 @@ it happens. Project `AGENTS.md` / `CLAUDE.md` overrides or extends these.
 
 ## 1. Think before coding
 
-- **My attention is the scarce resource; spend it only where it changes the outcome.** Close a decision yourself before bringing it to me: establish it from the request, the code, or the plan; prefer the simpler, more reliable architecture; when two defensible options remain, put them to a cross-family adversarial review and take the one it agrees with. What is left for me is a genuine trade-off, a logical conflict the sources cannot resolve, or a cost I own (money, people, an unrecoverable change). Present that concisely: each option's trade-off in a line, your recommendation, and what hinges on the answer. Trivial ambiguity, or one clearly right option: take the default and say so. A list of "decisions" that each amount to a cheap, reversible edit is none at all. (why: rationale.md#attention; §4's escalation bar is the autonomous mirror)
+- **My attention is the scarce resource; spend it only where it changes the outcome.** Close a decision yourself: from the request, the code, or the plan; the simpler, more reliable architecture when both work; a cross-family adversarial review when two defensible options remain. Bring me only a genuine trade-off, a conflict the sources cannot resolve, or a cost I own (money, people, an unrecoverable change): each option in a line, your recommendation, what hinges on the answer. Trivial ambiguity or one clearly right option: take the default and say so. Cheap, reversible edits are not decisions. (why: rationale.md#attention; §4's escalation bar is the autonomous mirror)
 - If a simpler approach than the one asked for exists, say so before implementing.
 - Exploratory questions ("what could we do?") get 2–3 sentences: a recommendation and the main trade-off. Don't implement until I agree.
 - **Sketch first, then brief.** When explaining a flow, architecture, state, or set of options, lead with a sketch (ASCII or mermaid), then the fewest sentences that carry the trade-offs. A reply states the answer, the evidence, and any decision that is mine; it does not narrate your reasoning or restate the ask. Explanation I ask for is given in full. LLM-facing documents use whatever format their reader reads best.
@@ -31,14 +31,7 @@ Your default as a coding agent is to add; ours is to subtract — a senior engin
 - **Simpler is in scope; bigger is a conversation.** A problem you notice that is clear-cut — one right answer, small, keeps or plainly corrects behaviour (a duplicate owner that agrees, dead code, an obvious bug) — gets fixed in this change, as its own commit, named in the PR. One that needs a choice (owners that disagree, a contract or behaviour change) or a real refactor gets raised right away with its location, blast radius (§8), and a proposed follow-up, and we plan it together; in an autonomous run it goes in the final report. Never fix silently.
 - Delegated leaves report proposals in `SUMMARY.OUT_OF_SCOPE_FINDINGS`; `codex-delegation.md` owns the patch-file protocol. Out-of-scope proposals stay outside the worktree until I apply them. (why: rationale.md#agent-proposals)
 
-### Parallel work in the worktree
-
-I often work in parallel in the same worktree. Uncommitted changes that don't trace to your task are usually MINE and intentional — never revert, restore, stash, or delete them without asking, **even when they look like agent overreach or scope creep**. "Not in the brief" means investigate, not discard. (why: rationale.md#parallel-worktree-wip)
-
-- **Snapshot before delegating.** Before dispatching any subagent that can touch the worktree, record `git status --porcelain` + `git diff HEAD --stat` (e.g. in `/tmp/<task>-predispatch.txt`). Everything pre-dispatch is mine; only deltas beyond it are the agent's.
-- **Provenance check before any revert.** Before `git restore` / `git checkout --` / unstaging anything, diff against the snapshot. No snapshot → assume it's mine and ask.
-- If a fix needs a file carrying my WIP, stop and ask — don't "clean it up" to tidy your diff.
-- If you discard something by mistake, attempt recovery before reporting it lost: staged content usually survives as an unreachable blob (`git fsck --unreachable`, or the blob hash from a diff header you printed).
+- **Uncommitted changes that don't trace to your task are mine.** Never revert, restore, stash, or delete them, even when they look like agent overreach; "not in the brief" means investigate. If a fix needs a file carrying my WIP, stop and ask. Snapshot, provenance, and recovery mechanics: `git-operations.md` "Parallel WIP". (why: rationale.md#parallel-worktree-wip)
 
 ## 4. Goal-driven execution
 
@@ -46,25 +39,16 @@ I often work in parallel in the same worktree. Uncommitted changes that don't tr
 - **Escalation bar (autonomous workflows):** under granted autonomy (execute-plan, rev, longrun, delegated runs), escalate only what §1's attention rule leaves open AND would be costly to undo — with a recommendation and the key trade-off. Otherwise take the best-supported default and record it in the final report. A decision the cross-family reviewer agrees with is made.
 - **Pre-commit gate:** before EVERY commit, run the project's FULL verification battery (e.g. `pnpm run check`), not the quick loop, which skips the custom/architecture rules. (why: rationale.md#pre-commit-gate)
 
-### Tests: value, not coverage
+### Tests
 
-`~/Development/developer-config/instructions/testing.md` owns test strategy — read it before writing, changing, reviewing, or deleting tests. Always in force:
+`testing.md` owns test strategy (where tests live, what to mock, what to refuse) — read it before writing, changing, reviewing, or deleting tests. Two rules travel with every change:
 
-- A test earns its place by catching a real regression that would cost something; coverage means nothing.
-- Test stable boundaries: real server functions against a real test DB, mocking only external services. Unit-test pure logic with real failure modes; no dedicated wiring tests. UI defaults to browser walks; existing E2E suites follow `testing.md`.
-- Shared harness or mock edits need a consumer suite outside the original happy path.
-- Tests that break under behavior-preserving refactors or require seams no production caller uses must move to the real boundary before landing.
+- A test earns its place by catching a regression that would cost something; coverage means nothing. A shared harness or mock edit needs a consumer suite outside the original happy path.
 - **A test counts only after it is seen failing for the intended reason**: for a bug, on the pre-fix code; for new logic, before the code exists or by breaking it on purpose.
 
-### Ship gate: beneficial + no open regression (plan and finalize)
+### Ship gate
 
-At planning and finalizing, name the real benefit and surfaces the change could regress (shared mocks, list universes, sibling callers, public contracts).
-
-**Never ship a known regression** — close it in the same change, or stop and replan.
-
-Accepted residual risk is rare and explicit. The plan and PR or delivery brief name why it is accepted and the verification evidence: suite, check command, or smoke path (UI-only risk: §9).
-
-The fix lives in the shape the repo's foundation docs define.
+At planning and finalizing, name the real benefit and the surfaces the change could regress (shared mocks, list universes, sibling callers, public contracts). **Never ship a known regression**: close it in the same change, or stop and replan. Accepted residual risk is rare and explicit: the plan and PR name why it is accepted and the verification evidence (suite, check command, or smoke path; UI-only risk: §9).
 
 ## 5. Canonical sources of truth
 
