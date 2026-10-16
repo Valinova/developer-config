@@ -29,7 +29,9 @@ eight. Pace concurrency to the machine; finders and verifiers run no suites.
 - `rubric.md`: the standard. Copy it into the run directory, which is
   `{RUN}` in the briefs and lives in the scratchpad.
 - `briefs.md`: finder, verifier, sorter, and implementer templates.
-- `comment-only.cjs`: the JS/TS guard. For another language, build the
+- `comment-only.cjs`: the JS/TS guard. It parses with its own pinned
+  TypeScript (`pnpm install --dir` this folder once; TypeScript 7 has no JS
+  parser API). For another language, build the
   equivalent comparison on that language's parser before stage 2. With no
   guard there is no comment-only PR: the guard is what makes a PR this size
   mergeable without line review.

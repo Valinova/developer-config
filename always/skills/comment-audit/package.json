@@ -1,0 +1,8 @@
+{
+  "name": "comment-audit-guard",
+  "private": true,
+  "description": "Parser for comment-only.cjs. TypeScript 6 is the last JS build with a parser API; 7 is the Go port.",
+  "dependencies": {
+    "typescript": "6.0.3"
+  }
+}

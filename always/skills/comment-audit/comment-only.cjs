@@ -12,7 +12,19 @@ if (!repo || !base) {
   console.error("usage: node comment-only.cjs <repo> <base-rev> [head-rev]");
   process.exit(2);
 }
-const ts = require(require.resolve("typescript", { paths: [repo] }));
+// Parser: the skill's own pinned TypeScript (package.json beside this file).
+// TypeScript 7 is the Go port and ships no JS parser API, so the audited
+// repo's copy is only a fallback when it is still a JS build.
+const ts = (() => {
+  for (const paths of [[__dirname], [repo]]) {
+    try {
+      const candidate = require(require.resolve("typescript", { paths }));
+      if (typeof candidate.createSourceFile === "function") return candidate;
+    } catch {}
+  }
+  console.error(`no JS TypeScript parser found; run: pnpm install --dir ${__dirname}`);
+  process.exit(2);
+})();
 const git = (...args) =>
   execFileSync("git", ["-C", repo, ...args], {
     maxBuffer: 1 << 28,
