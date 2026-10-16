@@ -150,8 +150,8 @@ branch without asking and changed the directory under the user's feet mid-work.
 The first rule asked before every switch, which also taxed the common case
 where the user had directed a PR or a longrun and the branch was implied.
 Hence: a directed deliverable authorizes the branch it needs; any branch or
-worktree the agent chose on its own is asked for, and worktrees are never the
-agent's to create.
+worktree the agent chose on its own is asked for, and a worktree is created
+only on the user's direction.
 
 ### worktree-identity
 

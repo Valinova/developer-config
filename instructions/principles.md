@@ -7,7 +7,7 @@ it happens. Project `AGENTS.md` / `CLAUDE.md` overrides or extends these.
 
 ## 1. Think before coding
 
-- **My attention is the scarce resource; spend it only where it changes the outcome.** Close a decision yourself: from the request, the code, or the plan; the simpler, more reliable architecture when both work; a cross-family adversarial review when two defensible options remain. Bring me only a genuine trade-off, a conflict the sources cannot resolve, or a cost I own (money, people, an unrecoverable change): each option in a line, your recommendation, what hinges on the answer. Trivial ambiguity or one clearly right option: take the default and say so. Cheap, reversible edits are not decisions. (why: rationale.md#attention; §4's escalation bar is the autonomous mirror)
+- **My attention is the scarce resource; spend it only where it changes the outcome.** Close a decision yourself: from the request, the code, or the plan; the simpler, more reliable architecture when both work; when two defensible options remain, a cross-family adversarial review, taking the one it agrees with. Bring me only a genuine trade-off, a conflict the sources cannot resolve, or a cost I own (money, people, an unrecoverable change): each option's trade-off in a line, your recommendation, what hinges on the answer. Trivial ambiguity or one clearly right option: take the default and say so. Cheap, reversible edits are not decisions. (why: rationale.md#attention; §4's escalation bar is the autonomous mirror)
 - If a simpler approach than the one asked for exists, say so before implementing.
 - Exploratory questions ("what could we do?") get 2–3 sentences: a recommendation and the main trade-off. Don't implement until I agree.
 - **Sketch first, then brief.** When explaining a flow, architecture, state, or set of options, lead with a sketch (ASCII or mermaid), then the fewest sentences that carry the trade-offs. A reply states the answer, the evidence, and any decision that is mine; it does not narrate your reasoning or restate the ask. Explanation I ask for is given in full. LLM-facing documents use whatever format their reader reads best.
@@ -22,7 +22,7 @@ Your default as a coding agent is to add; ours is to subtract — a senior engin
 - **Lock shape early, build behaviour late.** In a contract (schema, API, stored record), settle now only what is both expensive to change later (names, keys, identity, edges) and needed by this change. An empty slot for a future behaviour is still surface. Test: can the next change refine this without a migration?
 - Never hardcode values unless told to; take them from config or the caller. (why: rationale.md#simplicity)
 - Fix the real type (`unknown` with guards, proper types, generics); never suppress errors with `any` or `@ts-ignore`.
-- **Model the domain in types.** Variants are a discriminated union or state machine, never booleans that must stay in sync or a bag of optional fields; every switch over them is exhaustive (`never` in the default arm). The tell you skipped it: a feature that adds one more branch to an if/else chain, or a second flag tied to the first.
+- **Model the domain in types.** Variants are a discriminated union or state machine, never booleans that must stay in sync or a bag of optional fields; every switch over them is exhaustive, checked by the compiler or linter. The tell you skipped it: a second flag that must stay in sync with the first.
 - Reduce complexity by simplifying logic, never by redistributing it. Pass-through wrappers are one example, whatever the lint score says.
 - Ask before adding a dependency; prefer ~30 lines of owned code over a small package. A package must be at least 48 hours old — verify the bun/pnpm minimum-release-age cooldown applies.
 
@@ -33,7 +33,7 @@ Your default as a coding agent is to add; ours is to subtract — a senior engin
 - **A refactor pins behaviour first and earns its keep.** Before structure moves, capture current behaviour with a characterisation test or equivalence harness; typecheck and lint are not a pin, and a one-run pin is not committed. If the diff does not lower reader load somewhere (fewer layers to trace, less state to hold), revert it.
 - Delegated leaves report proposals in `SUMMARY.OUT_OF_SCOPE_FINDINGS`; `codex-delegation.md` owns the patch-file protocol. Out-of-scope proposals stay outside the worktree until I apply them. (why: rationale.md#agent-proposals)
 
-- **Uncommitted changes that don't trace to your task are mine.** Never revert, restore, stash, or delete them, even when they look like agent overreach; "not in the brief" means investigate. If a fix needs a file carrying my WIP, stop and ask. Snapshot, provenance, and recovery mechanics: `git-operations.md` "Parallel WIP". (why: rationale.md#parallel-worktree-wip)
+- **Uncommitted changes that don't trace to your task are mine.** Never revert, restore, stash, or delete them without asking, even when they look like agent overreach; "not in the brief" means investigate. If a fix needs a file carrying my WIP, stop and ask. Snapshot, provenance, and recovery mechanics: `git-operations.md` "Parallel WIP". (why: rationale.md#parallel-worktree-wip)
 
 ## 4. Goal-driven execution
 
@@ -43,14 +43,14 @@ Your default as a coding agent is to add; ours is to subtract — a senior engin
 
 ### Tests
 
-`testing.md` owns test strategy (where tests live, what to mock, what to refuse) — read it before writing, changing, reviewing, or deleting tests. Two rules travel with every change:
+`~/Development/developer-config/instructions/testing.md` owns test strategy (where tests live, what to mock, what to refuse) — read it before writing, changing, reviewing, or deleting tests. Two rules travel with every change:
 
 - A test earns its place by catching a regression that would cost something; coverage means nothing. A shared harness or mock edit needs a consumer suite outside the original happy path.
 - **A test counts only after it is seen failing for the intended reason**: for a bug, on the pre-fix code; for new logic, before the code exists or by breaking it on purpose.
 
 ### Ship gate
 
-At planning and finalizing, name the real benefit and the surfaces the change could regress (shared mocks, list universes, sibling callers, public contracts). **Never ship a known regression**: close it in the same change, or stop and replan. Accepted residual risk is rare and explicit: the plan and PR name why it is accepted and the verification evidence (suite, check command, or smoke path; UI-only risk: §9).
+At planning and finalizing, name the real benefit and the surfaces the change could regress (shared mocks, list universes, sibling callers, public contracts). **Never ship a known regression**: close it in the same change, or stop and replan. Accepted residual risk is rare and explicit: the plan and the PR or delivery brief name why it is accepted and the verification evidence (suite, check command, or smoke path; UI-only risk: §9).
 
 ## 5. Canonical sources of truth
 
@@ -67,13 +67,13 @@ At planning and finalizing, name the real benefit and the surfaces the change co
 A failure is visible and recorded. (why: rationale.md#fail-loud)
 
 - Validate only at real boundaries (user input, external APIs). On failure, throw a loud, typed error rather than catch and continue. Inside a pipeline, record the failed state where its owner shows it and release what it holds. No fallback unless the scenario genuinely warrants it; when in doubt, ask.
-- **Mutating steps converge.** Every state-mutating operation answers "what if this runs twice, or the previous run crashed halfway?" by deriving from current state. Anything a run leaves behind (a lock, a temp file, a half-written record, a claimed job) is recognisably stale to the next run.
+- **Mutating steps converge.** Ask of every state-mutating operation: what if it runs twice, or the previous run crashed halfway? A retry of the same mutation converges, and what an interrupted run leaves behind (a lock, a temp file, a half-written record, a claimed job) is distinguishable from live work.
 - **Selection and coverage follow domain boundaries** (time window, watermark, dependency state, all matching records), never arbitrary item/pass/time quotas. A numeric ceiling is only an explicitly labeled runaway/cost circuit breaker; when it trips, stop loudly and keep prior work — never truncate silently or call partial work complete.
 - Destructive operations on real data (migrations, bulk `DELETE`/`UPDATE`, overwriting files outside the repo): when in any doubt, ask me and validate before running. Removing committed, tracked files is recoverable — use judgement; ask before removing what git can't restore (untracked or uncommitted work, paths outside a repo).
 
 ## 7. Branch, worktree & commit management
 
-`instructions/git-operations.md` owns git, branch, worktree, and commit operations (permissions, backstop hook, commit hygiene, rebase policy); `instructions/durable-worktrees.md` owns worktree layout. Read it before any git write. The invariant: **explicit direction IS the approval; anything unrecoverable requires my approval.**
+`instructions/git-operations.md` owns git, branch, worktree, and commit operations (permissions, backstop hook, commit hygiene, rebase policy); `instructions/durable-worktrees.md` owns worktree layout. Read it before any git write and before dispatching anything that can edit the worktree. The invariant: **explicit direction IS the approval; anything unrecoverable requires my approval.**
 
 ## 8. High-value bias (80/20)
 
@@ -96,12 +96,12 @@ Don't sync state with `useEffect`. Derive from state/props inline or with `useMe
 
 (why: rationale.md#entropy)
 
-- Follow the codebase's existing pattern, even when you'd do it differently. Never add a competing one: if yours is genuinely better, say so and migrate fully, or don't introduce it. If the task needs a pattern the codebase lacks, name it and ask.
+- Follow the repo's foundation docs and existing pattern, even when you'd do it differently. Never add a competing one: if yours is genuinely better, say so and migrate fully, or don't introduce it. If the task needs a pattern the codebase lacks, name it and ask.
 - Name an awkward fit your change forces (a hack, a parameter threaded through layers, a special case) in your summary.
 - A deliberate simplification with a known ceiling carries a greppable marker: `// simplified: <ceiling>. upgrade when: <observable trigger>` (in the language's comment syntax). No observable trigger, rejected at review.
 - **A tactical mitigation is labeled as one** and never replaces or claims to be the root-cause fix. If the foundation is out of scope, stop and align rather than stack knobs (batch shrinks, timeouts, page cuts) that leave the worst case broken.
 - Leave what you touch no worse: no commented-out blocks, no TODOs without an owner (§3 bounds how far cleanup reaches).
-- A comment survives only for a non-obvious *why* the code cannot show; no phase narration. A `do not remove`-style comment is a rule without an enforcer: encode it as a type, test, or lint, then delete it.
+- A comment survives only for a non-obvious *why* the code cannot show; no phase narration. A `do not remove`-style comment is a rule without an enforcer: give it the cheapest one that exists (type, test, or lint) and keep only the why.
 - A violation class that keeps recurring graduates into a standing check (lint rule, CI script); one-off findings stay findings.
 
 ## 12. UI/UX: intentional information, zero duplication
