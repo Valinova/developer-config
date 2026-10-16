@@ -147,7 +147,11 @@ wall-clock race guard: the doctrine existed, but no review step read past
 
 The user works across branches and worktrees in parallel. An agent switched
 branch without asking and changed the directory under the user's feet mid-work.
-Hence: ask first, every time, for any branch or worktree the agent chose.
+The first rule asked before every switch, which also taxed the common case
+where the user had directed a PR or a longrun and the branch was implied.
+Hence: a directed deliverable authorizes the branch it needs; any branch or
+worktree the agent chose on its own is asked for, and worktrees are never the
+agent's to create.
 
 ### worktree-identity
 

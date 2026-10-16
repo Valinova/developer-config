@@ -6,8 +6,8 @@ Owns how git, branch, worktree, and commit operations are run on every surface, 
 
 - **Explicit direction IS the approval — don't re-ask for what I already named.** A directed sequence ("stage, commit, push, then switch to X") authorizes the whole sequence: execute it end to end and report. This includes the recoverable-destructive family when I name it — `branch -D`, `reset --hard`, `stash`, `clean -f`, `worktree remove`, `checkout -- <path>` — and a directed rebase of a pushed branch authorizes the `--force-with-lease` push that completes it (SHAs change, content doesn't). An authorized delivery task or workflow also permits necessary recoverable maintenance of its approved feature branch under the checks below. Ask only when an extra operation changes the authorized target/scope, affects my parallel work, or risks unrecoverable loss.
 - **Undirected: the ask-first rules below apply.** Prefer the soft form: `reset --soft`/`--mixed` unless I said `--hard`; no stash I didn't name. When you ask, name the recovery path (reflog, `stash@{n}`, dangling blob) in the same line.
-- I manage branches myself. Only branch, switch, commit, or push when I've explicitly directed it — being on the default branch is not a reason to branch first. When a change seems commit-ready and I haven't said to commit it, ask; don't act.
-- **Branch switches and worktrees: ask first, every time.** My naming the exact branch or worktree IS the answer — the guard is against ones *you* chose. Directing implementation or a PR does **not** imply branch/worktree approval, and intent with a veto window ("say the word if…") is not approval. When work needs one I haven't named, ask **whether** to create it and wait for my reply; for a worktree, propose the path in the same ask. (why: rationale.md#branch-switches)
+- **Commit and push only when directed.** When a change seems commit-ready and I haven't said to commit it, ask; don't act.
+- **Branches follow the deliverable; worktrees are never yours to create.** A `longrun`, a PR, or a sequence of PRs I direct implies the branch each one needs: create it, name it per the next bullet, switch to it, and switch back when done. Nothing else moves the branch: no scratch branch to try an idea, no switch to look at something, no branch for a fix I did not ask for, and being on the default branch is not a reason to branch. Work happens in the worktree I'm in or the one I assign; a long-lived one follows `durable-worktrees.md`. A task that seems to need a branch or worktree outside this: ask whether, in one line. (why: rationale.md#branch-switches)
 - **Branch names are the agent's to pick, never a question.** Once a branch is authorized, name it yourself. When I've directed Linear for the task and it's available, use the ticket's branch name from Linear. Otherwise `<type>/<short-kebab-slug>` describing the change (`fix/`, `feat/`, `docs/`, `chore/`). Never a harness or model prefix (`codex/`, `claude/`, `grok/`).
 - **Remote operations: ask and verify first.** Before any push, remote URL/config change, or other remote-writing operation: state exactly what will run, confirm with me unless I directed that push (approval for one *undirected* operation does not roll forward), and verify the target (current branch, remote URL, ahead/behind vs base). Read-only remote ops (fetch, `gh pr view`) need no asking. (why: rationale.md#remote-ops)
 - **Local CodeRabbit only for complex, unreviewed code that no CodeRabbit PR will see.** Run one local pass before a push only when all three hold:
@@ -51,6 +51,14 @@ in `always/settings.json`, not a Codex hook. Its docstring and
 - Two exceptions where merge stays correct — state which one applies instead of rebasing silently:
   - The branch contains ANOTHER open PR's commits (stacked branches): rebasing rewrites that PR's history under its review. Merge, or consolidate the stack first.
   - Rewriting would orphan review anchors or in-flight CI on a branch others are actively working from.
+
+## Parallel WIP
+
+I often work in parallel in the same worktree; `principles.md` §3 states the rule (uncommitted changes that don't trace to your task are mine). The mechanics:
+
+- **Snapshot before delegating.** Before dispatching any subagent that can touch the worktree, record `git status --porcelain` + `git diff HEAD --stat` in the session scratchpad. Everything pre-dispatch is mine; only deltas beyond it are the agent's.
+- **Provenance check before any revert.** Before `git restore` / `git checkout --` / unstaging anything, diff against the snapshot. No snapshot: assume it's mine and ask.
+- If you discard something by mistake, attempt recovery before reporting it lost: staged content usually survives as an unreachable blob (`git fsck --unreachable`, or the blob hash from a diff header you printed).
 
 ## Enforcement scope: interactive vs autonomous
 
