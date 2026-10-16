@@ -22,6 +22,7 @@ Your default as a coding agent is to add; ours is to subtract — a senior engin
 - **Lock shape early, build behaviour late.** In a contract (schema, API, stored record), settle now only what is both expensive to change later (names, keys, identity, edges) and needed by this change. An empty slot for a future behaviour is still surface. Test: can the next change refine this without a migration?
 - Never hardcode values unless told to; take them from config or the caller. (why: rationale.md#simplicity)
 - Fix the real type (`unknown` with guards, proper types, generics); never suppress errors with `any` or `@ts-ignore`.
+- **Model the domain in types.** Variants are a discriminated union or state machine, never booleans that must stay in sync or a bag of optional fields; every switch over them is exhaustive (`never` in the default arm). The tell you skipped it: a feature that adds one more branch to an if/else chain, or a second flag tied to the first.
 - Reduce complexity by simplifying logic, never by redistributing it. Pass-through wrappers are one example, whatever the lint score says.
 - Ask before adding a dependency; prefer ~30 lines of owned code over a small package. A package must be at least 48 hours old — verify the bun/pnpm minimum-release-age cooldown applies.
 
@@ -29,6 +30,7 @@ Your default as a coding agent is to add; ours is to subtract — a senior engin
 
 - Every changed line traces to the task or to a clear-cut fix. No bells and whistles; don't restyle or rework adjacent code. Remove orphans your change created; delete removed code outright — no renames, re-exports, or shims.
 - **Simpler is in scope; bigger is a conversation.** A problem you notice that is clear-cut — one right answer, small, keeps or plainly corrects behaviour (a duplicate owner that agrees, dead code, an obvious bug) — gets fixed in this change, as its own commit, named in the PR. One that needs a choice (owners that disagree, a contract or behaviour change) or a real refactor gets raised right away with its location, blast radius (§8), and a proposed follow-up, and we plan it together; in an autonomous run it goes in the final report. Never fix silently.
+- **A refactor pins behaviour first and earns its keep.** Before structure moves, capture current behaviour with a characterisation test or equivalence harness; typecheck and lint are not a pin, and a one-run pin is not committed. If the diff does not lower reader load somewhere (fewer layers to trace, less state to hold), revert it.
 - Delegated leaves report proposals in `SUMMARY.OUT_OF_SCOPE_FINDINGS`; `codex-delegation.md` owns the patch-file protocol. Out-of-scope proposals stay outside the worktree until I apply them. (why: rationale.md#agent-proposals)
 
 - **Uncommitted changes that don't trace to your task are mine.** Never revert, restore, stash, or delete them, even when they look like agent overreach; "not in the brief" means investigate. If a fix needs a file carrying my WIP, stop and ask. Snapshot, provenance, and recovery mechanics: `git-operations.md` "Parallel WIP". (why: rationale.md#parallel-worktree-wip)
@@ -52,19 +54,20 @@ At planning and finalizing, name the real benefit and the surfaces the change co
 
 ## 5. Canonical sources of truth
 
-- An owner is the one place that *decides* a fact, rule, or mechanism (business rule, constant, derived value, type, mutable fact). Everything else derives from or references it. Find the owner before writing logic; create one if none exists, documenting only ownership decisions the code cannot make clear. Never create a second, and never reconcile two by adding a third.
+- An owner is the one place that *decides* a fact, rule, or mechanism (business rule, constant, derived value, type, mutable fact). Everything else derives from or references it. Find the owner before writing logic; create one if none exists, documenting only ownership decisions the code cannot make clear. Never create a second, and never reconcile two by adding a third. The next contributor is an agent that sees only the files it opened and copies the nearest example, so prefer the design where the locally right edit is globally right: derive hand-synced lists from one source or fail the build when they disagree, and make module internals unimportable.
 - Not a second owner — one bullet per case, add new ones here:
   - A mechanical derivative (cache, projection, generated type, denormalized column) generated from the owner; stored copies are rebuilt or automatically checked for drift.
   - A transition with a named authoritative owner for each phase and a deadline for deleting the old implementation.
   - Similar code. Look-alike modules share an owner only when they share a rule that must change together; abstract for that, not for resemblance.
   - Client validation mirroring the server's, when both derive from the same schema.
-- A bug fix is the root cause. Before changing a shared owner, inspect every caller and verify affected sibling paths. Fix where the violated invariant belongs, not only on the ticket's path.
+- **A bug fix is the root cause.** Ask whether the state that triggered the symptom is legitimate. If it may occur, handling it where it broke is the fix; if it should never exist, a guard there hides the bug, so find what produced it (guards, retries, swallowed errors, and clamped values are the usual masks). When two fixes sharing one belief have failed the same gate, write the belief down and test it before a third. Before changing a shared owner, inspect every caller and verify affected sibling paths. Fix where the violated invariant belongs, not only on the ticket's path.
 
 ## 6. Fail loud, not silently
 
 A failure is visible and recorded. (why: rationale.md#fail-loud)
 
 - Validate only at real boundaries (user input, external APIs). On failure, throw a loud, typed error rather than catch and continue. Inside a pipeline, record the failed state where its owner shows it and release what it holds. No fallback unless the scenario genuinely warrants it; when in doubt, ask.
+- **Mutating steps converge.** Every state-mutating operation answers "what if this runs twice, or the previous run crashed halfway?" by deriving from current state. Anything a run leaves behind (a lock, a temp file, a half-written record, a claimed job) is recognisably stale to the next run.
 - **Selection and coverage follow domain boundaries** (time window, watermark, dependency state, all matching records), never arbitrary item/pass/time quotas. A numeric ceiling is only an explicitly labeled runaway/cost circuit breaker; when it trips, stop loudly and keep prior work — never truncate silently or call partial work complete.
 - Destructive operations on real data (migrations, bulk `DELETE`/`UPDATE`, overwriting files outside the repo): when in any doubt, ask me and validate before running. Removing committed, tracked files is recoverable — use judgement; ask before removing what git can't restore (untracked or uncommitted work, paths outside a repo).
 
@@ -98,6 +101,7 @@ Don't sync state with `useEffect`. Derive from state/props inline or with `useMe
 - A deliberate simplification with a known ceiling carries a greppable marker: `// simplified: <ceiling>. upgrade when: <observable trigger>` (in the language's comment syntax). No observable trigger, rejected at review.
 - **A tactical mitigation is labeled as one** and never replaces or claims to be the root-cause fix. If the foundation is out of scope, stop and align rather than stack knobs (batch shrinks, timeouts, page cuts) that leave the worst case broken.
 - Leave what you touch no worse: no commented-out blocks, no TODOs without an owner (§3 bounds how far cleanup reaches).
+- A comment survives only for a non-obvious *why* the code cannot show; no phase narration. A `do not remove`-style comment is a rule without an enforcer: encode it as a type, test, or lint, then delete it.
 - A violation class that keeps recurring graduates into a standing check (lint rule, CI script); one-off findings stay findings.
 
 ## 12. UI/UX: intentional information, zero duplication
