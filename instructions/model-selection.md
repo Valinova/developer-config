@@ -114,7 +114,8 @@ no suites.
   approval:** `agentplan` → plan/scope review; `execute-plan` → only the seam
   review, when a later phase tears out what an earlier one built; `rev` → the
   diff review; `longrun` → plan review + final `rev` (+ the seam review);
-  `full-docs` → its adversarial validation of the documentation diff.
+  `full-docs` → its adversarial validation of the documentation diff;
+  `comment-audit` → per-shard cross-family verification + the fix PR's `rev`.
 - **Granted autonomy without a skill** ("go build it and open a PR"): judge
   it, and state what was chosen and why.
 

@@ -1,0 +1,7 @@
+interface:
+  display_name: "Comment Audit"
+  short_description: "Repo-wide comment audit with stacked comment and fix PRs"
+  default_prompt: "Use $comment-audit to audit this repository's comments."
+
+policy:
+  allow_implicit_invocation: false

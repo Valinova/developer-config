@@ -32,7 +32,7 @@ minutes), then retry once. Never retry in a loop.
 **Read before you dispatch.** Before any dispatch (`Agent` tool, Grok
 `spawn_subagent`, `claude-exec.sh`, `codex-exec.sh`, `pi-exec.sh`) or any
 workflow skill (`agentplan`, `execute-plan`, `rev`, `docs`, `full-docs`,
-`babysit`, `longrun`), read
+`comment-audit`, `babysit`, `longrun`), read
 `~/Development/developer-config/instructions/model-selection.md` and
 `~/Development/developer-config/instructions/codex-delegation.md` in full. Every brief that lets a leaf delegate further must require the same
 read plus the leaf's harness model card (Claude Code: `codex-delegation.md`); ambient principles never supply

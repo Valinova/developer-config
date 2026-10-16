@@ -302,8 +302,8 @@ directories live under `claude/skills/`, `codex/skills/`, `pi/skills/`, and
 `grok/skills/`. Each live skill path is a per-skill symlink to exactly one of
 those owners.
 
-The shared set is `clearcut-review`, `code-simplifier`, `com`, `comall`, `docs`,
-`no-use-effect`, and `simplicity-audit` — all seven linked into
+The shared set is `clearcut-review`, `code-simplifier`, `com`, `comall`,
+`comment-audit`, `docs`, `no-use-effect`, and `simplicity-audit` — all eight linked into
 Claude, Codex, Pi, and Grok Build. Keep this list current when adding a shared
 skill: a skill nobody enumerates is a skill nobody links (`code-simplifier` sat
 unlinked in every harness for exactly that reason).
@@ -321,7 +321,7 @@ how to write one is `instructions/agent-guidance.md` "Skill descriptions".
 Workflows that carry consequential intent include `agents/openai.yaml` with
 `allow_implicit_invocation: false`; they remain visible for explicit selection
 but cannot activate from conversational similarity. That is every skill under
-`codex/skills/`, plus `clearcut-review`, `com`, `comall`, `docs`, and `simplicity-audit` from `always/skills/`. Standing policies such as `no-use-effect` ship an
+`codex/skills/`, plus `clearcut-review`, `com`, `comall`, `comment-audit`, `docs`, and `simplicity-audit` from `always/skills/`. Standing policies such as `no-use-effect` ship an
 `agents/openai.yaml` carrying an `interface:` block and deliberately no
 `policy:` block, so they stay implicitly discoverable; `code-simplifier`
 carries no `agents/` directory at all and is likewise discoverable.
