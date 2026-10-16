@@ -30,8 +30,8 @@ orchestrator changed, or the base branch advanced.
 Repeat only the smallest invalid portion when the request or relevant code has
 materially changed and the existing artifact is demonstrably no longer valid.
 State that invalidation before repeating work. An existing reviewed plan
-satisfies the planning review; if it is valid but uncommitted, continue from
-the plan-commit portion of stage 2 instead of rerunning `agentplan`.
+satisfies the planning review; if it is still valid, continue at stage 3
+instead of rerunning `agentplan`.
 
 ## Stages
 
