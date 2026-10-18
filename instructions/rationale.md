@@ -82,7 +82,9 @@ output is worse than no output.
 
 The 2026-10-16 comment audit filed 34 issues; triage found 7 reachable by a
 user and took two hours. The verification that sorted them (one Opus pass
-reading code) is cheap enough to be the filing step.
+reading code) is cheap enough to be the filing step. Two days later, eleven
+open assistant issues traced to five roots; one rooted issue with a "done
+when" list is what a reader can hold, a dozen symptom issues is not.
 
 ### browser-cost
 
