@@ -5,7 +5,11 @@ description: How to check a web app in a real browser efficiently — verifying 
 
 # Browser test
 
-A browser is for what is only observable rendered (layout, interaction, hydration); cheaper checks come first and the ask-before rule is in `principles.md` §9. Do the walk yourself; delegate it only when it is long enough to bury your context.
+Cheaper checks come first; browser authority is in `principles.md` §9.
+[Testing policy](../../../instructions/testing.md#pr-proof-and-regression-scenarios)
+owns scenario selection, fixed outcomes and proof evidence: browser-visible PR
+outcomes need rendered proof even when calculations can be checked below the UI.
+Do the walk yourself; delegate it only when it is long enough to bury your context.
 
 ## What you need
 
@@ -30,4 +34,4 @@ Read and navigate by default. Submit, approve or delete only when that write is 
 
 ## Finish
 
-Close the session, stop every process you started (by PID, never by pattern), and delete the scratch dir. If running the app modified tracked files, report them; don't restore files you can't prove you changed. Report the steps, the observed values against what was expected, and any console errors.
+Close the session, stop every process you started (by PID, never by pattern), and delete the scratch dir. If running the app modified tracked files, report them; don't restore files you can't prove you changed. Report proof under the testing policy, including any console errors.

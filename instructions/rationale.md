@@ -121,16 +121,13 @@ is a fork that rots both halves.
 
 ### test-strategy
 
-Recent models write many unit tests after the code, and most restate the code
-just written: they pass on the first run, catch almost nothing, and break on
-every refactor, so the agent spends its time fixing tests instead of the
-feature. The usual counter (make scripted E2E the only mechanism) does not fit
-here: the UIs change too fast for E2E specs to stay green, and an existing
-Playwright suite was run by neither the project check nor CI. Business rules, permissions, and money outcomes are the stable,
-costly layer, so the server boundary with a real test DB is the default. It
-keeps most of E2E's realism without the UI churn. The "seen failing" and
-"failure modes first" gates come from the same feedback: a test that has never
-failed has not been shown to detect anything.
+A few complete user workflows with exact outcomes catch integration failures
+that layers of mirrored unit tests miss. Flexible agent navigation can tolerate
+UI movement without weakening those outcomes; it does not prove every path.
+Useful reruns need maintained scenarios and honest evidence, not a mandatory
+framework or CI job. Distinct numerical, permission and rollback edges still need
+focused protection. The "seen failing" and "failure modes first" gates distinguish
+that protection from tests that merely restate the code.
 
 ### test-shapes
 

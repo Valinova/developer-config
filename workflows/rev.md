@@ -22,8 +22,9 @@ and the full and contained rows' pass is the principles audit.
 The principles audit is the engineering principles and the repo's
 `AGENTS.md`/`CLAUDE.md` guidance: correctness and regressions, with emphasis on
 simplicity, intentionality, canonical ownership, and removal of unnecessary
-scope. Test changes are judged against `testing.md` "Shapes to refuse": a
-new test file without a stated reason, or a case that restates a registry,
+scope. Check PR proof and its scenario decision against `testing.md` "PR proof
+and regression scenarios". Test changes are judged against `testing.md` "Shapes
+to refuse": a new test file without a stated reason, or a case that restates a registry,
 roster, or i18n literal, is a finding. When tests or shared test harnesses or
 mocks change, the reviewer reads `testing.md` in full and compares each
 changed contract with coverage across files; a finding names the concrete

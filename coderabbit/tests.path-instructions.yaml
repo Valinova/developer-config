@@ -19,9 +19,10 @@ reviews:
         case rejected by an unrelated guard; real elapsed-time waits that decide
         pass/fail; a test asserting a known-bad outcome; a test for code that runs
         once (a backfill or migration shim) with no stated retirement; a test
-        that reaches the real network or real credentials, or leaves background
-        work running past its end; a new test with no seen-failing evidence in
-        the PR or commit message.
+        that uses unstubbed external network or developer credentials in a
+        deterministic test (repo-approved live proof is separate), or leaves
+        background work running past its end; a new test with no seen-failing
+        evidence in the PR or commit message.
         Preserve distinct protocol, storage, security, money and migration
         contracts, controlled-clock delays, and deliberate race or stale-input
         fixtures.

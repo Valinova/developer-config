@@ -45,12 +45,12 @@ Your default as a coding agent is to add; ours is to subtract — a senior engin
 
 `~/Development/developer-config/instructions/testing.md` owns test strategy (where tests live, what to mock, what to refuse) — read it before writing, changing, reviewing, or deleting tests. Two rules travel with every change:
 
-- A test earns its place by catching a regression that would cost something; coverage means nothing. A shared harness or mock edit needs a consumer suite outside the original happy path.
+- Follow [PR proof and regression scenarios](./testing.md#pr-proof-and-regression-scenarios) for dev proof and the PR scenario decision. A shared harness or mock edit needs a consumer suite outside the original happy path.
 - **A test counts only after it is seen failing for the intended reason**: for a bug, on the pre-fix code; for new logic, before the code exists or by breaking it on purpose.
 
 ### Ship gate
 
-At planning and finalizing, name the real benefit and the surfaces the change could regress (shared mocks, list universes, sibling callers, public contracts). **Never ship a known regression**: close it in the same change, or stop and replan. Accepted residual risk is rare and explicit: the plan and the PR or delivery brief name why it is accepted and the verification evidence (suite, check command, or smoke path; UI-only risk: §9).
+At planning and finalizing, name the real benefit and the surfaces the change could regress (shared mocks, list universes, sibling callers, public contracts). **Never ship a known regression**: close it in the same change, or stop and replan. Accepted residual risk is rare and explicit: the plan and the PR or delivery brief name why it is accepted and the verification evidence under [PR proof and regression scenarios](./testing.md#pr-proof-and-regression-scenarios).
 
 ## 5. Canonical sources of truth
 
@@ -83,10 +83,13 @@ A failure is visible and recorded. (why: rationale.md#fail-loud)
 - **Fold by root, not by symptom.** Before filing, find the owner whose absence or duplication causes the defect. One issue per root; its body lists every symptom the fix settles as a checkable "done when" task-list line (`- [ ] …`), ticked when the slice that proves it lands. A symptom of an open root is a line there, never its own issue. Clear-cut cleanup is never filed: it ships in the next pruning PR.
 - Size a fix to the code's remaining life: a one-shot migration, tear-down, or backfill gets the smallest shape that completes its run; permanent indexes, general contracts, and proof systems are for code that stays. A subagent's recommendation informs this sizing; it is never the plan.
 
-## 9. Verify cheap first — ask before driving a browser
+## 9. Verify cheap first — browser authority
 
-- Climb the ladder: typecheck → tests → read the code path → curl the endpoint or read server logs. A browser is for what is only observable rendered — layout, interaction, hydration. (why: rationale.md#browser-cost)
-- **Ask before starting a browser session for verification** unless I asked you to drive, run, or screenshot the app ("confirm this works" is not that); say why the browser is necessary.
+- Climb the ladder: typecheck → tests → read the code path → curl the endpoint or
+  read server logs. Browser-visible PR outcomes require rendered proof under
+  `testing.md` "PR proof and regression scenarios", even when their calculations
+  can also be checked below the UI. (why: rationale.md#browser-cost)
+- **Browser authority:** directed implementation or delivery authorizes the browser walk required by [PR proof](./testing.md#pr-proof-and-regression-scenarios), in the repo-approved dev environment with test credentials, unless user or repo instructions restrict it. Otherwise ask before starting a browser session unless I asked you to drive, run, or screenshot the app ("confirm this works" alone is not that); say why it is necessary. This grants no production or broader data authority.
 - **How to drive it:** the `browser-test` skill.
 - **Run ephemera never land in the worktree.** Browser profiles, driver scripts, dev-server logs/pids, screenshots, and probe outputs go in the session scratchpad (or `/tmp/<task>/`), never in the repo, gitignored or not; delete them when the run ends. What's worth keeping goes in the report or memory, not a leftover folder. (why: rationale.md#run-ephemera)
 

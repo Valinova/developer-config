@@ -35,12 +35,12 @@
       "Bash(git push --delete origin master:*)"
     ],
     "ask": [],
-    "defaultMode": "acceptEdits",
+    "defaultMode": "bypassPermissions",
     "additionalDirectories": [
       "/tmp"
     ]
   },
-  "model": "opus",
+  "model": "fable",
   "hooks": {
     "PreToolUse": [
       {
@@ -85,7 +85,7 @@
       "effortLevel": "high"
     },
     "claude-fable-5-1": {
-      "effortLevel": "medium"
+      "effortLevel": "high"
     },
     "claude-opus-5-5": {
       "effortLevel": "medium"
