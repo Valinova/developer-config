@@ -283,9 +283,9 @@ To bring a machine onto this: `claude mcp remove playwright -s user` if the
 entry exists, create the three symlinks from the table, and add the alias.
 Zed's Claude agent takes the same `--mcp-config ~/.claude/mcp/playwright.json` in its launch args on machines
 where a browser from Zed is wanted; that setting is machine-local.
-`always/scripts/reap-orphan-mcp.sh` reaps orphaned Playwright MCP servers older than two hours; Codex workers are excluded.
-It runs from the user crontab every 15 minutes; on a new machine add this line with `crontab -e`:
-`*/15 * * * * $HOME/.claude/scripts/reap-orphan-mcp.sh`.
+`always/scripts/reap-orphan-mcp.sh` reaps orphaned Playwright MCP servers older than two hours (Codex workers excluded) and SIGKILLs any one-shot `tsc` older than ten minutes, logging to `~/.local/state/reap-orphan.log`.
+It runs from the user crontab every 5 minutes; on a new machine add this line with `crontab -e`:
+`*/5 * * * * $HOME/.claude/scripts/reap-orphan-mcp.sh`.
 
 ### Skills — the shared workflow primitive
 

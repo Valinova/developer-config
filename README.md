@@ -36,7 +36,7 @@ workflows/        One shared body per delivery workflow (agentplan, execute-plan
                   full-docs, longrun, rev, babysit). Not a skill dir, never linked.
 always/
   scripts/        Dispatch wrappers (Codex, Claude, Pi), Grok ACP runner, hook
-                  guards, wiring and private-terms checkers, reap-orphan-mcp.sh.
+                  guards, wiring and private-terms checkers, reap-orphan-mcp.sh (runaway reaper).
   commands/       Slash-command / prompt entry points: shared/, claude/, pi/.
   skills/         Harness-neutral skills linked into Claude, Codex, Pi, and Grok
                   Build: clearcut-review, code-simplifier, com, comall,
