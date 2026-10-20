@@ -167,7 +167,8 @@ CODEX_MODEL_OVERRIDES=(
 
 dispatch_and_wait() {
   # codex-cli 0.147.0 removed `exec --full-auto`; --sandbox workspace-write is its exec-mode equivalent.
-  codex exec --sandbox workspace-write "${CODEX_MODEL_OVERRIDES[@]}" --json "$(cat "$BRIEF")" </dev/null > "$LOG_PATH" 2>&1
+  # Hook trust is granted in the TUI only; automation vets codex/hooks.json through this repo.
+  codex exec --sandbox workspace-write --dangerously-bypass-hook-trust "${CODEX_MODEL_OVERRIDES[@]}" --json "$(cat "$BRIEF")" </dev/null > "$LOG_PATH" 2>&1
 }
 
 # Background mode: the worker (codex + close-event writer) is re-parented
@@ -201,7 +202,7 @@ os.dup2(devnull_w, 1)
 os.dup2(devnull_w, 2)
 
 worker = r'''
-if codex exec --sandbox workspace-write \
+if codex exec --sandbox workspace-write --dangerously-bypass-hook-trust \
     -c "model=${MODEL}" \
     -c "model_reasoning_effort=${EFFORT}" \
     -c "service_tier=${SERVICE_TIER}" \

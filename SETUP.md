@@ -24,6 +24,7 @@ The repo is cloned at `~/Development/developer-config` on every machine
 | `~/.codex/AGENTS.md` | symlink | `instructions/principles.md` |
 | `~/.codex/config.toml` approvals and native subagent defaults | merge | Set `approval_policy = "on-request"`, `approvals_reviewer = "auto_review"`, `[agents]` to GPT-6.1 Sol / high, and the dispatch instruction below; preserve every unrelated setting |
 | `~/.codex/rules/command-safety.rules` | symlink | `codex/command-safety.rules` (hard blocks for the unrecoverable only) |
+| `~/.codex/hooks.json` | symlink | `codex/hooks.json` (the issue-bar nudge; the exec wrappers pass `--dangerously-bypass-hook-trust` since this repo is the vetting; interactive Codex trusts it once in `/hooks`, again after the script changes) |
 | `~/.pi/agent/AGENTS.md` | symlink | `instructions/principles.md` |
 | `~/.claude/settings.json` | symlink | `always/settings.json` |
 | `~/.claude/mcp/playwright.json` | symlink | `always/mcp/playwright.json` (on-demand MCP server definition — see "MCP servers load on demand") |
@@ -71,7 +72,7 @@ listed Codex approvals/defaults/routing, Grok compatibility/models/MCP, and Pi M
 preserve all unrelated configuration.
 
 The hook scripts — `always/scripts/supervised-git-backstop.py` (plus its test,
-`test_supervised_git_backstop.py`) and `foreground-dispatch-guard.py` — are NOT
+`test_supervised_git_backstop.py`), `foreground-dispatch-guard.py` and `issue-bar-guard.py` — are NOT
 linked into `~/.claude/scripts/`: the `PreToolUse` hooks in `always/settings.json`
 invoke them by absolute repo path, so per-file links would be dead weight.
 `always/scripts/lib/` — the shared `wrapper-common`, `codex_registry` and `claude-registry`
@@ -414,6 +415,7 @@ python3 always/scripts/test_grok_acp_exec.py
 bash always/scripts/lib/test-codex-registry.sh
 bash always/scripts/lib/test-wrappers.sh
 python3 always/scripts/test_foreground_dispatch_guard.py
+python3 always/scripts/test_issue_bar_guard.py
 bun pi/tests/destructive-guard.test.ts
 bun pi/tests/bash-timeout-guard.test.ts
 ```

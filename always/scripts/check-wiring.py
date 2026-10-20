@@ -41,6 +41,7 @@ LINKS = {
     "Codex": {
         "AGENTS.md": "instructions/principles.md",
         "rules/command-safety.rules": "codex/command-safety.rules",
+        "hooks.json": "codex/hooks.json",
     },
     "Pi": {
         "AGENTS.md": "instructions/principles.md",

@@ -85,6 +85,11 @@ user and took two hours. The verification that sorted them (one Opus pass
 reading code) is cheap enough to be the filing step. Two days later, eleven
 open assistant issues traced to five roots; one rooted issue with a "done
 when" list is what a reader can hold, a dozen symptom issues is not.
+Three days after that format rule landed, twenty more issues complied with it
+and still proposed guards, lints and types for defects nobody had observed: a
+rule that gates format does not gate admission. Admission is now the rule,
+and `issue-bar-guard.py` asks for its `Bar:` line at the moment of filing,
+because a principle among forty is read only when something stops the hand.
 
 ### browser-cost
 

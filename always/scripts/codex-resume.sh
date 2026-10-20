@@ -181,7 +181,7 @@ CODEX_MODEL_OVERRIDES=(
 )
 
 dispatch_and_wait() {
-  codex exec resume "${CODEX_MODEL_OVERRIDES[@]}" --json "$SESSION_ID" "$(cat "$BRIEF")" </dev/null > "$LOG_PATH" 2>&1
+  codex exec resume --dangerously-bypass-hook-trust "${CODEX_MODEL_OVERRIDES[@]}" --json "$SESSION_ID" "$(cat "$BRIEF")" </dev/null > "$LOG_PATH" 2>&1
 }
 
 # Background mode: worker re-parented into ITS OWN SESSION via a python
@@ -212,7 +212,7 @@ os.dup2(devnull_w, 1)
 os.dup2(devnull_w, 2)
 
 worker = r'''
-if codex exec resume \
+if codex exec resume --dangerously-bypass-hook-trust \
     -c "model=${MODEL}" \
     -c "model_reasoning_effort=${EFFORT}" \
     -c "service_tier=${SERVICE_TIER}" \

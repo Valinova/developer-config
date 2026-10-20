@@ -40,7 +40,7 @@
       "/tmp"
     ]
   },
-  "model": "fable",
+  "model": "opus",
   "hooks": {
     "PreToolUse": [
       {
@@ -58,6 +58,15 @@
           {
             "type": "command",
             "command": "python3 \"$HOME/Development/developer-config/always/scripts/foreground-dispatch-guard.py\""
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$HOME/Development/developer-config/always/scripts/issue-bar-guard.py\""
           }
         ]
       }
@@ -85,7 +94,7 @@
       "effortLevel": "high"
     },
     "claude-fable-5-1": {
-      "effortLevel": "high"
+      "effortLevel": "medium"
     },
     "claude-opus-5-5": {
       "effortLevel": "medium"
