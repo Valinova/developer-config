@@ -26,7 +26,7 @@ third party, a shared account); the repo's hazard list is the standing boundary.
 
 Proof is scoped by blast radius, not by revision. After a fix, re-prove only
 the surfaces that fix can change; a fix that cannot alter rendered behaviour
-(a comment, a test, message text, a type) is covered by the gate alone. The
+(a comment, a test, a type) is covered by the gate alone. The
 record names what the re-proof covered and what it reused from the earlier
 proof of this branch.
 

@@ -12,7 +12,7 @@ Owns how git, branch, worktree, and commit operations are run on every surface, 
 - **Remote operations: ask and verify first.** Before any push, remote URL/config change, or other remote-writing operation: state exactly what will run, confirm with me unless I directed that push (approval for one *undirected* operation does not roll forward), and verify the target (current branch, remote URL, ahead/behind vs base). Read-only remote ops (fetch, `gh pr view`) need no asking. (why: rationale.md#remote-ops)
 - **CodeRabbit: the PR review is the record; the CLI is a judgment call.** A PR in a repo with CodeRabbit auto-review gets its review without anything added, and `babysit` waits for it. The CLI is for code no PR review will see yet: complex, unreviewed code before its first push, or a large implementation at a phase boundary (never per commit). Always `--deep` — without it the CLI runs a lighter policy than the PR review, for the same included review — and once over the whole diff:
   `coderabbit review --deep --committed --base origin/<default> --agent -c ~/Development/developer-config/coderabbit/tests.path-instructions.yaml AGENTS.md`.
-  Triage findings as PR findings; the repo's own gate still decides. On this PR-sized sample the CLI caught about half of what the PR review did, so it never closes a PR on its own. A first push into an empty repo has no base to diff, so skip it and say so. No CLI: say so in the report.
+  Triage findings as PR findings; the repo's own gate still decides. The CLI never closes a PR on its own (why: rationale.md#coderabbit). A first push into an empty repo has no base to diff, so skip it and say so. No CLI: say so in the report.
 
 ## The mechanical floor
 
@@ -37,7 +37,7 @@ in `always/settings.json`, not a Codex hook. Its docstring and
 - One logical change per commit, split by concern (file-level is fine — no hunk-level splitting), each with a message saying what and why. Never lump unrelated changes into one commit.
 - Single-concern PRs are the default; I may explicitly opt into a bundled multi-concern PR. In a bundle, the commit is the revert and review unit — one concern per commit, each independently green — and that discipline becomes mandatory.
 - **Never alter commit author/committer identity or rewrite author history.** No `git config user.name`/`user.email`, no `--author`, no `filter-branch`/`rebase`/amend to change who authored a commit — unless I explicitly ask you to fix authorship. Commits use my configured identity as-is.
-- **Worktree identity:** never `git config user.*` inside a worktree (it clobbers the shared `.git/config`). Scope any needed identity per-invocation (`git -c user.name=… -c user.email=… commit`), and after removing a scratch worktree, verify `git config user.email` still resolves correctly. (why: rationale.md#worktree-identity)
+- **Worktree identity:** never `git config user.*` inside a worktree (it clobbers the shared `.git/config`). When I explicitly authorize an identity change, scope it per-invocation (`git -c user.name=… -c user.email=… commit`), and after removing a scratch worktree, verify `git config user.email` still resolves correctly. (why: rationale.md#worktree-identity)
 
 ## Updating a branch: prefer rebase over merge
 
@@ -59,7 +59,7 @@ I often work in parallel in the same worktree; `principles.md` §3 states the ru
 
 ## Enforcement scope: interactive vs autonomous
 
-The ask-first rules above assume I'm present; conversational approval is the mechanism. Autonomous agents (Hermes, cron) enforce the **same invariants** mechanically via their own approval policy (see the agent's autonomy envelope, e.g. `~/.hermes/SOUL.md`). On every surface: never rewrite authorship, never bare force-push, stage explicit paths, never touch my parallel WIP, and **anything unrecoverable requires my approval**. A denial or timeout is never license to achieve the same effect by an alternate route.
+The ask-first rules above assume I'm present; conversational approval is the mechanism. Autonomous agents (Hermes, cron) enforce the **same invariants** mechanically via their own approval policy (see the agent's autonomy envelope, e.g. `~/.hermes/SOUL.md`). A denial or timeout is never license to achieve the same effect by an alternate route.
 
 ## Durable worktrees
 
