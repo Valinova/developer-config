@@ -1,6 +1,7 @@
 # Canonical Codex command rules. Link from ~/.codex/rules/command-safety.rules.
 # Only the unrecoverable is blocked here, mirroring the Claude deny tier in
-# instructions/git-operations.md. Prefix rules catch the common spellings only;
+# instructions/git-operations.md, plus Doppler prd: Codex never uses production
+# credentials (approvals go to the automatic reviewer, not Pedro). Prefix rules catch the common spellings only;
 # other forms fall to the instructions. Everything else is judged by the agent from
 # the instructions (ask when unclear or when work could be lost); see permissions.md.
 
@@ -26,4 +27,20 @@ prefix_rule(
     justification = "Never delete the default branch on the remote.",
     match = ["git push --delete origin main", "git push --delete origin master"],
     not_match = ["git push --delete origin feature"],
+)
+
+prefix_rule(
+    pattern = ["doppler", ["run", "secrets"], ["--config", "-c"], "prd"],
+    decision = "forbidden",
+    justification = "Codex never uses Doppler prd; hand Pedro the command. Read production through the project's read-only credential under a non-prd config.",
+    match = ["doppler run --config prd -- psql", "doppler run -c prd -- pnpm sync", "doppler secrets --config prd"],
+    not_match = ["doppler run --config dev -- psql", "doppler run -c stg -- pnpm sync"],
+)
+
+prefix_rule(
+    pattern = ["doppler", ["run", "secrets"], "--config=prd"],
+    decision = "forbidden",
+    justification = "Codex never uses Doppler prd; hand Pedro the command.",
+    match = ["doppler run --config=prd -- pnpm sync"],
+    not_match = ["doppler run --config=dev -- pnpm sync"],
 )

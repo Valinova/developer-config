@@ -23,7 +23,7 @@ The repo is cloned at `~/Development/developer-config` on every machine
 | `~/.claude/CLAUDE.md` | symlink | `claude-root.md` |
 | `~/.codex/AGENTS.md` | symlink | `instructions/principles.md` |
 | `~/.codex/config.toml` approvals and native subagent defaults | merge | Set `approval_policy = "on-request"`, `approvals_reviewer = "auto_review"`, `[agents]` to GPT-6.1 Sol / high, and the dispatch instruction below; preserve every unrelated setting |
-| `~/.codex/rules/command-safety.rules` | symlink | `codex/command-safety.rules` (hard blocks for the unrecoverable only) |
+| `~/.codex/rules/command-safety.rules` | symlink | `codex/command-safety.rules` (hard blocks for the unrecoverable and Doppler prd) |
 | `~/.codex/hooks.json` | symlink | `codex/hooks.json` (the issue-bar nudge; the exec wrappers pass `--dangerously-bypass-hook-trust` since this repo is the vetting; interactive Codex trusts it once in `/hooks`, again after the script changes) |
 | `~/.pi/agent/AGENTS.md` | symlink | `instructions/principles.md` |
 | `~/.claude/settings.json` | symlink | `always/settings.json` |

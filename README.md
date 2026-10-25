@@ -45,7 +45,7 @@ always/
   settings.json   User-global ~/.claude/settings.json.
 claude/skills/    Claude stubs over workflows/.
 codex/            model-defaults.md (Codex dispatch card), permissions.md and
-                  command-safety.rules (automatic review; unrecoverable-only blocks); skills/:
+                  command-safety.rules (automatic review; unrecoverable + Doppler prd blocks); skills/:
                   stubs over workflows/ plus Codex-only skills.
 grok/             model-defaults.md (Grok Build card); skills/: stubs over workflows/.
 pi/               model-defaults.md (Pi card), settings, subagents, role agents,
