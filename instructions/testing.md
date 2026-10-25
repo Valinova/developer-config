@@ -8,12 +8,27 @@ file before writing, changing, reviewing, or deleting tests. Project-level
 
 ## PR proof and regression scenarios
 
-Every meaningful PR needs dev proof: focused tests or real-boundary probes may
-suffice; live proof uses the repo-approved development environment. Browser-visible
+Every delivery proves the two claims of `principles.md` §4 "Ship gate": the
+benefit, and that the regression surfaces its plan named hold. Proof exercises the
+goal through every owner and head the change touches (UI, assistant, MCP),
+including the writes that constitute it; a walk that avoids those writes is not
+proof. Focused tests or real-boundary probes may suffice; browser-visible
 behaviour needs rendered browser proof, including when the change is in stores,
-calculations or other indirect owners. Obvious low-risk changes may explain why
-code inspection suffices. Start with cheap checks; they do not replace
-proof of rendered outcomes. Browser authority follows `principles.md` §9.
+calculations or other indirect owners, and a changed assistant head or transport
+needs a live model call. Obvious low-risk changes may explain why code inspection
+suffices. Start with cheap checks; they do not replace proof of rendered outcomes.
+
+The agent runs this proof itself by default, dev server, browser and dev
+deployment included, in the repo-approved development environment ("Live proof"
+below). It asks first only when proof would spend a metered budget (API tokens, a
+billed review round) or reach outside that environment (production data, a real
+third party, a shared account); the repo's hazard list is the standing boundary.
+
+Proof is scoped by blast radius, not by revision. After a fix, re-prove only
+the surfaces that fix can change; a fix that cannot alter rendered behaviour
+(a comment, a test, message text, a type) is covered by the gate alone. The
+record names what the re-proof covered and what it reused from the earlier
+proof of this branch.
 
 Move incrementally toward a small maintained set of complete, real user
 workflows with precise outcomes. Reuse existing coverage first. Every PR states

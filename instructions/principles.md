@@ -50,7 +50,7 @@ Your default as a coding agent is to add; ours is to subtract — a senior engin
 
 ### Ship gate
 
-At planning and finalizing, name the real benefit and the surfaces the change could regress (shared mocks, list universes, sibling callers, public contracts). **Never ship a known regression**: close it in the same change, or stop and replan. Accepted residual risk is rare and explicit: the plan and the PR or delivery brief name why it is accepted and the verification evidence under [PR proof and regression scenarios](./testing.md#pr-proof-and-regression-scenarios).
+Every delivery, a PR or a direct merge to main, ships only when it is clearly beneficial and non-regressing. At planning and finalizing, name the real benefit and the surfaces the change could regress (shared mocks, list universes, sibling callers, public contracts). Non-regressing is not a promise of absence: each named surface is either proven on this revision or fails loudly if it regresses (§6: a typed error, a Sentry event, a watched log), so a regression is seen and recoverable, never silent. **Never ship a known regression**: close it in the same change, or stop and replan. Accepted residual risk is rare and explicit: the plan and the PR or delivery brief name why it is accepted and the verification evidence under [PR proof and regression scenarios](./testing.md#pr-proof-and-regression-scenarios).
 
 ## 5. Canonical sources of truth
 
@@ -89,7 +89,7 @@ A failure is visible and recorded. (why: rationale.md#fail-loud)
   read server logs. Browser-visible PR outcomes require rendered proof under
   `testing.md` "PR proof and regression scenarios", even when their calculations
   can also be checked below the UI. (why: rationale.md#browser-cost)
-- **Browser authority:** directed implementation or delivery authorizes the browser walk required by [PR proof](./testing.md#pr-proof-and-regression-scenarios), in the repo-approved dev environment with test credentials, unless user or repo instructions restrict it. Otherwise ask before starting a browser session unless I asked you to drive, run, or screenshot the app ("confirm this works" alone is not that); say why it is necessary. This grants no production or broader data authority.
+- **Browser authority:** a browser session in the repo-approved dev environment with test credentials needs no asking; it is spent like any other token. The ask triggers are [PR proof](./testing.md#pr-proof-and-regression-scenarios)'s: a metered budget, or anything outside that environment.
 - **How to drive it:** the `browser-test` skill.
 - **Run ephemera never land in the worktree.** Browser profiles, driver scripts, dev-server logs/pids, screenshots, and probe outputs go in the session scratchpad (or `/tmp/<task>/`), never in the repo, gitignored or not; delete them when the run ends. What's worth keeping goes in the report or memory, not a leftover folder. (why: rationale.md#run-ephemera)
 
