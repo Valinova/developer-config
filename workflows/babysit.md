@@ -39,7 +39,9 @@ pass at push time (`git-operations.md` "Direction and approval") stand in.
    user's call.
 3. **Fix.** Accepted findings and CI fixes go to ONE pass on the harness's
    implement lane, rung per `model-selection.md` "Effort". Verify locally and
-   commit.
+   commit. Re-proof follows `testing.md` "PR proof and regression scenarios":
+   scoped to what the fixes can change, the rest reused from the branch's
+   earlier proof, and the round's report says which.
 4. **Push once if changes need publishing** (`--force-with-lease` after a
    rebase), after verifying the remote target.
    Never push a CI fix alone while a CodeRabbit review is pending. If nothing

@@ -8,7 +8,8 @@ that name.
 
 Run the full delivery pipeline autonomously. Invoking this workflow authorizes
 the commits, reviews, push, pull request, and babysit's per-round pushes
-required by the stages below. Its gates are the plan review, the final `rev`,
+required by the stages below, and the dev proof `testing.md` "PR proof and
+regression scenarios" requires, under its ask triggers. Its gates are the plan review, the final `rev`,
 and the seam review when a plan tears out what it built (`model-selection.md`
 "External calls").
 
@@ -45,16 +46,23 @@ instead of rerunning `agentplan`.
    its cross-family scope review is this workflow's plan gate.
 3. Run `execute-plan` through every phase (Iterative: implement with the user
    in bounded passes) and commit.
-4. Run `rev` and commit its reviewed fixes.
-5. Run `docs` to consolidate the branch's documentation — folding what
+4. Run the dev proof the plan named (`testing.md` "PR proof and regression
+   scenarios") against the branch running in the approved dev environment,
+   fix what it finds, and commit; its record goes in the pull request body.
+   In Iterative mode the passes with the user may already have been that
+   proof; the agent judges whether they covered the named surfaces and
+   records what they did not. A gap the ask triggers leave open is recorded
+   as incomplete, never called verified.
+5. Run `rev` and commit its reviewed fixes.
+6. Run `docs` to consolidate the branch's documentation — folding what
    passes the principles §13 bar from the local plan into canonical docs and
    deleting that plan file — then commit (this workflow authorizes it).
-6. Verify the complete branch and the intended remote/branch target, and
+7. Verify the complete branch and the intended remote/branch target, and
    apply the principles §4 "Ship gate". Then push and open a pull request with
    a descriptive summary, verification results, and all important unresolved
    decisions deferred for the user, per `model-selection.md` "PR status at
    delivery".
-7. Run `babysit` on the opened pull request.
+8. Run `babysit` on the opened pull request.
 
 ## Stop conditions
 
