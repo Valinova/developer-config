@@ -21,7 +21,7 @@ rules: `rationale.md` (not loaded).
 - **Never kill codex runs by pattern.** `pkill -f "codex exec"` (or any pattern kill) has shared blast radius (why: rationale.md#pattern-kill). Verify liveness first; kill only a PID proven to belong to your task, or simply re-dispatch under a fresh `-r2` name when the stalled run made no file changes.
 - **One session per task.** Parallel tasks use distinct names. Recommended max parallel = 3, provisional: revert to 2 if health checks start flagging `stalled` runs or wall-clock degrades (why: rationale.md#parallel-limit). Higher than 3 only deliberately.
 - **Split large asks into diagnose → apply.** A single long-running task that crashes loses all in-process context.
-- **Briefs assume ambient principles.** A delegated leaf inherits the engineering principles from its harness's global file (`~/.codex/AGENTS.md` and `~/.pi/agent/AGENTS.md` are symlinks to `instructions/principles.md`), so briefs never restate the doctrine. If a leaf machine's global file does not resolve, fix the wiring per SETUP.md instead of compensating inside the brief.
+- **Briefs assume ambient principles.** A delegated leaf inherits the engineering principles from its harness's global file (`~/.codex/AGENTS.md` and `~/.pi/agent/AGENTS.md` are symlinks to `instructions/principles.md`), so briefs never restate the doctrine. A brief names the two or three `principles.md` sections the task is most likely to violate, by number, and restates nothing else. If a leaf machine's global file does not resolve, fix the wiring per SETUP.md instead of compensating inside the brief.
 
 ## Required brief sections
 
