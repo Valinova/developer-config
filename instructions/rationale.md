@@ -18,7 +18,8 @@ edit with one sensible default (2026-10-14, evals longrun: lane routing, a
 one-row status reset, two weak verdicts; none costly to undo). The fix is
 closing the decision first (sources, then simplicity, then a cross-family
 review as tie-breaker) and reserving the ask for what only I can weigh, laid
-out so the answer takes one read.
+out so the answer takes one read. §4's escalation bar is the autonomous
+mirror of this rule.
 
 ### simplicity
 
@@ -34,7 +35,16 @@ smell test because it is the review that actually happens.
 Agents tend to add surface when deletion would solve the problem. Earlier
 guidance reinforced that tendency by permitting reserved slots and
 discouraging removal of pre-existing dead code. §2 now makes subtraction an
-explicit decision before adding.
+explicit decision before adding. A coding agent's default is to add; the
+counterweight is a senior engineer's smallest change, where deletion is a
+result.
+
+### agent-contributor
+
+The next contributor is an agent that sees only the files it opened and
+copies the nearest example. A design where the locally right edit is also
+globally right survives that reader; one that depends on knowing a distant
+second copy does not.
 
 ### parallel-worktree-wip
 
@@ -227,6 +237,9 @@ posts a review only when it has findings, so a push that resolves them
 flips the check to pass and resolves the threads with nothing new posted.
 On 2026-09-09 an agent polling for a review on the new head waited
 indefinitely on an already-clean round.
+
+On a PR-sized sample, the local CLI (`--deep`) caught about half of what the
+PR review did, so a CLI pass never closes a PR on its own.
 
 ### opus-browser-walks
 
@@ -424,6 +437,15 @@ warm pings — for any wait shorter than about seven hours a heartbeat is
 cheaper than letting the cache lapse (settled 2026-09-03). Fifty minutes, not
 fifty-nine: the wake fires after the delay, then queues and runs, and the TTL
 clock does not wait for that.
+
+### tracked-file-edits
+
+The safety prompt comes from Claude Code itself, even under bypass; neither
+of our hooks is involved, and a multi-command chain of in-place rewrites is
+the likeliest trigger. On 2026-10-09 an hour was lost when a subagent's
+seen-red break, done with `sed -i` plus `cp` restores, stalled silently on
+that prompt until a human noticed. A recurrence graduates the rule to a
+PreToolUse deny per principles §11.
 
 ## SETUP.md
 
