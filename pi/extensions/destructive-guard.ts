@@ -1,7 +1,9 @@
 /**
  * destructive-guard.ts — mechanical backstop for UNRECOVERABLE operations (Pi).
  *
- * Scope is deliberately narrow: only operations whose damage cannot be undone.
+ * Scope is deliberately narrow: operations whose damage cannot be undone, plus
+ * any command run with Doppler production credentials.
+ *   - doppler … prd             (--config/-c/--config=/DOPPLER_CONFIG, wrapped too)
  *   - recursive/forced rm of a root (/, ~, $HOME, .., their /* forms, the
  *     home path), sudo rm in any form
  *   - git reset --hard          (destroys uncommitted work)
@@ -40,6 +42,9 @@ const CATASTROPHIC_TARGETS = new Set(["/", "/*", "~", "~/*", "$HOME", "$HOME/*",
 
 export function analyze(command: string): Hit[] {
 	const hits: Hit[] = [];
+	// Whole-string match so wrapped forms (bash -c "…", env prefixes) are caught too.
+	if (/\bDOPPLER_CONFIG=prd(?![\w-])/.test(command) || (/\bdoppler\b/.test(command) && /(?:--config[= ]|-c\s+)prd(?![\w-])/.test(command)))
+		hits.push({ rule: "doppler prd", why: "runs with production credentials" });
 	const segments = command
 		.split(/&&|\|\||[;|\n]/)
 		.map((s) => s.trim())
@@ -154,7 +159,7 @@ export default function (pi: ExtensionAPI) {
 
 		const ok = await ctx.ui.confirm(
 			`⚠ ${hits.map((h) => h.rule).join(" + ")}`,
-			`${summary}\n\n$ ${shown}\n\nThis cannot be undone. Allow?`,
+			`${summary}\n\n$ ${shown}\n\nAllow?`,
 		);
 		if (!ok) {
 			ctx.ui.notify(`Blocked: ${hits[0].rule}`, "info");
