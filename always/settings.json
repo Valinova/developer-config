@@ -34,7 +34,12 @@
       "Bash(git push --delete origin main:*)",
       "Bash(git push --delete origin master:*)"
     ],
-    "ask": [],
+    "ask": [
+      "Bash(*doppler *--config prd*)",
+      "Bash(*doppler *--config=prd*)",
+      "Bash(*doppler *-c prd*)",
+      "Bash(*DOPPLER_CONFIG=prd*)"
+    ],
     "defaultMode": "bypassPermissions",
     "additionalDirectories": [
       "/tmp"
@@ -94,7 +99,7 @@
       "effortLevel": "high"
     },
     "claude-fable-5-1": {
-      "effortLevel": "medium"
+      "effortLevel": "high"
     },
     "claude-opus-5-5": {
       "effortLevel": "medium"
