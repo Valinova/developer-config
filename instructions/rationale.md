@@ -239,7 +239,12 @@ On 2026-09-09 an agent polling for a review on the new head waited
 indefinitely on an already-clean round.
 
 On a PR-sized sample, the local CLI (`--deep`) caught about half of what the
-PR review did, so a CLI pass never closes a PR on its own.
+PR review did, so it closes a round only where the diff's risk is low.
+Included PR reviews are the scarcer pool and the CLI has its own, larger
+usage, so a rate-limited round spends the CLI on a low-risk PR and nothing
+on a trivial one: waiting out the limit for a five-line diff (2026-10-25,
+PR #723) would have cost a review some real PR then lacks, for findings the
+gate already covers.
 
 ### opus-browser-walks
 

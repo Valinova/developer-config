@@ -14,6 +14,7 @@ HOOK = str(pathlib.Path(__file__).with_name("issue-bar-guard.py"))
 
 BAR = "Bar: observed — Sentry KUSHKI-C0 fired 2026-10-16\n"
 DELETES = "Bar: deletes — feedback table, submit mutation, UI entry\n"
+DIRECTED = "Bar: directed — \"open an issue for the target architecture\", 2026-10-26\n"
 
 CASES = [
     # (command, expected)  expected in {"deny", "allow"}
@@ -25,6 +26,7 @@ CASES = [
     (f"gh issue create --title x --body '{BAR}Blast radius: …'", "allow"),
     (f"gh issue create -t x -F - <<'EOF'\n{DELETES}Pointers at abc123\nEOF", "allow"),
     (f"gh api repos/o/r/issues -X POST -f title=x -f body='{BAR}'", "allow"),
+    (f"gh issue create -t x -F - <<'EOF'\n{DIRECTED}Target: …\nEOF", "allow"),
     ("gh issue create --title x --body 'bar: observed - lowercase is not the line'", "deny"),
     # --- not a filing ---
     ("gh issue list --state open", "allow"),

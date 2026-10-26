@@ -25,7 +25,7 @@ import re
 import sys
 
 # The line opens the body, so it follows a newline, a quote or `body=`.
-BAR_LINE = re.compile(r"(?:^|[\n\"'=])\s*Bar:\s*(?:observed|deletes)\s*[—–-]+\s*\S")
+BAR_LINE = re.compile(r"(?:^|[\n\"'=])\s*Bar:\s*(?:observed|deletes|directed)\s*[—–-]+\s*\S")
 
 CMD_POSITION = r"(?:^|[;&|(]|\n)\s*(?:\S*/)?"
 ISSUE_CREATE = re.compile(CMD_POSITION + r"gh\s+issue\s+create\b")
@@ -47,6 +47,8 @@ REASON = (
     "  Bar: observed — <who saw it, the Sentry id, or the data count showing "
     "wrong output today>\n"
     "  Bar: deletes — <what goes>\n"
+    "  Bar: directed — <the user's request, quoted> (only when the user "
+    "explicitly asked for this issue)\n"
     "A path that could misbehave, a rule the code does not yet meet, a smarter "
     "lint, a tighter type, or a test rewrite is not filed: leave it in the "
     "report, or put a `simplified:` marker at its one site. Re-send with the "

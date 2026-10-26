@@ -26,9 +26,11 @@ pass at push time (`git-operations.md` "Direction and approval") stand in.
    CodeRabbit's own status check. Do not wait for a review object —
    CodeRabbit posts one only when it has findings; a pass with no review is a
    settled, clean round. A pass whose note reads "Review rate limited" is not:
-   no review ran. Ask `@coderabbitai rate limit` (free) for the window, wait
-   it out, then `@coderabbitai review` the moment it opens; the CLI does not
-   stand in for a PR review. Poll read-only with `gh` (`gh pr checks`, `gh api`);
+   no review ran. Whether to wait, run the CLI instead, or do neither is
+   `git-operations.md` "CodeRabbit"'s call by the diff's risk; a CLI pass
+   settles the round like a review. When waiting, ask `@coderabbitai rate
+   limit` (free) for the window, wait it out, then `@coderabbitai review` the
+   moment it opens. Poll read-only with `gh` (`gh pr checks`, `gh api`);
    a poll that keys on a review object appearing on the new head never
    satisfies after a clean push. Never report while either is still pending.
    Claude Code: a wait past an hour uses the `ScheduleWakeup` heartbeat (`claude-conventions.md` "Prompt-cache heartbeat during long waits"), stopped the moment the round resumes; elsewhere: keep polling (`gh pr checks --watch`, `gh api`).
