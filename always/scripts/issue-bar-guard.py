@@ -1,19 +1,10 @@
 #!/usr/bin/env python3
-"""Make the agent state the issue bar before it files a GitHub issue.
+"""Require an observed, reachable, deletes or directed bar before filing.
 
-principles.md §8: an issue exists for an observed symptom or a deletion,
-nothing else. The 2026-10-16 format rule (reachability, bucket, pointers) was
-followed to the letter by twenty more issues in three days, each proposing a
-guard for a defect nobody had observed (why: rationale.md#issue-bar). A rule
-that gates format does not gate admission, so this hook asks the admission
-question at the moment of filing.
-
-It is a nudge, not a gate. The first `gh issue create` (or a `gh api` write to
-an `/issues` endpoint) whose body carries no `Bar:` line is denied with the bar
-text as the reason; the agent writes its answer into the body and re-sends,
-and that call passes. Nothing is approved by a human and the content of the
-line is never judged: the point is that the rule is read, and the answer lands
-in the issue where the reader can check it.
+principles.md §8 admission nudge (why: rationale.md#issue-bar): deny
+`gh issue create` or a `gh api` write to an `/issues` endpoint without a
+`Bar:` line. Re-sending with the line passes; no human approval or content
+judgment. The answer stays in the issue for the reader to check.
 
 Same envelope as foreground-dispatch-guard.py (Claude, Codex, Grok). Codex
 loads it from codex/hooks.json after a one-time trust in `/hooks`.
@@ -25,7 +16,7 @@ import re
 import sys
 
 # The line opens the body, so it follows a newline, a quote or `body=`.
-BAR_LINE = re.compile(r"(?:^|[\n\"'=])\s*Bar:\s*(?:observed|deletes|directed)\s*[—–-]+\s*\S")
+BAR_LINE = re.compile(r"(?:^|[\n\"'=])\s*Bar:\s*(?:observed|reachable|deletes|directed)\s*[—–-]+\s*\S")
 
 CMD_POSITION = r"(?:^|[;&|(]|\n)\s*(?:\S*/)?"
 ISSUE_CREATE = re.compile(CMD_POSITION + r"gh\s+issue\s+create\b")
@@ -42,15 +33,16 @@ BODY_FILE = re.compile(r"(?:--body-file|-F)[=\s]+[\"']?([^\s\"']+)")
 SHELL_TOOLS = {"Bash", "bash", "run_terminal_command", "run_terminal_cmd"}
 
 REASON = (
-    "Issue bar (principles.md §8): an issue exists for an observed symptom or "
-    "a deletion, nothing else. Open the body with one line:\n"
+    "Issue bar (principles.md §8): observed, reachable, or deletes. "
+    "Open the body with one line:\n"
     "  Bar: observed — <who saw it, the Sentry id, or the data count showing "
     "wrong output today>\n"
+    "  Bar: reachable — <path> → <wrong outcome>\n"
     "  Bar: deletes — <what goes>\n"
     "  Bar: directed — <the user's request, quoted> (only when the user "
     "explicitly asked for this issue)\n"
-    "A path that could misbehave, a rule the code does not yet meet, a smarter "
-    "lint, a tighter type, or a test rewrite is not filed: leave it in the "
+    "A rule the code does not yet meet, a smarter lint, a tighter type, or a "
+    "test rewrite is not filed: leave it in the "
     "report, or put a `simplified:` marker at its one site. Re-send with the "
     "line, or don't file."
 )

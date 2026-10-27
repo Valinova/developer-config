@@ -100,6 +100,8 @@ and still proposed guards, lints and types for defects nobody had observed: a
 rule that gates format does not gate admission. Admission is now the rule,
 and `issue-bar-guard.py` asks for its `Bar:` line at the moment of filing,
 because a principle among forty is read only when something stops the hand.
+Reachable prod risks need no repro to file: the audit's useful issues were
+user-reachable, while speculative guards stay out.
 
 ### browser-cost
 

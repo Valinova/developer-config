@@ -13,6 +13,7 @@ import tempfile
 HOOK = str(pathlib.Path(__file__).with_name("issue-bar-guard.py"))
 
 BAR = "Bar: observed — Sentry APP-C0 fired 2026-10-16\n"
+REACHABLE = "Bar: reachable — quote save with an empty tier → total priced at zero\n"
 DELETES = "Bar: deletes — feedback table, submit mutation, UI entry\n"
 DIRECTED = "Bar: directed — \"open an issue for the target architecture\", 2026-10-26\n"
 
@@ -24,6 +25,7 @@ CASES = [
     ("gh api repos/o/r/issues -X POST -f title=x -f body=y", "deny"),
     ("gh api repos/o/r/issues -f title=x", "deny"),
     (f"gh issue create --title x --body '{BAR}Blast radius: …'", "allow"),
+    (f"gh issue create --title x --body '{REACHABLE}Blast radius: …'", "allow"),
     (f"gh issue create -t x -F - <<'EOF'\n{DELETES}Pointers at abc123\nEOF", "allow"),
     (f"gh api repos/o/r/issues -X POST -f title=x -f body='{BAR}'", "allow"),
     (f"gh issue create -t x -F - <<'EOF'\n{DIRECTED}Target: …\nEOF", "allow"),
