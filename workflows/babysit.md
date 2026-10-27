@@ -22,17 +22,20 @@ pass at push time (`git-operations.md` "Direction and approval") stand in.
 
 ## Round
 
-1. **Wait until both have settled**: every check concluded, including
-   CodeRabbit's own status check. Do not wait for a review object —
-   CodeRabbit posts one only when it has findings; a pass with no review is a
-   settled, clean round. A pass whose note reads "Review rate limited" is not:
-   no review ran. Whether to wait, run the CLI instead, or do neither is
-   `git-operations.md` "CodeRabbit"'s call by the diff's risk; a CLI pass
-   settles the round like a review. When waiting, ask `@coderabbitai rate
-   limit` (free) for the window, wait it out, then `@coderabbitai review` the
-   moment it opens. Poll read-only with `gh` (`gh pr checks`, `gh api`);
-   a poll that keys on a review object appearing on the new head never
-   satisfies after a clean push. Never report while either is still pending.
+1. **Wait until the round's signal has settled.** Round 1: every check
+   concluded, including CodeRabbit's own status check. Do not wait for a
+   review object — CodeRabbit posts one only when it has findings; a pass with
+   no review is a settled, clean round. A pass whose note reads "Review rate
+   limited" is not: no review ran. Whether to wait, run the CLI instead, or do
+   neither is `git-operations.md` "CodeRabbit"'s call by the diff's risk; a
+   CLI pass settles the round like a review. When waiting, ask `@coderabbitai
+   rate limit` (free) for the window, wait it out, then `@coderabbitai review`
+   the moment it opens. Later rounds: wait for CI only, then run the CLI over
+   the round's commits (`--base <the head round 1's review covered>`); an
+   auto-review that lands meanwhile is triaged too, but the round never waits
+   for one. Poll read-only with `gh` (`gh pr checks`, `gh api`); a poll that
+   keys on a review object appearing on the new head never satisfies after a
+   clean push. Never report while the round's signal is still pending.
    Claude Code: a wait past an hour uses the `ScheduleWakeup` heartbeat (`claude-conventions.md` "Prompt-cache heartbeat during long waits"), stopped the moment the round resumes; elsewhere: keep polling (`gh pr checks --watch`, `gh api`).
 2. **Triage.** Red checks get fixed. Every CodeRabbit finding is accepted,
    declined with a reason, or deferred to the user in the report — the
@@ -63,7 +66,8 @@ wherever there is real learning, never mandatory. CodeRabbit confirms with a
 
 ## Two-round cost circuit breaker
 
-If round 1 changes the PR, wait for its CI and review before round 2. After
+If round 1 changes the PR, wait for its CI before round 2; round 2's review is
+the CLI pass over round 1's commits (step 1). After
 round 2's triage, implement accepted fixes. If another push is needed, comment
 `@coderabbitai ignore` on the PR (never in the description, which would have
 skipped round 1), then push once. Wait for the final push's CI checks to

@@ -246,6 +246,13 @@ on a trivial one: waiting out the limit for a five-line diff (2026-10-25,
 PR #723) would have cost a review some real PR then lacks, for findings the
 gate already covers.
 
+A later round's delta is small and sits on a baseline the PR review already
+covered, so a second PR review re-spends the scarce pool on code it has seen
+and can stall the round for an hour on the rate limit (2026-10-26, PR #1065:
+four commits, +40/−17, gate and suite green, auto-review rate limited; the
+CLI over those commits took minutes). Rounds after the first therefore settle
+on CI plus the CLI over their own commits.
+
 ### opus-browser-walks
 
 Opus quota is normally available, so there is no reason to drop below it
