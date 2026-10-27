@@ -12,7 +12,7 @@ import tempfile
 
 HOOK = str(pathlib.Path(__file__).with_name("issue-bar-guard.py"))
 
-BAR = "Bar: observed — Sentry KUSHKI-C0 fired 2026-10-16\n"
+BAR = "Bar: observed — Sentry APP-C0 fired 2026-10-16\n"
 DELETES = "Bar: deletes — feedback table, submit mutation, UI entry\n"
 DIRECTED = "Bar: directed — \"open an issue for the target architecture\", 2026-10-26\n"
 
