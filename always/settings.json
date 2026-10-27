@@ -27,18 +27,16 @@
       "Bash(rm -rf ~)",
       "Bash(rm -rf $HOME)",
       "Bash(rm -rf ..)",
+      "Bash(rm -fr /)",
+      "Bash(rm -fr ~)",
+      "Bash(rm -fr $HOME)",
+      "Bash(rm -fr ..)",
       "Bash(git push --force origin main:*)",
       "Bash(git push --force origin master:*)",
       "Bash(git push -f origin main:*)",
       "Bash(git push -f origin master:*)",
       "Bash(git push --delete origin main:*)",
       "Bash(git push --delete origin master:*)"
-    ],
-    "ask": [
-      "Bash(*doppler *--config prd*)",
-      "Bash(*doppler *--config=prd*)",
-      "Bash(*doppler *-c prd*)",
-      "Bash(*DOPPLER_CONFIG=prd*)"
     ],
     "defaultMode": "bypassPermissions",
     "additionalDirectories": [
