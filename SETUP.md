@@ -226,15 +226,14 @@ the official plugin instead.
 
 `always/settings.json` and `pi/settings.json` are symlinked, so the harnesses
 rewrite them in place: Claude Code's `/model` and `/effort` rewrite (or delete)
-`model` and `effortLevel`; plugin installs and cloud sync rewrite
+`model`, `effortLevel` and `modelSettings`; plugin installs and cloud sync rewrite
 `enabledPlugins`, `extraKnownMarketplaces`, `autoCompactWindow`, and the UI toggles; Pi's `/model`
 and thinking toggles rewrite `defaultProvider`, `defaultModel`,
 `defaultThinkingLevel`, `lastChangelogVersion`, and `theme`. **This drift is
 expected — do not "reconcile" it**, and never read a HEAD value of those keys
 as a cross-machine default. Agents never ask about, flag, review, or edit
 those keys: they reflect the config on the user's machine at that moment. In a
-diff review they are not findings; when the user asks for a commit that
-includes the file, commit them as they stand. The repo owns only `permissions` and `hooks` in
+diff review they are not findings, and a commit leaves their hunks unstaged. The repo owns only `permissions` and `hooks` in
 `always/settings.json` and `packages` in `pi/settings.json`; a plain-copy
 `~/.claude/settings.json` is compared on those blocks alone.
 
