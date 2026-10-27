@@ -5,79 +5,31 @@ come from `model-selection.md` "Harness seats"; IDs, wrappers, and sandbox
 limits come from the harness's model card (`<harness>/model-defaults.md`;
 Claude Code: `instructions/codex-delegation.md`).
 
-Refine the current branch's open pull request until it is merge-ready. This
-workflow is independently runnable and is also the final stage composed by
-`longrun`; it never invokes `longrun` itself. Invoking it authorizes the
-accepted fixes, checks, commits, PR review replies, and at most one push per
-round described below, including a rebase onto the PR's base and the
-`--force-with-lease` push that follows it. The orchestrator owns git
-operations; implementer leaves make no git writes (`codex-delegation.md`
-"Sandbox note").
+Take the current branch's open pull request through one round of CodeRabbit
+and CI, then report. Independently runnable and the final `longrun` stage; it
+never invokes `longrun`. Invoking it authorizes the fixes, commits, PR replies,
+and the one push below, including a rebase onto the PR's base and its
+`--force-with-lease` push. The orchestrator owns git; implementer leaves make
+no git writes. A PR with neither checks nor CodeRabbit has nothing to babysit:
+say so and stop.
 
-CI checks and the CodeRabbit review together are CI/CD. A round treats them
-as one signal and combines any needed changes into at most one push. A PR
-with neither (no checks configured, CodeRabbit auto-review off) has nothing
-to babysit: say so and stop. The repo's own gate and the local CodeRabbit
-pass at push time (`git-operations.md` "Direction and approval") stand in.
+1. **Wait** for every check, CodeRabbit's status check included (`gh pr checks
+   --watch`). A pass with no review object is a clean review; "Review rate
+   limited" means none ran, and `git-operations.md` "CodeRabbit" decides what
+   replaces it. If the repo's `.coderabbit.yaml` lacks
+   `reviews.auto_review.auto_incremental_review: false`, tell the user: the
+   push will spend a second review.
+2. **Fix** red checks and the clear-cut findings worth fixing, in one pass on
+   the harness's implement lane. Decline the rest with a reason; a finding that
+   needs a choice goes to the user in the report. Rebase if the branch is
+   behind or conflicting. Verify locally, re-proving per `testing.md` "PR proof
+   and regression scenarios", and commit.
+3. **Teach.** Where an accept or decline reflects a durable preference, reply
+   on its thread mentioning `@coderabbitai` with the reason; it confirms with
+   "Learnings Added". Resolving threads and reactions teach it nothing.
+4. **Push once**, after verifying the remote target, and wait for its CI. A
+   second review needs the user's yes (`git-operations.md` "CodeRabbit").
 
-## Round
-
-1. **Wait until the round's signal has settled.** Round 1: every check
-   concluded, including CodeRabbit's own status check. Do not wait for a
-   review object — CodeRabbit posts one only when it has findings; a pass with
-   no review is a settled, clean round. A pass whose note reads "Review rate
-   limited" is not: no review ran. Whether to wait, run the CLI instead, or do
-   neither is `git-operations.md` "CodeRabbit"'s call by the diff's risk; a
-   CLI pass settles the round like a review. When waiting, ask `@coderabbitai
-   rate limit` (free) for the window, wait it out, then `@coderabbitai review`
-   the moment it opens. Later rounds: wait for CI only, then run the CLI over
-   the round's commits (`--base <the head round 1's review covered>`); an
-   auto-review that lands meanwhile is triaged too, but the round never waits
-   for one. Poll read-only with `gh` (`gh pr checks`, `gh api`); a poll that
-   keys on a review object appearing on the new head never satisfies after a
-   clean push. Never report while the round's signal is still pending.
-   Claude Code: a wait past an hour uses the `ScheduleWakeup` heartbeat (`claude-conventions.md` "Prompt-cache heartbeat during long waits"), stopped the moment the round resumes; elsewhere: keep polling (`gh pr checks --watch`, `gh api`).
-2. **Triage.** Red checks get fixed. Every CodeRabbit finding is accepted,
-   declined with a reason, or deferred to the user in the report — the
-   orchestrator's call under the principles §4 escalation bar. There is no
-   count threshold: "minimal" means nothing is left that the orchestrator
-   would accept. If the branch is behind or conflicting, verify the PR's
-   actual base branch and remote, then rebase onto it (the `git-operations.md`
-   stacked-branch exception still applies). Merge order across PRs is the
-   user's call.
-3. **Fix.** Accepted findings and CI fixes go to ONE pass on the harness's
-   implement lane, rung per `model-selection.md` "Effort". Verify locally and
-   commit. Re-proof follows `testing.md` "PR proof and regression scenarios":
-   scoped to what the fixes can change, the rest reused from the branch's
-   earlier proof, and the round's report says which.
-4. **Push once if changes need publishing** (`--force-with-lease` after a
-   rebase), after verifying the remote target.
-   Never push a CI fix alone while a CodeRabbit review is pending. If nothing
-   needs changing and the PR satisfies the ship gate, report merge-ready.
-
-## Teaching CodeRabbit
-
-Resolving threads and thumbs reactions teach it nothing. Where an accept or
-decline reflects a durable team preference, reply on that line thread
-mentioning `@coderabbitai` with the reasoning ("we intentionally … because
-…"); a one-off exception gets a plain reply without the mention. Encouraged
-wherever there is real learning, never mandatory. CodeRabbit confirms with a
-"Learnings Added" section.
-
-## Two-round cost circuit breaker
-
-If round 1 changes the PR, wait for its CI before round 2; round 2's review is
-the CLI pass over round 1's commits (step 1). After
-round 2's triage, implement accepted fixes. If another push is needed, comment
-`@coderabbitai ignore` on the PR (never in the description, which would have
-skipped round 1), then push once. Wait for the final push's CI checks to
-conclude before assessing readiness.
-
-There is no round 3: the cap limits review cost, not the ship gate. Report
-merge-ready only when the current PR satisfies the principles §4 "Ship gate"
-and no accepted findings remain unresolved. Otherwise preserve the work and
-report the circuit breaker, remaining findings, and failed or blocked checks
-as incomplete delivery; do not claim merge-ready.
-
-Merge only when the user explicitly directed "merge when ready" and named
-squash vs merge commit; otherwise report the verified PR status without merging.
+Report merge-ready only when the PR meets principles §4 "Ship gate" and no
+accepted finding is open; otherwise report what remains. Merge only when the
+user directed "merge when ready" and named squash or merge commit.
