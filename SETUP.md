@@ -21,8 +21,8 @@ The repo is cloned at `~/Development/developer-config` on every machine
 | Live path | → | Canonical source (this repo) |
 |---|---|---|
 | `~/.claude/CLAUDE.md` | symlink | `claude-root.md` |
-| `~/.codex/AGENTS.md` | symlink | `instructions/principles.md` |
-| `~/.codex/config.toml` approvals and native subagent defaults | merge | Set `approval_policy = "on-request"`, `approvals_reviewer = "auto_review"`, `[agents]` to GPT-6.1 Sol / high, and the dispatch instruction below; preserve every unrelated setting |
+| `~/.codex/AGENTS.md` | symlink | `codex/AGENTS.md` (generated from `claude-root.md` plus Codex's card) |
+| `~/.codex/config.toml` approvals and native subagent defaults | merge | Set `approval_policy = "on-request"`, `approvals_reviewer = "auto_review"`, `[agents]` to GPT-6.1 Sol / high; preserve every unrelated setting |
 | `~/.codex/rules/command-safety.rules` | symlink | `codex/command-safety.rules` (hard blocks for the unrecoverable and Doppler prd) |
 | `~/.codex/hooks.json` | symlink | `codex/hooks.json` (the issue-bar nudge; the exec wrappers pass `--dangerously-bypass-hook-trust` since this repo is the vetting; interactive Codex trusts it once in `/hooks`, again after the script changes) |
 | `~/.pi/agent/AGENTS.md` | symlink | `instructions/principles.md` |
@@ -68,7 +68,7 @@ starting harnesses, and never installs packages or changes live files.
 
 Use symlinks for repo-owned files so edits land in git. The existing plain-copy
 exception for Claude settings is described below. Machine-owned merges are the
-listed Codex approvals/defaults/routing, Grok compatibility/models/MCP, and Pi MCP entries;
+listed Codex approvals/defaults, Grok compatibility/models/MCP, and Pi MCP entries;
 preserve all unrelated configuration.
 
 The hook scripts — `always/scripts/supervised-git-backstop.py` (plus its test,
@@ -88,9 +88,10 @@ shell that `command -v codex-exec.sh`, `command -v claude-exec.sh`, and, when
 installed, `command -v pi-exec.sh` resolve to these repo-owned wrappers.
 
 `~/.codex/AGENTS.md` is what Codex reads globally (never
-`~/.claude/AGENTS.md`); it loads the shared engineering principles only. Keep
-model routing out of that file. Merge these values into `~/.codex/config.toml` without replacing any
-unrelated instruction or setting:
+`~/.claude/AGENTS.md`); it loads Claude's shared core plus Codex's card.
+Regenerate with `python3 always/scripts/check-wiring.py --generate` after
+editing a source; CI's `--check` rejects drift. Merge these values into
+`~/.codex/config.toml` without replacing unrelated instructions or settings:
 
 ```toml
 approval_policy = "on-request"
@@ -109,13 +110,6 @@ containment. Do not pair it with `never`, which rejects escalations before
 review. These values affect newly loaded configuration;
 verify effective permissions after restarting the client.
 
-Also append this sentence to the existing top-level `developer_instructions`
-string, or create that string if it is absent:
-
-> Before dispatching native subagents, a cross-family `claude -p` pass, or a Grok ACP pass, read
-> `~/Development/developer-config/codex/model-defaults.md` and apply it unless
-> an explicit user or per-dispatch model/reasoning choice overrides it.
-
 The agent TOML values are mechanical defaults, not an effort floor; the card routes
 each dispatch through `instructions/model-selection.md`. After pulling a change
 to these values, each machine updates its own `[agents]` and Grok
@@ -123,7 +117,7 @@ to these values, each machine updates its own `[agents]` and Grok
 than a symlink because Codex owns and mutates the rest of `config.toml`
 (plugins, trusted projects, MCP, and desktop state).
 
-**Grok Build** (`~/.grok/`) is a **full orchestrator**, like Claude Code: its
+**Grok Build** (`~/.grok/`) keeps its existing rule-file wiring: its
 session model is the machine's local config, native `spawn_subagent` children
 are Grok 4.7 (they cannot be Claude or Codex), Codex implement via the existing Claude Code wrappers, and
 Claude via `claude -p`. Grok does **not** expand `@import`, so there is no
@@ -131,7 +125,7 @@ Claude via `claude -p`. Grok does **not** expand `@import`, so there is no
 later-alphabetical wins on conflict, which is why the links are numbered). That
 set is the `~/.grok/rules/` rows in "Contract"; it deliberately omits
 `claude-conventions.md`, and model-selection and codex-delegation are read on
-dispatch per the bootstrap rule, not linked.
+dispatch per its harness card, not linked.
 
 Grok's TUI mutates `~/.grok/config.toml` (hints, UI, marketplace), so that file
 is a documented merge rather than a symlink, same reason as Codex. Merge without
@@ -177,8 +171,8 @@ already loads them from `~/.claude/settings.json`, and a second registration
 would double-fire.
 
 **Pi** (`~/.pi/agent/`) runs the machine's local default model. Its one global
-context file points at `principles.md` (same as
-Codex). Pi differs from Claude Code in two ways that matter here — it injects
+context file points at `principles.md`. Pi differs from Claude Code in two
+ways that matter here — it injects
 context files **verbatim** (no `@import` expansion, so the `claude-root.md`
 pure-imports pattern does NOT work for it) and it loads only **one** global
 context file. So Pi receives the universal root doctrine (`principles.md`) and
@@ -330,37 +324,32 @@ carries no `agents/` directory at all and is likewise discoverable.
 
 ```
 claude-root.md                      the ~/.claude/CLAUDE.md loader — pure @imports of the
-                                    always-loaded Claude-side files below, holds no rules itself
+                                    shared core + Claude conventions; manifest for codex/AGENTS.md
+codex/AGENTS.md                     generated shared core + codex/model-defaults.md, always loaded
 instructions/principles.md          every agent, every repo  (Claude via claude-root import;
                                     Codex via ~/.codex/AGENTS.md; Grok via ~/.grok/rules/00-principles.md;
                                     Hermes embeds it in SOUL via sync-soul-principles.py)
 instructions/git-operations.md      git, branch, worktree, and commit operations — permissions,
                                     backstop tiers, commit hygiene, rebase policy, durable worktrees
-                                    (Claude via claude-root import; Grok via
+                                    (Claude via claude-root import; Codex via codex/AGENTS.md; Grok via
                                     ~/.grok/rules/10-git-operations.md; Hermes embeds it in SOUL
-                                    next to principles; Codex and Pi reach it through the §7 pointer)
+                                    next to principles; Pi reaches it through the §7 pointer)
 instructions/testing.md             test strategy, authoring gate, refused shapes, pruning —
-                                    every agent reads it on demand via the principles §4 pointer
+                                    always loaded by Claude Code + Codex; others use the principles §4 pointer
 instructions/claude-conventions.md  Claude Code only
-instructions/dispatch-bootstrap.md  Claude Code + Grok Build always-loaded: hard delegation
+instructions/dispatch-bootstrap.md  Claude Code + Codex + Grok Build always-loaded: delegation
                                     triggers, the read-on-dispatch rule,
                                     the External-calls default (none unless decided)
 instructions/model-selection.md     canonical model profiles, harness seats, and effort —
-                                    read on dispatch by Claude Code, Grok Build, and
-                                    Codex (the latter via `codex/model-defaults.md`);
-                                    Hermes links it
+                                    always loaded by Claude Code + Codex; others read on dispatch
 instructions/agent-guidance.md      reference, not auto-loaded
-codex/model-defaults.md              Codex dispatch routing (native subagents,
-                                     cross-family `claude -p`, Grok Build over ACP),
-                                     loaded on dispatch
+codex/model-defaults.md              Codex dispatch mechanics, always loaded in codex/AGENTS.md
 pi/model-defaults.md                 Pi dispatch projection, loaded via APPEND_SYSTEM.md
 grok/model-defaults.md               Grok Build dispatch projection, loaded via
                                      ~/.grok/rules/30-model-defaults.md
 hermes/model-defaults.md             Hermes dispatch mechanics (Claude via claude -p only)
 instructions/rationale.md            incident and reasoning archive behind the loaded rules — not auto-loaded
-instructions/codex-delegation.md    orchestrators only (Claude / Hermes / Grok Build) —
-                                    Claude Code reads it on dispatch (not auto-loaded);
-                                    Grok reads it on dispatch (not linked)
+instructions/codex-delegation.md    brief-writers read on dispatch; not auto-loaded
 instructions/coding-orchestration.md Hermes farm doctrine — linked, not auto-loaded
 instructions/durable-worktrees.md    reference, not auto-loaded
 ```
@@ -378,16 +367,16 @@ a second owner; a deliberate override must be labeled as one).
       On Hermes installs, this includes `agentplan`, `execute-plan`, `rev`,
       `babysit`, `longrun`, and shared `docs` and `clearcut-review` under `skills/software-development/`.
 - [ ] `python3 always/scripts/check-workflow-stubs.py` exits 0 (every delivery-skill stub points at an existing `workflows/*.md`).
-- [ ] `~/.codex/AGENTS.md` resolves to a file whose first line is `# Engineering principles`
+- [ ] `~/.codex/AGENTS.md` resolves to `codex/AGENTS.md`; `python3 always/scripts/check-wiring.py --check` exits 0.
 - [ ] `~/.codex/config.toml` retains all machine-owned settings after merging.
 - [ ] *If Grok Build is installed:* `grok --version` and `grok models` succeed under the machine-local Grok login.
 - [ ] *If Pi is installed:* `~/.pi/agent/AGENTS.md` starts with `# Engineering principles`; role profiles under `~/.pi/agent/agents/` have no pinned model/thinking.
 - [ ] *If Grok Build is installed:* `~/.grok/config.toml` retains all machine-owned settings after merging.
 - [ ] *If Grok Build is installed:* a fresh `grok inspect` lists `00-principles.md`, `05-dispatch-bootstrap.md`, `10-git-operations.md`, and `30-model-defaults.md` as loaded project instructions. `~/.claude/CLAUDE.md` if listed is tagged `[disabled]` (unexpanded `@import` stub).
 - [ ] *If Grok Build is installed:* `grok inspect` labels the delivery six `user` from `~/.grok/skills`, not `user [claude]`, and lists an MCP server named `convex` from `~/.grok/config.toml`.
-- [ ] A fresh `claude` session sees principles §1–§12, the Artifacts rule, AND the
-      dispatch-bootstrap hard delegation triggers; `model-selection.md` and
-      `codex-delegation.md` are NOT in its ambient context (read on dispatch only)
+- [ ] Fresh Claude Code and Codex sessions see principles, git-operations,
+      dispatch-bootstrap, model-selection, testing, and their own harness card;
+      `codex-delegation.md` remains read on dispatch.
 - [ ] *If Hermes is installed:* `~/.hermes/SOUL.md`'s principles block matches
       `principles.md` — `python3 ~/.hermes/scripts/sync-soul-principles.py`
       prints `already in sync`. Any other output means the block drifted (or

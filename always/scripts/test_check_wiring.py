@@ -1,6 +1,9 @@
 """Exercise configuration drift that can leave a harness incorrectly wired."""
 
 import importlib.util
+import shutil
+import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -25,25 +28,8 @@ class MergeTests(unittest.TestCase):
             (root / "config.toml").write_text(text)
             return MODULE.audit_merge(harness, root)
 
-    def test_routing_must_be_an_active_instruction(self):
-        config = (
-            CODEX_PERMISSIONS + '[agents]\ndefault_subagent_model = "gpt-6.1-sol"\n'
-            'default_subagent_reasoning_effort = "high"\n'
-        )
-        for prefix in (
-            '# read codex/model-defaults.md\n',
-            'unrelated = "codex/model-defaults.md"\n',
-        ):
-            with self.subTest(prefix=prefix):
-                self.assertTrue(self.audit(prefix + config))
-        self.assertFalse(self.audit(
-            'developer_instructions = "Read codex/model-defaults.md before dispatch"\n'
-            + config
-        ))
-
     def test_invalid_config_fails_without_a_traceback(self):
         for text in (
-            'developer_instructions = "Read codex/model-defaults.md"\n'
             '[agents]\ndefault_subagent_model = "gpt-6.1-sol"\n'
             'default_subagent_reasoning_effort = "high"\ninvalid toml',
             '[agents]\ndefault_subagent_model = "gpt-6.1-sol"\n'
@@ -54,15 +40,13 @@ class MergeTests(unittest.TestCase):
 
     def test_equivalent_toml_syntax_is_accepted(self):
         self.assertFalse(self.audit(
-            CODEX_PERMISSIONS + "developer_instructions = 'Read codex/model-defaults.md before dispatch'\n"
-            "agents = { default_subagent_model = 'gpt-6.1-sol', "
+            CODEX_PERMISSIONS + "agents = { default_subagent_model = 'gpt-6.1-sol', "
             "default_subagent_reasoning_effort = 'high' }\n"
         ))
 
     def test_codex_command_review_cannot_silently_be_disabled(self):
         config = (
             CODEX_PERMISSIONS
-            + 'developer_instructions = "Read codex/model-defaults.md"\n'
             + '[agents]\ndefault_subagent_model = "gpt-6.1-sol"\n'
             + 'default_subagent_reasoning_effort = "high"\n'
         )
@@ -100,6 +84,59 @@ class MergeTests(unittest.TestCase):
             path.write_text('{"mcpServers":{"convex":{"command":"npx",'
                             '"args":["-y","convex@latest","mcp","start"]}}}')
             self.assertFalse(MODULE.audit_pi_mcp(root))
+
+
+class CodexAgentsTests(unittest.TestCase):
+    # Config checks cannot detect missing rules or drift in the generated root.
+    def test_committed_codex_agents_is_current(self):
+        result = subprocess.run(
+            [sys.executable, SPEC.origin, "--check"], capture_output=True, text=True
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_generation_preserves_import_order_and_detects_drift(self):
+        with tempfile.TemporaryDirectory() as directory:
+            repo = Path(directory)
+            script = repo / "always/scripts/check-wiring.py"
+            script.parent.mkdir(parents=True)
+            shutil.copyfile(SPEC.origin, script)
+            (repo / "instructions").mkdir()
+            (repo / "codex").mkdir()
+            (repo / "claude-root.md").write_text(
+                "Manifest prose is not an instruction.\n"
+                "@~/Development/developer-config/instructions/second.md\n"
+                "@~/Development/developer-config/instructions/claude-conventions.md\n"
+                "@~/Development/developer-config/instructions/first.md\n"
+            )
+            (repo / "instructions/second.md").write_text("Second — [link](./rule.md)\n")
+            (repo / "instructions/first.md").write_text("First\n")
+            (repo / "instructions/claude-conventions.md").write_text("Claude only\n")
+            (repo / "codex/model-defaults.md").write_text("Codex card\n")
+            target = repo / "codex/AGENTS.md"
+
+            def run(flag):
+                return subprocess.run(
+                    [sys.executable, str(script), flag], capture_output=True, text=True
+                )
+
+            generated = run("--generate")
+            self.assertEqual(generated.returncode, 0, generated.stdout + generated.stderr)
+            content = target.read_bytes()
+            self.assertEqual(content.split(b"\n", 1)[1],
+                             "\nSecond — [link](./rule.md)\n\nFirst\n\nCodex card\n".encode())
+            self.assertEqual(run("--check").returncode, 0)
+            self.assertEqual(run("--generate").returncode, 0)
+            self.assertEqual(target.read_bytes(), content)
+            for stale in (b"stale\n", content[:-1], None):
+                with self.subTest(stale=stale):
+                    if stale is None:
+                        target.unlink()
+                    else:
+                        target.write_bytes(stale)
+                    result = run("--check")
+                    self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+                    self.assertIn("stale", result.stdout)
+                    self.assertEqual(target.read_bytes() if target.exists() else None, stale)
 
 
 if __name__ == "__main__":

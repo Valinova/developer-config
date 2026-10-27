@@ -1,8 +1,7 @@
 # Dispatch bootstrap
 
-Always loaded so a session knows the moment it must delegate and what to read
-first. `model-selection.md` (seats, effort, lanes) and
-`codex-delegation.md` (briefs, wrappers) are read on dispatch, not every turn.
+Always loaded by Claude Code and Codex with model policy and testing.
+`codex-delegation.md` (briefs, wrappers) is read on dispatch.
 
 **A check killed for memory is a memory problem, not a code failure.** On
 WSL, earlyoom kills heavy check processes first (`tsgo`, `vitest`, `eslint`,
@@ -14,28 +13,33 @@ its result says nothing about the code. Don't change code in response. Wait
 until other sessions' heavy work has settled (check `free -h` every few
 minutes), then retry once. Never retry in a loop.
 
-**Hard delegation triggers — delegate, don't do it yourself:**
+**Delegate in three cases:**
 
-- **Fact retrieval across more than a couple of files** (repo recon, logs or
-  transcripts, doc digestion, "find every place that…") → a retrieval
-  subagent that returns a distilled brief (≤ ~3K tokens) with file:line
-  pointers; delegate any extraction whose result would exceed ~2K tokens.
-  Judging content is read, not delegated. Verify by spot-checking pointers.
-- **Any edit touching more than a couple of files**, or any implement pass
-  with a brief → the harness's implementer lane (Claude Code: a fresh native
-  Opus `Agent` at the task's rung, Codex wrappers for a user-named
-  cross-family implement), never the orchestrator
-  editing file by file in its own window, except a `rev` reviewer applying its own
-  clear-cut fixes within the agreed findings' scope, with no git writes.
+1. **Multitasking or long-running work:** helpers run while you keep the
+   conversation coherent.
+2. **Orchestrating a workflow end-to-end** (`longrun`, `execute-plan`, `rev`,
+   …): helpers implement, reviewers review. While orchestrating, your own
+   tool calls are limited to writing briefs, dispatching, reading verdicts
+   and post-run summaries, reading the diff you will commit, small
+   decision-critical artifacts, authorized local verification (including
+   the full pre-commit gate), and git.
+3. **Bulk or mechanical work:** retrieval across more than a couple of files
+   → a retrieval subagent returning a distilled brief (≤ ~3K tokens) with
+   file:line pointers; delegate extractions over ~2K tokens. Judging content
+   is read, not delegated; spot-check pointers. Edits across more than a
+   couple of files or any implement pass with a brief → the harness's
+   implementer lane, except a `rev` reviewer applying its own clear-cut fixes
+   within the agreed findings' scope, with no git writes.
+
+Otherwise do it yourself: a handful of reads or edits isn't worth a helper.
 
 **Read before you dispatch.** Before any dispatch (`Agent` tool,
 `claude-exec.sh`, `codex-exec.sh`, `pi-exec.sh`) or any
 workflow skill (`agentplan`, `execute-plan`, `rev`, `docs`, `full-docs`,
 `comment-audit`, `babysit`, `longrun`), read
-`~/Development/developer-config/instructions/model-selection.md` and
-`~/Development/developer-config/instructions/codex-delegation.md` in full. Every brief that lets a leaf delegate further must require the same
-read plus the leaf's harness model card (Claude Code: `codex-delegation.md`); ambient principles never supply
-seats, effort, or brief grammar.
+`~/Development/developer-config/instructions/codex-delegation.md` in full.
+Every brief that lets a leaf delegate further must require the same read
+plus the leaf's harness model card (Claude Code: `codex-delegation.md`).
 
 **External calls** dispatch another model for independent judgment (a plan
 or diff review, `rev`, an escalation, any cross-family opinion); local checks,

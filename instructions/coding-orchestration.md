@@ -82,7 +82,7 @@ Native HTTP delegation would give Hermes a second token store competing with the
 ## Execution paths (preference order)
 
 1. **Subscription CLI harnesses for ALL farm-out work.**
-   - `claude -p` — Anthropic subscription OAuth, *not* direct-API billing. Apply `claude-conventions.md` "Orchestrator context discipline".
+   - `claude -p` — Anthropic subscription OAuth, *not* direct-API billing. While orchestrating a workflow, apply `dispatch-bootstrap.md` "Delegate in three cases" §2.
    - `codex exec` — OpenAI subscription coding/review path. Always `</dev/null` in non-interactive contexts.
    - Fan-out follows `model-selection.md` "Subagent fan-out" and the process limits below.
 2. **Hermes-native `delegate_task` — niche/lightweight.** Use the native batch contract above.

@@ -1,8 +1,9 @@
 # Hermes dispatch defaults
 
 Before dispatch, read
-`~/Development/developer-config/instructions/dispatch-bootstrap.md` "External
-calls" and
+`~/Development/developer-config/instructions/dispatch-bootstrap.md`,
+`~/Development/developer-config/instructions/git-operations.md`,
+`~/Development/developer-config/instructions/codex-delegation.md`, and
 `~/Development/developer-config/instructions/model-selection.md`, especially
 "Announce-then-proceed preamble",
 "Harness seats" and "Subagent fan-out". Those sections

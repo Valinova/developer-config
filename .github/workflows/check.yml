@@ -20,6 +20,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - run: python3 always/scripts/check-wiring.py --check
       - run: python3 always/scripts/test_check_wiring.py
       - run: python3 always/scripts/test_supervised_git_backstop.py
       - run: python3 always/scripts/test_grok_acp_exec.py

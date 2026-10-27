@@ -5,7 +5,8 @@ The map below enforces SETUP.md's contract; update both together. Resolve
 relative symlinks and command-link chains before comparing targets. Only
 repo-pointing extras in managed directories are errors; foreign entries are
 informational. Hand-merged configs are parsed with Python 3.11+ tomllib.
-Never write live files. Exit 1 for drift, 0 when all installed harnesses pass.
+Never write live files. --generate rebuilds codex/AGENTS.md; --check checks
+only that generated file. Exit 1 for drift, 0 when checks pass.
 """
 
 # simplified: report-only, run by hand and in the gate. upgrade when: the
@@ -13,6 +14,7 @@ Never write live files. Exit 1 for drift, 0 when all installed harnesses pass.
 # SessionStart hook), or the report has been hand-applied identically on
 # two machines (then --fix).
 
+import argparse
 import json
 import re
 import sys
@@ -39,7 +41,7 @@ LINKS = {
         "mcp/playwright-browser-headed.json": "always/mcp/playwright-browser-headed.json",
     },
     "Codex": {
-        "AGENTS.md": "instructions/principles.md",
+        "AGENTS.md": "codex/AGENTS.md",
         "rules/command-safety.rules": "codex/command-safety.rules",
         "hooks.json": "codex/hooks.json",
     },
@@ -194,7 +196,6 @@ def audit_merge(harness, root):
     except tomllib.TOMLDecodeError:
         return [("MERGE", path, "valid TOML", "invalid TOML")]
     if harness == "Codex":
-        instructions = config.get("developer_instructions")
         checks = [
             ('approval_policy = "on-request"',
              config.get("approval_policy") == "on-request"),
@@ -204,8 +205,6 @@ def audit_merge(harness, root):
              config_value(config, "agents", "default_subagent_model") == "gpt-6.1-sol"),
             ('[agents] default_subagent_reasoning_effort = "high"',
              config_value(config, "agents", "default_subagent_reasoning_effort") == "high"),
-            ("developer_instructions: codex/model-defaults.md reference",
-             isinstance(instructions, str) and "codex/model-defaults.md" in instructions),
         ]
     else:
         checks = [("[compat.claude] {} = false".format(key),
@@ -259,6 +258,29 @@ def audit_pi_mcp(root):
             if config_value(config, "mcpServers", "convex", key) != expected]
 
 
+def codex_agents(repo, check):
+    prefix = "@~/Development/developer-config/"
+    sources = [line.removeprefix(prefix)
+               for line in (repo / "claude-root.md").read_text().splitlines()
+               if line.startswith(prefix)
+               and line != prefix + "instructions/claude-conventions.md"]
+    sources.append("codex/model-defaults.md")
+    content = (
+        b"<!-- Generated from claude-root.md by always/scripts/check-wiring.py --generate; do not edit. -->\n\n"
+        + b"\n".join((repo / source).read_bytes() for source in sources)
+    )
+    target = repo / "codex/AGENTS.md"
+    if check:
+        if not target.is_file() or target.read_bytes() != content:
+            print("codex/AGENTS.md is stale; run python3 always/scripts/check-wiring.py --generate")
+            return 1
+        print("codex/AGENTS.md is current")
+    else:
+        target.write_bytes(content)
+        print("Generated codex/AGENTS.md")
+    return 0
+
+
 def main(home=None, repo=None):
     home = Path.home() if home is None else Path(home)
     repo = Path(__file__).resolve().parents[2] if repo is None else Path(repo)
@@ -294,4 +316,11 @@ def main(home=None, repo=None):
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description=__doc__)
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--generate", action="store_true", help="rebuild codex/AGENTS.md")
+    mode.add_argument("--check", action="store_true", help="check codex/AGENTS.md drift only")
+    args = parser.parse_args()
+    if args.generate or args.check:
+        sys.exit(codex_agents(Path(__file__).resolve().parents[2], args.check))
     sys.exit(main())

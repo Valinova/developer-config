@@ -1,12 +1,7 @@
 # Codex dispatch defaults
 
-Before dispatch, read
-`~/Development/developer-config/instructions/dispatch-bootstrap.md` "External
-calls" and
-`~/Development/developer-config/instructions/model-selection.md`, especially
-"Announce-then-proceed preamble",
-"Harness seats" and "Subagent fan-out". Those sections
-own shared policy; this card is not a substitute for them.
+Shared policy is always loaded with this card. Before dispatch, read
+`~/Development/developer-config/instructions/codex-delegation.md`.
 The `claude -p` process lifecycle is Codex-specific and is owned here. Grok
 is dormant; `grok/` holds its config. An explicit user or per-dispatch model/reasoning choice always
 wins among valid combinations under that policy.

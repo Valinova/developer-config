@@ -25,10 +25,10 @@ One line per top-level entry; each file's header and `SETUP.md` own the detail.
 
 ```
 instructions/     The doctrine, one owner per fact: principles, git-operations,
-                  claude-conventions, dispatch-bootstrap (always loaded in Claude
-                  Code), model-selection and codex-delegation (read on dispatch),
-                  coding-orchestration, agent-guidance, durable-worktrees, the
-                  and the rationale archive (reference, not auto-loaded).
+                  dispatch-bootstrap, model-selection, testing (Claude Code + Codex
+                  always loaded); claude-conventions (Claude only); codex-delegation
+                  (read on dispatch); coding-orchestration, agent-guidance,
+                  durable-worktrees, rationale (reference, not auto-loaded).
 claude-root.md    Becomes ~/.claude/CLAUDE.md via symlink. Pure @imports.
 SETUP.md          The wiring contract + verification checklist. No install script.
 workflows/        One shared body per delivery workflow (agentplan, execute-plan,
@@ -43,7 +43,7 @@ always/
   mcp/            On-demand MCP server definitions (Playwright).
   settings.json   User-global ~/.claude/settings.json.
 claude/skills/    Claude stubs over workflows/.
-codex/            model-defaults.md (Codex dispatch card), permissions.md and
+codex/            AGENTS.md (generated shared core + model-defaults.md), permissions.md and
                   command-safety.rules (automatic review; unrecoverable + Doppler prd blocks); skills/:
                   stubs over workflows/ plus Codex-only skills.
 grok/             model-defaults.md (Grok Build card); skills/: stubs over workflows/.
@@ -78,15 +78,15 @@ coderabbit/       Canonical CodeRabbit path-instruction snippets, copied per rep
       ▼             ▼           ▼            ▼            ▼            ▼
 ┌──────────────┐ ┌──────────────┐ ┌────────────┐ ┌─────────────────────┐
 │ CLAUDE CODE  │ │    CODEX     │ │     PI     │ │     GROK BUILD      │
-│ principles + │ │ principles   │ │ principles │ │ rules/*.md:         │
-│ conventions +│ │ ONLY; merge  │ │ + pi/model-│ │  principles +       │
-│ bootstrap;   │ │ Sol/high;    │ │ defaults   │ │  bootstrap +        │
-│ model-sel. + │ │ read model-  │ │ skills:    │ │  grok/model-defaults│
-│ codex-deleg  │ │ defaults.md  │ │  always/+pi│ │  (model-sel./codex- │
-│ on dispatch  │ │ always/+codex│ │            │ │  deleg on dispatch) │
-│ skills:      │ │              │ │            │ │ skills: always/+    │
-│  always/+    │ │              │ │            │ │  grok/ (overrides   │
-│  claude/     │ │              │ │            │ │  bundled execute-   │
+│ shared core +│ │ shared core +│ │ principles │ │ rules/*.md:         │
+│ conventions  │ │ Codex card   │ │ + pi/model-│ │  principles + git + │
+│ (@imports)   │ │ (generated)  │ │ defaults   │ │  bootstrap +        │
+│ codex-deleg  │ │ codex-deleg  │ │ skills:    │ │  grok/model-defaults│
+│ on dispatch  │ │ on dispatch  │ │  always/+pi│ │  (model-sel./codex- │
+│ skills:      │ │ skills:      │ │            │ │  deleg on dispatch) │
+│  always/+    │ │  always/+    │ │            │ │ skills: always/+    │
+│  claude/     │ │  codex/      │ │            │ │  grok/ (overrides   │
+│              │ │              │ │            │ │  bundled execute-   │
 └──────────────┘ └──────────────┘ └────────────┘ │  plan). Codex       │
                                                  │ wrappers; claude -p │
                                                  └─────────────────────┘
