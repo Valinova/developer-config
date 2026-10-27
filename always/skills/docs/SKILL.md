@@ -9,9 +9,7 @@ Review all documentation created or modified on the current branch.
 
 **Seat.** When this stage is farmed out (a delegated lane, or the docs stage
 inside `longrun`), seat and rung come from `instructions/model-selection.md`
-"Harness seats" and "Effort". Under a distilled brief that names
-the sources, the allowlist and what to verify against the code, the fold is
-mechanical work. The orchestrator's own pass over the resulting diff is the
+"Harness seats" (the "Work" row). The orchestrator's own pass over the resulting diff is the
 judgment step.
 
 - Judge each document against the bar in `instructions/principles.md` §13. Fold what passes into its one owning doc; delete the rest, including the branch's local plan.

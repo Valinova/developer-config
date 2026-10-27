@@ -8,7 +8,7 @@ Claude Code: `instructions/codex-delegation.md`).
 Run the `docs` skill (`always/skills/docs/SKILL.md`) over every core document
 in the repository — not only the ones the branch touched — then validate the
 result adversarially. That validation is this workflow's gate
-(`model-selection.md` "External calls"); invoking it is the approval.
+(`dispatch-bootstrap.md` "External calls"); invoking it is the approval.
 
 ## Preamble
 
@@ -22,7 +22,7 @@ then the audit scope, and the parent pipeline mode only when composed.
    reads (with the consumer), and agent commands that write into `docs/`.
 2. **Audit.** Apply `docs` to the full core-doc set, fanning out read-only
    audit subagents at the harness's audit seat, with effort and fan-out per
-   `model-selection.md` "Effort" and "Subagent fan-out". The output is a
+   `model-selection.md` "Harness seats" and "Subagent fan-out". The output is a
    keep / fold / delete map.
 3. **Implement** the map in lanes with fixed file allowlists. Committed plans
    and backlogs go: the reviewer checks each backlog entry against the code,
@@ -31,8 +31,7 @@ then the audit scope, and the parent pipeline mode only when composed.
    reviews the complete documentation diff. Two finding classes block:
    content lost with no surviving owner, and a claim wrong against the code.
    Otherwise apply only findings the orchestrator and reviewer both deem
-   valuable. After an implementer override, pick the reviewer by the actual
-   author's family under `model-selection.md` "External calls".
+   valuable. Reviewer seat: `model-selection.md` "Harness seats".
 5. **Enforce.** Add or tighten a docs-budget check in the repo's full check
    command, with ceilings at the final size rounded up.
 6. Leave the resulting edits unstaged for the user's final review.

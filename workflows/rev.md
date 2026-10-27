@@ -6,14 +6,14 @@ limits come from the harness's model card (`<harness>/model-defaults.md`;
 Claude Code: `instructions/codex-delegation.md`).
 
 Review the committed branch. This workflow IS the diff review
-(`model-selection.md` "External calls"), independently runnable and also the
+(`dispatch-bootstrap.md` "External calls"), independently runnable and also the
 review stage composed by `longrun`; it never invokes `longrun` itself.
 Invoking it authorizes the review at the chosen depth and the commits required
 for the agreed fixes.
 
 ## Depth
 
-Pick the lightest matching row of the rev-depth table in `model-selection.md`
+Pick the lightest matching row of the rev-depth table in `workflows/longrun.md`
 "Delivery pipeline modes" and announce it, with the reviewer seat and rung,
 per "Announce-then-proceed preamble". The table owns what each row runs; in
 this workflow the full row's simplifier is the shared `code-simplifier` skill,
@@ -37,10 +37,10 @@ reviewer's brief.
 ## External-review-only mode
 
 When a caller invokes this skill as its already-selected cross-family reviewer
-(today: Claude through `claude -p` from Codex, Grok Build, or Hermes), run the
-review at the depth and scope the caller's brief names, return complete
-findings, and stop. Do not dispatch another reviewer, edit files, stage, or
-commit. Discovery nesting follows `model-selection.md` "Subagent fan-out";
+(today: Claude through `claude -p` from Codex or Hermes), run the
+review at the depth and scope the caller's brief names, apply the clear-cut
+fixes, return the remaining findings, and stop. Do not dispatch another
+reviewer, stage, or commit. Discovery nesting follows `model-selection.md` "Subagent fan-out";
 omission does not forbid it.
 
 ## Sequence
@@ -49,18 +49,27 @@ For a normal invocation, verify the branch against the user's direction
 (`git-operations.md` "Direction and approval") before modifying files.
 
 1. **Review.** Dispatch one cross-family reviewer at the harness's reviewer
-   seat (`model-selection.md` "External calls"), rung per "Effort", at the
-   chosen depth over the committed diff. It returns one findings list. The
-   orchestrator never reviews its own diff. After an implementer override,
-   pick the reviewer by the actual author's family under "External calls".
-2. **Agree.** Read the findings once; keep what is valuable and give each
-   dropped finding a one-line reason in the final report. No second review, no
-   re-triage loop. Escalate only unresolved critical choices under principles
-   §4.
-3. **Fix.** The harness's implement lane applies the kept set; the
-   orchestrator does no mechanical editing itself.
+   seat, rung per `model-selection.md` "Harness seats", at the
+   chosen depth over the committed diff. It applies the clear-cut fixes itself
+   (principles §3: one right answer), with no git writes, and returns the
+   findings that need a choice. The orchestrator never reviews its own diff.
+2. **Validate.** The orchestrator reads the fix diff and the open findings
+   once, and notes each edit it rejects and each finding it would take, with
+   its reasoning.
+3. **Align.** Resume the reviewer with those notes. What the two agree on gets
+   the clear-cut default, and the reviewer applies it, reverting rejected
+   edits. What they cannot agree on goes to the PR as a follow-up under
+   `longrun`, otherwise to the user in the final report.
 4. **Verify and commit.** The orchestrator runs the full check battery,
    stages exact files, and creates coherent descriptive commits.
 
 If the kept findings require several passes, execute them here as a bounded
 review-fix plan; do not recurse into `longrun`. Do not push or open a PR.
+
+Reuse valid findings. Verify ordinary fixes locally; another review runs only
+when a separate gate requires it. A confirmed finding earns an in-scope fix or
+an out-of-scope report under principles §3. A review finding alone does not
+justify a test: a bug must have a costly recurrence, and new logic follows
+`testing.md`'s authoring gate. The final report states what each pass changed;
+a pass that changed nothing is reported as such, never hidden — that is the
+signal to lower the default next time (why: rationale.md#cross-family-review).

@@ -1,9 +1,11 @@
 # Sub-agent model defaults (Pi)
 
 Before dispatch, read
+`~/Development/developer-config/instructions/dispatch-bootstrap.md` "External
+calls" and
 `~/Development/developer-config/instructions/model-selection.md`, especially
-"External calls", "Announce-then-proceed preamble",
-"Harness seats", "Roster", "Effort", and "Subagent fan-out". Those sections
+"Announce-then-proceed preamble",
+"Harness seats" and "Subagent fan-out". Those sections
 own shared policy; this card is not a substitute for them.
 
 Pi-only concerns below: explicit slugs (Pi cannot fuzzy-resolve family
@@ -21,7 +23,7 @@ still apply.
   two-family rule, translated through the ID map below.
 - Native Anthropic on Pi bills the API: an `anthropic/…` `Agent` runs only
   when the user names it, and the subscription-only Opus rule in canonical
-  "Subagent fan-out" does not authorize it.
+  "Harness seats" does not authorize it.
 
 ## Exact Pi model IDs
 
@@ -43,7 +45,7 @@ authenticated `/model` list before dispatch; do not guess a versioned slug.
 ### Provider routing is sealed
 
 Which provider each model must go through, and why a wrong pair silently
-bills OpenRouter, is `model-selection.md` "Harness seats". In Pi the prefix
+bills OpenRouter, is `instructions/coding-orchestration.md` "Auth doctrine (hard rules)". In Pi the prefix
 names an **authenticated Pi provider**, not the model's vendor:
 `openai/gpt-6-astra` is OpenRouter's slug, while the subscription route is
 `openai-codex/gpt-6-astra`; and `deepseek-v4-flash` does not exist in the
@@ -61,8 +63,7 @@ lookup:** never Haiku, never Sonnet, and Pi does not farm `claude -p`.
 - **Every fresh dispatch names `model` and `thinking`.** Tintin agent profiles
   own roles and tools only — not model defaults. Resume keeps the existing
   session model.
-- Choose the seat and rung from canonical "Harness seats", "Roster", and
-  "Effort", then translate the model through the ID map above.
+- Choose the seat and rung from canonical "Harness seats", then translate the model through the ID map above.
   Interactive session model/thinking is TUI state in
   `pi/settings.json` — expected to change; do not reconcile it.
 - Sub-agents can only use models Pi has authenticated (`/model`). If a pick
@@ -80,7 +81,7 @@ The Codex delegation pattern (`instructions/codex-delegation.md`) works for
 ~/.claude/scripts/pi-resume.sh <task-name> /tmp/pi-<task-name>-followup.md [same flags]
 ```
 
-Wrapper defaults: `xai` / `grok-4.7` / thinking `high`; select each dispatch under `model-selection.md` and resolve Pi IDs through the map above. Registry: `~/.hermes/state/pi-sessions.jsonl` (separate file, created on first dispatch — it does not exist until then; Pi's own line shape: `start` carries `log_file`, not the Codex registry's `log_path`). Logs `/tmp/pi-<task>.log`, post-run summary `/tmp/pi-<task>.post-run.md`. Resume is cwd-keyed — run `pi-resume.sh` from the same repo as the dispatch.
+Wrapper defaults: `deepseek` / `deepseek-flash` / thinking `high`; select each dispatch under `model-selection.md` and resolve Pi IDs through the map above. Registry: `~/.hermes/state/pi-sessions.jsonl` (separate file, created on first dispatch — it does not exist until then; Pi's own line shape: `start` carries `log_file`, not the Codex registry's `log_path`). Logs `/tmp/pi-<task>.log`, post-run summary `/tmp/pi-<task>.post-run.md`. Resume is cwd-keyed — run `pi-resume.sh` from the same repo as the dispatch.
 
 **Waiting.** Same shape as Codex: dispatch `pi-exec.sh` alone in its own
 `run_in_background` call, then attach `pi-wait.sh <task> <timeout>` in a
@@ -91,9 +92,7 @@ wake runs `pi-wait.sh <task> 1`, which reads only the current run (a resume
 leaves the previous post-run file in place until it closes). Confirm the route from the log, not the flags:
 `grep -oE '"(provider|model)":"[^"]+"' /tmp/pi-<task>.log | sort | uniq -c`.
 
-**Mechanical tail on DeepSeek** (user-named, 2026-09-22):
-`pi-exec.sh <task> <brief> --provider deepseek --model deepseek-flash --thinking high`
-resolves to the DeepSeek row of the ID map. A brief that allows nesting must pin every
+**Nesting on DeepSeek.** A brief that allows nesting must pin every
 nested `Agent` to `deepseek/deepseek-flash` at `high`, with disjoint file
 lists per nested agent.
 
@@ -105,9 +104,7 @@ this overrides any seat default." Then verify at the
 first wait, not at the end:
 `grep -oE '"name":"Agent","arguments":\{[^}]*"model":"[^"]+"' /tmp/pi-<task>.log`
 lists each nested dispatch's model. A mismatch is a brief-compliance finding:
-decide keep-or-stop with the user; don't let it pass silently. (2026-09-22: a
-DeepSeek leaf nested on `xai/grok-4.7` despite a pin; the user accepted Grok
-for mechanical work, so either is fine when named.)
+decide keep-or-stop with the user; don't let it pass silently.
 
 Differences from Codex that change the brief:
 

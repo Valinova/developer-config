@@ -28,8 +28,7 @@ instructions/     The doctrine, one owner per fact: principles, git-operations,
                   claude-conventions, dispatch-bootstrap (always loaded in Claude
                   Code), model-selection and codex-delegation (read on dispatch),
                   coding-orchestration, agent-guidance, durable-worktrees, the
-                  rationale archive (reference, not auto-loaded), and benchmarks
-                  (data log behind the effort rule, not loaded).
+                  and the rationale archive (reference, not auto-loaded).
 claude-root.md    Becomes ~/.claude/CLAUDE.md via symlink. Pure @imports.
 SETUP.md          The wiring contract + verification checklist. No install script.
 workflows/        One shared body per delivery workflow (agentplan, execute-plan,
@@ -130,7 +129,7 @@ documented merge into a machine-owned config; the table is `SETUP.md`
 "Contract". What each harness loads, and why Codex, Pi, and Grok Build load
 less than Claude Code, is in `SETUP.md` (the per-harness sections and
 "Instruction hierarchy"). Who orchestrates, implements, and reviews on each
-harness is `instructions/model-selection.md` "Harness seats" and "Roster".
+harness is `instructions/model-selection.md` "Harness seats".
 
 ## New machine
 

@@ -1,10 +1,10 @@
 # Codex delegation — brief template
 
-CLI-agnostic guidance for delegating work to `codex exec` from a non-Codex agent (Hermes, Claude Code, Grok Build, etc.).
+CLI-agnostic guidance for delegating work to `codex exec` from a non-Codex agent (Hermes, Claude Code, etc.).
 
 Before dispatch, read
 `~/Development/developer-config/instructions/model-selection.md` for
-"Harness seats", "Roster", "Effort", and "Subagent fan-out". This file owns
+"Harness seats" and "Subagent fan-out". This file owns
 briefs and wrapper mechanics, not model policy. Incident history behind the
 rules: `rationale.md` (not loaded).
 
@@ -28,13 +28,12 @@ rules: `rationale.md` (not loaded).
 Every brief must include:
 
 1. **Scope** — what to change.
-2. **Allowlist** — the explicit list of files codex is allowed to modify. If a fix needs to touch a file outside the allowlist, codex must stop and report rather than expand scope. Adjacent "while I'm here" fixes belong in a follow-up brief, not this one.
+2. **Allowlist** — the explicit list of files codex is allowed to modify. If a fix needs to touch a file outside the allowlist, codex must not expand scope: it stops that step, reports it with the patch it would apply, and continues the steps that do not depend on it (Codex otherwise halts the whole run, costing a resume). Adjacent "while I'm here" fixes belong in a follow-up brief, not this one.
 3. **Do NOT** — anti-goals (layers not to touch, phases to defer), **and the side-effecting commands the leaf must never run**: anything that deploys, migrates, writes a remote, or touches a shared environment. Source the list from the repo's own environment docs or the project's skill for that platform; (why: rationale.md#leaf-side-effects).
 4. **Success criteria** — what must pass (typecheck, specific tests, `bun run check`, etc.). The leaf runs only the checks its sandbox can complete (package lint, typecheck, the named tests). The invoker owns the full pre-commit gate outside the sandbox; a brief never asks the leaf for a build or a gate that needs network, port binding, or git subprocesses (why: rationale.md#leaf-gates). One typecheck at a time, package-scoped, never the whole repository suite; a *reviewer* brief verifies by reading and runs no suites at all (why: rationale.md#heavy-verification-serialization).
 5. **Sandbox note** — "Make NO git writes of any kind — no `git add`, `git commit`, `git fetch`, `git push`, branch, worktree, stash, or config changes. Leave edits unstaged and report changed files by path; the invoking agent handles all git operations. Leave pre-existing worktree and staged changes untouched." This applies to ordinary checkouts and linked worktrees alike. The wrapper's worktree warning is diagnostic; it does not change this contract.
-6. **Nested delegation** — implementer briefs only (Codex `exec`, Pi `pi -p`, and an Opus **implement** `claude -p`). Write "allowed for the mechanical tail (name it), after reading `dispatch-bootstrap.md` and the files it points at" or "forbidden". Omitting the section means forbidden (`model-selection.md` "Leaf fan-out").
+6. **Nested delegation** — implementer briefs only (Codex `exec`, Pi `pi -p`, and an Opus **implement** `claude -p`). An implement pass usually has one judgment core and a mechanical tail; the brief may allow nesting for the tail with fixed allowlists, the tail taking the `model-selection.md` "Harness seats" mechanical row. Write "allowed for the mechanical tail (name it), after reading `dispatch-bootstrap.md` and the files it points at" or "forbidden". Omitting the section means forbidden.
    Reviewer nesting follows `model-selection.md` "Subagent fan-out" instead; omitting the section from a reviewer brief does not forbid it.
-   Grok ACP leaves (`grok-acp-exec.py`, a user-named override lane) cannot nest — the wrapper passes `--no-subagents`. That flag is this wrapper only, not a Claude rule; never put it in a `claude -p` brief.
 7. **Final SUMMARY block instruction** — the brief must tell codex to end its run with a SUMMARY block in this exact grammar:
    ```
    SUMMARY:
@@ -76,10 +75,10 @@ decides the rung per diff. **Nobody pushes under a live editing lane:** a courie
 
 Every wrapper appends lifecycle events (`start` / `session_captured` / `close`, `resume_*` for resumes) to the shared, never-auto-pruned registry `~/.hermes/state/codex-sessions.jsonl` — the wrappers `mkdir -p` it, Hermes install or not; `/tmp/codex-<task>.*` files are per-run ephemera only. Line grammar, extraction regexes, and dispatch-hygiene constants are owned by `always/scripts/lib/codex_registry.py`; read its docstring before touching it.
 
-## Caller: Claude Code, Grok Build, and Hermes (shell wrappers)
+## Caller: Claude Code and Hermes (shell wrappers)
 
-Use the wrappers in `~/.claude/scripts/` — never raw `codex exec`. Grok Build
-and Hermes have no second wrapper set; they invoke the same scripts (Hermes
+Use the wrappers in `~/.claude/scripts/` — never raw `codex exec`. Hermes has
+no second wrapper set; it invokes the same scripts (Hermes
 through its dispatch guard, `coding-orchestration.md` "Path 1").
 
 ```bash
@@ -100,10 +99,10 @@ sustained memory pressure a `ScheduleWakeup` poll replaces the waiter since it
 holds no process. `codex-status.sh` is the mandatory liveness check before
 concluding a run is dead: STALE means "look at the log tail", not "kill it".
 
-Model, effort, and service tier are passed **per run as flags** — no env vars. The consumer decides each in its own prompt; unset, they default to `gpt-6.1-sol` / `high` / `default` tier — reviews from Claude Code and user-named implement passes alike; pass `--effort medium` for contained work and `--model gpt-6-astra` for complex cross-cutting work:
+Model, effort, and service tier are passed **per run as flags** — no env vars. The consumer decides each in its own prompt; unset, they default to `gpt-6.1-sol` / `high` / `default` tier; choose model and rung from `model-selection.md` "Harness seats":
 
-- `--model SLUG` — the permitted Codex slug under `model-selection.md` "Roster"; passed through without roster validation.
-- `--effort LEVEL` — passed through verbatim without validation. The CLI decides wire support; `model-selection.md` "Effort" decides which rung to request. Wrapper defaults are not a task's effort floor.
+- `--model SLUG` — passed through without roster validation.
+- `--effort LEVEL` — passed through verbatim without validation. The CLI decides wire support. Wrapper defaults are not a task's effort floor.
 - `--service-tier TIER` — default `default`; `priority` (the Fast 2x tier) is **user-opt-in only**: pass it only when the user has explicitly directed it for that run or session. Pipeline/command docs must never pin `priority` as their default tier. The wrapper never infers a tier from effort.
 
 Pass the same non-default `--model`/`--effort`/`--service-tier` to `codex-resume.sh` when resuming.
@@ -114,13 +113,13 @@ The exec wrapper redirects stdin, logs to `/tmp/codex-<task>.log`, registers in 
 
 Codex writes full session transcripts to `~/.codex/sessions/<date>/rollout-<timestamp>-<uuid>.jsonl`. The wrappers capture the session UUID in the registry at dispatch time so follow-ups don't have to grep the logs. Preserve resumability until cleanup: if a run fails before the session ID is captured, warn before starting over.
 
-## Pi delegation (Grok 4.7)
+## Pi delegation
 
-A user-named override lane (`model-selection.md` "Roster"). Delegated `pi -p` runs (`pi-exec.sh` and twins in `~/.claude/scripts/`) follow the same brief sections, Sandbox note, SUMMARY block, and post-run discipline as Codex; wrapper flags, registry, and Pi-specific differences are in `pi/model-defaults.md` "Delegated runs".
+A user-named override lane (`model-selection.md` "Harness seats"). Delegated `pi -p` runs (`pi-exec.sh` and twins in `~/.claude/scripts/`) follow the same brief sections, Sandbox note, SUMMARY block, and post-run discipline as Codex; wrapper flags, registry, and Pi-specific differences are in `pi/model-defaults.md` "Delegated runs".
 
 ## Claude delegation (`claude -p`)
 
-The lane for reaching a Claude seat from outside Claude Code (Codex, Pi, Hermes, Grok). From a Claude Code orchestrator the same-family lane is the native `Agent`, which takes `model` and `effort`; `claude-exec.sh` is used there only for a run that must outlive the session (`model-selection.md` "Fresh window or inherited context"). Deliberately simpler than the Codex wrappers (why: rationale.md#claude-exec-simplicity).
+The lane for reaching a Claude seat from outside Claude Code (Codex, Pi, Hermes). From a Claude Code orchestrator the same-family lane is the native `Agent`, which takes `model` and `effort`; `claude-exec.sh` is used there only for a run that must outlive the session (`model-selection.md` "Fresh window or inherited context"). Deliberately simpler than the Codex wrappers (why: rationale.md#claude-exec-simplicity).
 
 ```bash
 ~/.claude/scripts/claude-exec.sh <task-name> /tmp/claude-<task-name>-brief.md [--effort LEVEL] [--model SLUG] [--resume] [--foreground]
@@ -128,11 +127,11 @@ The lane for reaching a Claude seat from outside Claude Code (Codex, Pi, Hermes,
 ~/.claude/scripts/claude-status.sh <task-name>                                # read-only triage verdict: RUNNING / CLOSED / FAILED / STALE / UNKNOWN
 ```
 
-Wrapper defaults: `opus` / `medium`; choose the rung under `model-selection.md` "Effort", passing overrides explicitly. `--resume` continues the session last captured for that task name. Registry `~/.hermes/state/claude-sessions.jsonl` (shell-wrapper line grammar, separate file); log `/tmp/claude-<task>.log` (stream-json); post-run summary `/tmp/claude-<task>.post-run.md` with staged / unstaged / untracked sections and the final result text plus cost. Runs with `--dangerously-skip-permissions`; the PreToolUse hooks in `always/settings.json` still apply inside the child.
+Wrapper defaults: `opus` / `medium`; choose the rung under `model-selection.md` "Harness seats", passing overrides explicitly. `--resume` continues the session last captured for that task name. Registry `~/.hermes/state/claude-sessions.jsonl` (shell-wrapper line grammar, separate file); log `/tmp/claude-<task>.log` (stream-json); post-run summary `/tmp/claude-<task>.post-run.md` with staged / unstaged / untracked sections and the final result text plus cost. Runs with `--dangerously-skip-permissions`; the PreToolUse hooks in `always/settings.json` still apply inside the child.
 
 Differences from Codex that change the brief:
 
 - **Same delegated git policy:** the child *can* write the index, but must follow the no-git-writes Sandbox note, `CHANGED_FILES` report, and post-run provenance checks above.
 - Same dispatch rules: `claude-exec.sh` in its own `run_in_background` Bash call as the final command, `claude-wait.sh` in a separate call (`foreground-dispatch-guard.py` enforces both); same 45s first-event check; same registry-based recovery after a session restart (`claude-wait.sh` is idempotent). `claude-wait.sh` and `claude-status.sh` are resume-aware — a run starts at the task's most recent `start` **or** `resume_started` event (`lib/wrapper-common.sh` owns that rule), so neither is answered by the previous run's close line.
-- **Nested delegation** follows Required brief sections §6: implement briefs use its omit-default; reviewer nesting follows `model-selection.md` "Subagent fan-out", and omission does not forbid it. Do not import Grok ACP `--no-subagents` here.
+- **Nested delegation** follows Required brief sections §6: implement briefs use its omit-default; reviewer nesting follows `model-selection.md` "Subagent fan-out", and omission does not forbid it.
 - All other brief sections and post-run discipline apply unchanged. The brief carries the distilled context — file:line pointers, the plan phase, the allowlist — because nothing from the orchestrator's window reaches the child except that file.

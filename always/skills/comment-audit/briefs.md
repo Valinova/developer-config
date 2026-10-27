@@ -35,7 +35,7 @@ Return ≤400 tokens: stats, counts, the three most important symptoms.
 ## Verifier (cross-family reviewer seat, one per shard)
 
 Review one shard of a comment audit. The author's family tendencies come from
-`model-selection.md` "Known family tendencies"; lead with them. Hunt: (a)
+`model-selection.md` "Family tendencies"; lead with them. Hunt: (a)
 deletions of load-bearing comments, (b) rewrites whose new claim is false,
 (c) symptoms overstated or misclassified.
 

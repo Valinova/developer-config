@@ -16,6 +16,17 @@ pointers I would otherwise restate — never PR status, shipped work, pending-it
 lists, or anything git, a PR, or the code can answer. A ruling about code goes
 in the repo (a comment at the site, or `AGENTS.md` for a recurring trap).
 
+## Orchestrator context discipline
+
+Everything in the orchestrator's window is re-sent every turn and degrades its
+reasoning as it grows (`model-selection.md` "Fresh window or inherited
+context"). Its own tool calls are limited to: writing briefs, dispatching,
+reading verdicts and post-run summaries, reading the diff it is about to
+commit, small decision-critical artifacts, authorized local verification
+(including the full pre-commit gate), and git. Everything else is farmed out
+per `model-selection.md` "Harness seats"; when to delegate at all is
+`dispatch-bootstrap.md`.
+
 ## Edit tracked files with the Edit tool, never an in-place shell rewrite
 
 Break and restore an owner with Edit. A shell in-place rewrite of a tracked

@@ -358,7 +358,6 @@ grok/model-defaults.md               Grok Build dispatch projection, loaded via
                                      ~/.grok/rules/30-model-defaults.md
 hermes/model-defaults.md             Hermes dispatch mechanics (Claude via claude -p only)
 instructions/rationale.md            incident and reasoning archive behind the loaded rules — not auto-loaded
-instructions/benchmarks.md           data log behind the effort rule — not loaded
 instructions/codex-delegation.md    orchestrators only (Claude / Hermes / Grok Build) —
                                     Claude Code reads it on dispatch (not auto-loaded);
                                     Grok reads it on dispatch (not linked)
@@ -447,8 +446,8 @@ and only *loaded* via symlink; `docs` and `clearcut-review` load from
 `always/skills/` alongside them.
 Hermes restating doctrine in other local skills is still drift — prefer a
 pointer at this repo.
-Model/effort policy: read `instructions/model-selection.md` "Harness seats",
-"Roster", and "Effort" through `hermes/model-defaults.md` before dispatch.
+Model/effort policy: read `instructions/model-selection.md` "Harness seats"
+through `hermes/model-defaults.md` before dispatch.
 
 **WSL.** Keep all clones on the Linux filesystem (`~/Development/...`), never
 under `/mnt/c` — symlinks are unreliable on the Windows mount and git won't

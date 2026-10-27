@@ -27,8 +27,8 @@ set -euo pipefail
 TASK=""
 BRIEF=""
 MODE="background"
-PROVIDER="xai"
-MODEL="grok-4.7"
+PROVIDER="deepseek"
+MODEL="deepseek-flash"
 THINKING="high"
 
 usage() {
@@ -42,8 +42,8 @@ with the follow-up brief. Run from the same repo as the original dispatch
 
 Options:
   --foreground      Block until pi completes.
-  --provider NAME   Provider. Default: xai.
-  --model SLUG      Model to run. Default: grok-4.7.
+  --provider NAME   Provider. Default: deepseek.
+  --model SLUG      Model to run. Default: deepseek-flash.
   --thinking LEVEL  Thinking level (off|minimal|low|medium|high|xhigh|max). Default: high.
 EOF
   exit 1

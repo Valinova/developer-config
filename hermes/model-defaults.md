@@ -1,9 +1,11 @@
 # Hermes dispatch defaults
 
 Before dispatch, read
+`~/Development/developer-config/instructions/dispatch-bootstrap.md` "External
+calls" and
 `~/Development/developer-config/instructions/model-selection.md`, especially
-"External calls", "Announce-then-proceed preamble",
-"Harness seats", "Roster", "Effort", and "Subagent fan-out". Those sections
+"Announce-then-proceed preamble",
+"Harness seats" and "Subagent fan-out". Those sections
 own shared policy; this card is not a substitute for them. Then read
 `~/Development/developer-config/instructions/coding-orchestration.md` for
 dispatch paths, wrappers, auth doctrine, and the PR-burndown / decision-brief
@@ -21,7 +23,6 @@ contracts.
   `gpt-6.1-sol-900k` — the suffix is stripped on the wire. Do not pin
   `model.context_length` over it; the bare slug budgets the stale 272k
   advertisement.
-- DeepSeek via `delegate_task` only for trivial retrieval/summaries.
 
 ## Machine-local vs owned here
 

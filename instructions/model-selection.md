@@ -14,291 +14,89 @@ lifecycle, sandbox limits: `codex/`, `grok/`, `pi/`, and
 `hermes/model-defaults.md`. Farm-out mechanics (`claude -p` / `codex exec`
 lifecycle, Hermes paths, auth doctrine) live in `coding-orchestration.md`.
 
-Interactive Claude Code and `claude -p` ride the Anthropic subscription.
-Hermes conversation does not: native `provider: anthropic` bills the API
-(extra usage), and `claude-subscription-directsdk-experimental` is not an
-automatic route (tried, not reliable). Claude farm-out stays `claude -p`.
+Every session starts in one of two families, by harness. Inside a range, the
+task's complexity picks the rung; complex work takes the higher side.
 
-The same subscription-over-metered rule seals **provider routing** on the
-harnesses sharing Pi's provider store (Pi, Hermes, Grok Build): a model goes
-through the provider that owns it — **DeepSeek only through `deepseek`, OpenAI
-models only through the `openai-codex` subscription** — unless the user
-explicitly names another route for that dispatch. A `provider/id` pair naming
-the model's vendor rather than an authenticated provider does not error; it
-falls through to OpenRouter and bills the metered key. Pi's exact IDs and the
-pre-dispatch resolution check live in `pi/model-defaults.md`.
-
-Every session starts in one of two families, by harness:
-
-| Side | Orchestrator | Executes | Adversarial review |
-|------|--------------|----------|--------------------|
-| **Claude Code** (and `claude -p` from anywhere) | Fable 5.1 — the session model is the user's `/model` pick; Opus for simpler sessions is fine | Opus 5.5 via a fresh native `Agent` (`model: "opus"`, `effort` per "Effort") | GPT-6.1 Sol via the Codex wrappers; Astra when complex or cross-cutting |
-| **Codex** | GPT-6 Astra | GPT-6.1 Sol (`gpt-6.1-sol`) native subagents at `medium`–`high`; Astra when the work is long-horizon, cross-cutting, or a Sol pass failed the gate | Claude via `claude -p`: Opus 5.5 contained, Fable 5.1 + nested Opus complex |
-
-**Pi, Hermes, Grok Build:** their default model is whatever each machine's
-local config sets — out of doctrine. When they review or implement
-cross-family, the same two-family rule applies (never the author's family).
-
-**Overrides (user-named only):** cross-family implement — from Claude Code
-→ Sol (Codex wrappers, `--model gpt-6.1-sol`), from Codex → Opus
-(`claude -p --model opus`); anywhere, Grok 4.7, DeepSeek, open-source models,
-and GPT-6 Luna, at `high` unless the user says otherwise.
-
-## Roster
-
-Only the families above are in play. Haiku is never used. Sonnet 5.5 takes
-purely mechanical or exploratory work only: retrieval, recon, a mechanical tail
-with an exact spec, a scripted browser walk. Never implementation that needs
-judgment, review, or planning; the orchestrator spot-checks its pointers.
-
-On the Claude side Opus 5.5 executes everything else the orchestrator does
-not — implement, docs fold, contained review, and any exploration or
-mechanical work that needs judgment. Fable is never an implementer by default.
-
-Codex dispatch uses `gpt-6.1-sol` and `gpt-6-astra`; `gpt-6-luna` only as a
-user-named override. **Sol 6.1 is the Codex workhorse**: every Codex
-delegation — native subagent, wrapper implement, wrapper review — defaults to
-it. Astra, like Fable, is for orchestrating, for complex cross-cutting or
-long-horizon work, or when the user names it. Older model lines are retired from this repo; their
-availability in a harness does not authorize their use.
-
-**Overrides run only when the user names them for that dispatch** — never a
-default seat, a cost saving, or an extra opinion an agent adds on its own
-judgment. When named, do not copy Claude-specific prompting habits onto them.
-Briefing Grok and routing an implement to a Grok leaf:
-`grok/model-defaults.md` "Grok as a leaf".
-
-## Effort
-
-`medium` or `high` for everything: **`high` is the ceiling** — `xhigh` only
-when the user names it, never `max`. Step up one rung only for long multistep
-terminal/agent work or a brief with open unknowns. The Codex ladder is Sol
-`medium` → Sol `high` → Astra `medium` → Astra `high`: when Sol at `high`
-isn't enough, switch to Astra rather than raising Sol's rung.
-
-| Family | Default | Step up |
+| | Claude Code (and `claude -p` from anywhere) | Codex |
 |---|---|---|
-| Opus 5.5 | `medium` | `high` |
-| GPT-6.1 Sol | `high` (`medium` for contained or mechanical work) | → Astra `medium` |
-| GPT-6 Astra | `medium` | `high` |
-| Fable 5.1 | `medium` | `high` |
+| Orchestrate | Opus 5.5 or Fable 5.1, the user's `/model` pick | GPT-6 Astra |
+| Mechanical (retrieval, recon, a tail with an exact spec) | Sonnet 5.5 @ `medium`–`high` | GPT-6.1 Sol @ `medium`–`high` |
+| Work (implement, research, docs fold, judged exploration) | Opus 5.5, fresh native `Agent` @ `medium`–`high` | Sol @ `high`–`xhigh`; Astra @ `medium`–`high` when long-horizon, cross-cutting, or a Sol pass failed the gate |
+| Browser walk (why: rationale.md#opus-browser-walks) | Opus 5.5 (Sonnet for a purely scripted walk) @ `medium` | — |
+| Review, contained | Sol @ `high`–`xhigh`, Codex wrappers | Opus 5.5 @ `high`, `claude -p` |
+| Review, complex or cross-cutting | Astra @ `high`–`xhigh` | Fable 5.1 @ `high` with nested Opus discovery |
+
+- **Never the author's family.** The review row follows who wrote the work,
+  after an implementer override the actual author. No third family unless
+  the user names one.
+- **Unavailable seat:** if the seat is unavailable under the harness's access
+  rules, stop and say so; the user decides the substitute.
+- **Ceilings:** `high` for Claude models, `xhigh` for Codex models; never
+  `max` or `ultra` (Astra's delegate-for-you rung: delegation is the
+  orchestrator's job). The wrappers pass `--effort` through verbatim, so
+  doctrine closes them, not tooling.
+- **Pass the rung on every fresh dispatch.** Every lane takes it as a parameter
+  (`Agent` `effort`, the wrappers' `--effort`); this table is the explicit
+  instruction the `Agent` tool's `effort` parameter requires. The session's
+  own effort and `always/settings.json` `effortLevel` are transient TUI state,
+  never the baseline (why: rationale.md#session-effort).
+- **Pi** dispatches default to DeepSeek Flash @ `high`; **Hermes** runs its
+  machine's local default. Both follow the cross-family rule.
+- **Any other model runs only when the user names it or gives guidance for
+  it**, never as a default seat, a cost saving, or an extra opinion.
 
 (why: rationale.md#effort)
 
-**`max` and `ultra` are never an agent's choice.** `ultra` (Astra's
-delegate-for-you rung) is out entirely — delegation is the orchestrator's job,
-not something a leaf improvises. The wrappers pass `--effort` through
-verbatim, so both are closed by doctrine, not by tooling.
+## Announce-then-proceed preamble
 
-**The interactive session effort is not doctrine.** The
-`always/settings.json` `effortLevel` and a session's running rung are
-transient TUI state: never read them as the baseline, reconcile them to this
-table, or flag the drift (why: rationale.md#session-effort).
+Under granted autonomy without an invoked skill, state first whether an
+external call is warranted and why; only if one is, add the complexity read,
+seat, and rung per call. For an invoked workflow, announce its gates and each
+reviewer's seat and rung. Name mode (`workflows/longrun.md` "Delivery pipeline
+modes") and stage only inside a running delivery workflow. Then continue
+without waiting unless the action itself requires permission. This is the
+user's refinement loop, so it runs even when the answer is "none".
+Interactive work without an invoked workflow gets no preamble. Silence means
+default; a non-default choice made silently is a defect, not discretion. In
+non-interactive runs, the same block goes at the top of the final report.
 
-**The rung is passed, never inherited.** Every lane takes effort as a
-parameter (`Agent` `effort`, the wrappers' `--effort`); the orchestrator sets
-it from the table above on each dispatch. This table is the explicit
-instruction the `Agent` tool's `effort` parameter requires.
+## Family tendencies — a lens, not a checklist
 
-## External calls
-
-An external call dispatches another model for independent judgment — a plan
-or diff review, `rev`, an escalation, any cross-family opinion. Local checks,
-tests, and the pre-commit gate are not external calls; run them when required
-by the task and verification policy. Reviewer briefs verify by reading and run
-no suites.
-
-- **Interactive / iterative work with the user:** no external call unless the
-  user asks. Suggest one when the risk warrants it; the user's yes is the go.
-- **A workflow skill carries its own gates, and invoking it is the
-  approval:** `agentplan` → plan/scope review; `execute-plan` → only the seam
-  review, when a later phase tears out what an earlier one built; `rev` → the
-  diff review; `longrun` → plan review + final `rev` (+ the seam review);
-  `full-docs` → its adversarial validation of the documentation diff;
-  `comment-audit` → per-shard cross-family verification + the fix PR's `rev`.
-- **Granted autonomy without a skill** ("go build it and open a PR"): judge
-  it, and state what was chosen and why.
-
-Nothing else converts "available" into "required" — not a subagent's
-existence, not a repo-level `AGENTS.md` command (why:
-rationale.md#pipeline-proportionality).
-
-**Who: one rule.** Plan review and diff review are the same thing — a
-cross-family review at the weight the complexity warrants (why:
-rationale.md#cross-family-review).
-
-- **Never the author's family.** Codex-authored work goes to Claude — Opus
-  5.5 when contained, Fable 5.1 with nested Opus discovery when complex or
-  cross-cutting. Claude-authored work (Opus or Fable) goes to Sol 6.1 when contained,
-  Astra when complex or cross-cutting. After an
-  implementer override, the reviewer follows the actual author's family.
-- **Rung per "Effort":** the family default for contained work, its step-up
-  for complex or cross-cutting work (a reviewer is the check on everything
-  below it).
-- **No third family** unless the user names one.
-
-Pi, Hermes, and Grok Build follow the same two-family rule. If the seat is
-unavailable under the harness's access rules, stop and say so; the user
-decides the substitute. Reuse valid findings. Verify ordinary fixes locally; another review runs only
-when a separate gate requires it. A confirmed finding earns an in-scope fix or
-an out-of-scope report under principles.md §3. A review finding alone does not
-justify a test: a bug must have a costly recurrence, and new logic follows
-testing.md's authoring gate. The final report states what
-each pass changed; a pass that changed nothing is reported as such, never
-hidden — that is the signal to lower the default next time.
-
-**Known family tendencies — a lens, not a rule.** The principles decide what
-good looks like; this only says where each heavyweight tends to miss them.
-Opus 5.5 under-proves: it asserts unverified inferences as fact, calls a
-partial check a full read, and checks a plan against requirements it wrote
-itself (Opus 5.5 System Card p.36). Astra proves well — cross-file breaks,
-false assumptions, the missing test — but over-builds: extra files, types,
-tests, and research the brief did not ask for. So, as author, compensate for
-your own tendency and say so in the summary (Opus: which claims it verified
-and which it inferred; Astra: what it added beyond the brief and why each
-item stays). As reviewer, lead with the author's tendency: reviewing Opus,
-hunt what is missing; reviewing Astra, hunt what to delete.
-Read the whole diff either way; this is where to look first, not a checklist.
-
-## Delivery pipeline modes
-
-These modes describe an invoked delivery workflow, not every task.
-`agentplan`, `execute-plan`, `rev`, `docs`, `babysit`, and `longrun` compose
-these stages; which gates each carries, and who reviews at what weight, is
-"External calls":
-
-```
-Full       agentplan(scope + phases) → execute-plan → rev → docs → PR → babysit
-Discover   agentplan(scope only) → probe → agentplan(phases) → execute-plan → rev → docs → PR → babysit
-Iterative  scope note → implement with the user → rev → docs → PR → babysit
-```
-
-- **Gates:** the plan gate before code lands is a full adversarial plan review
-  in Full and a scope-only review in Discover and Iterative; the rev gate's
-  depth scales (below).
-- **One seam review before a tear-out.** When a plan's later phases delete
-  or re-key what its earlier phases built, run one cross-family review of
-  the built seam at that boundary, before the tear-out phase, and scope the
-  final rev to what that review did not see. A seam defect found under
-  deleted code costs a second pass over the tear-out's fixtures; found at
-  the boundary it costs one fix pass rev would have demanded anyway. This is
-  the only interim adversarial run; phases never each get one.
-- **Discover** is chosen when the plan would have to guess at facts only a
-  probe can settle (database shape, a spike, a failing test).
-- **Iterative** is chosen when the work's shape is not known up front and the
-  user is steering live; there is no phased plan artifact.
-- The orchestrator picks the mode and states it in the preamble. Default is
-  Full.
-
-**Review depth scales with the change.** The pipeline is for non-trivial work
-(whether a review runs at all is "External calls"); within it, the rev gate is
-always present but its depth follows the change, never the fact that a
-workflow was invoked (why: rationale.md#pipeline-proportionality):
-
-| Change | Rev depth |
-|---|---|
-| Complex or cross-cutting | Full rev: code-simplifier, judgment lenses where they earn fan-out, other-family validation per "External calls" |
-| Contained, well-specified | One cross-family pass at the reviewer family's default rung ("Effort"); no lens fan-out |
-| Mini PR, or a fix-verify iteration loop | A light cross-family validation of the fix and its verification evidence; no simplifier or lenses |
-
-Classify by risk and affected contracts, not size: a change that fits the
-complex row wins regardless of diff size. The light row covers a bounded
-delta against an already-reviewed baseline; it never replaces the branch's
-outstanding full review. The orchestrator selects the lightest matching row
-and announces it — the full row is the fallback when unsure, not a ritual.
-The chosen depth and scope travel in the reviewer's brief.
-
-**PR status at delivery.** A completed `longrun` opens a ready-for-review
-(non-draft) PR so CI and automated reviewers can run. Draft is reserved for
-an explicit user request or an unresolved critical blocker that makes ready
-status inaccurate; name the exception in the final report. A blocker is not
-completed delivery.
-
-**Announce-then-proceed preamble.** Under granted autonomy without an
-invoked skill, state first whether an external call is warranted and why;
-only if one is, add the complexity read, seat, and rung per call. For an
-invoked workflow, announce its gates and each reviewer's seat and rung. Name
-mode and stage only inside a running delivery workflow. Then continue without
-waiting unless the action itself requires permission. This is the user's
-refinement loop, so it runs even when the answer is "none". Interactive work
-without an invoked workflow gets no preamble — a call there is suggested and
-confirmed, never announced and taken. Silence means default; a non-default choice made silently is a
-defect, not discretion. In non-interactive runs, the same block goes at the
-top of the final report.
-
-CodeRabbit's PR-side review is consumed by `babysit` (local CLI use follows `git-operations.md` "Direction and approval"),
-which settles it together with CI, at most one push per round, with a
-two-round cost circuit breaker. The cap never implies merge-ready: apply
-babysit's final verification and report incomplete delivery when its ship
-gate is unmet (why: rationale.md#coderabbit).
+Opus 5.5 under-proves: asserts inferences as fact, calls a partial check a full
+read, checks a plan against its own requirements (System Card p.36). Astra
+over-builds: files, types, tests, research the brief did not ask for. Sol 6.1
+reshapes what it was told to keep: trims rationale, renames names and test
+titles, adds unasked assertions. As author, say in the summary how you
+compensated (Opus: claims verified vs inferred; Astra, Sol: what went beyond
+the brief and why). As reviewer, lead with the author's tendency (Opus: what is
+missing; Astra: what to delete; Sol: prose, names, tests against the brief),
+then read the whole diff.
 
 ## Subagent fan-out
 
-When independent review is warranted, start with one reviewer. Add lenses
-only for separable questions. A broad repo alone does not justify fan-out.
-An Opus contained reviewer or a Fable complex reviewer may nest Opus discovery
-subagents unless the brief forbids it; the reviewer keeps the judgment.
-Discovery subagents are not extra review lenses.
+When independent review is warranted, start with one reviewer; add lenses
+only for separable questions. A broad repo alone does not justify fan-out. An
+Opus contained or Fable complex reviewer may nest Opus discovery subagents
+unless the brief forbids it; the reviewer keeps the judgment, and discovery
+subagents are not extra lenses. Otherwise spawn only the subagents the
+situation needs, never a fleet. Soft ceiling: **eight at a time**; beyond
+eight requires genuine value and a user check-in first.
 
-Outside those gates, spawn only the number of subagents the situation actually
-needs — never a fleet for its own sake. Soft ceiling: **eight at a time**;
-beyond eight requires genuine value and a user check-in first.
-
-Browser-driving subagents (Playwright walks, UI verification, screenshot
-loops) are mechanical work: in subscription Claude lanes they take the
-**Opus 5.5** seat (why: rationale.md#opus-browser-walks); Sonnet 5.5 may take
-a purely scripted walk. Pi uses its
-local default. The per-call economy rule in
-`principles.md` §9 still governs.
-
-## Orchestrator context discipline
-
-On Claude Code, everything in the orchestrator's window is re-sent every turn
-and degrades its reasoning as it grows (see "Fresh window or inherited
-context" below). The Claude Code orchestrator's own tool calls are limited to:
-writing briefs,
-dispatching, reading verdicts and post-run summaries, reading the diff it is
-about to commit, small decision-critical artifacts, authorized local
-verification (including the full pre-commit gate), and git. Everything else
-is farmed out to Opus per "Roster"; when to delegate at all is
-`dispatch-bootstrap.md`.
-
-Research on Claude Code uses a native Opus subagent; research on Codex uses
-a native Sol subagent. Pi, Grok Build, and Hermes use their local default.
-
-### Leaf fan-out: a judgment core and a mechanical tail
-
-An implement pass usually has one judgment core (the seam, the contract, the
-admission rule) and a long mechanical tail (re-keying many callers, writing
-table-driven test rows, mirroring a change across sibling files). The default
-brief for such a pass lets the Opus implementer farm the tail to nested Opus
-subagents with fixed allowlists, and carries the `dispatch-bootstrap.md` read
-rule so the leaf takes seats and rungs from doctrine. A brief that forbids
-nested delegation says so explicitly. The orchestrator still owns git and the
-combined-diff provenance check.
-
-### Fresh window or inherited context: decide by the input, not the cache
+## Fresh window or inherited context
 
 Only context degradation drives this decision, never cache cost
 (why: rationale.md#context-degradation). From Claude Code the same-family lane
-is the native `Agent` (why: rationale.md#native-agent-lane):
+is the native `Agent` (why: rationale.md#native-agent-lane). The orchestrator
+decides lane and rung per task and states them and why in the preamble (or the
+report, when non-interactive).
 
-- **Fork** (`subagent_type: "fork"`) inherits the session window and rung. It
-  is right when the session context *is* the input: a review lens over what
-  was just discussed, a retrieval pass the orchestrator will read.
-- **Fresh `Agent`** (any other type) starts from zero plus the prompt and
-  takes `model` and `effort`. It is the default for any bounded,
-  well-specified pass, concentrated implementation above all; the prompt is
-  the brief and carries the distilled context.
-- **`claude-exec.sh`** is for callers outside Claude Code (Codex, Pi, Hermes,
-  Grok) and, from Claude Code, only for a run that must outlive the session:
-  hours-long or resumable work, where its registry and `--resume` matter. Its
-  cold-start floor means it never pays off for minute-scale tasks. The Codex
-  family's equivalents are the Codex wrappers or
-  `spawn_agent(reasoning_effort=…)`.
-- The orchestrator's window size is the tiebreaker. The larger it grows, the
-  more every bounded task belongs in a fresh agent with the distilled brief,
-  and the orchestrator keeps its window for what only it can do: review.
-
-The orchestrator decides rung and lane per task, states them and why in the
-preamble (or the report, when non-interactive), and continues.
+- **Fork** (`subagent_type: "fork"`) inherits the session window and rung:
+  right when the session context *is* the input (a review lens over what was
+  just discussed, a retrieval pass the orchestrator will read).
+- **Fresh `Agent`** starts from zero plus the brief and takes `model` and
+  `effort`: the default for any bounded pass, implementation above all.
+- **`claude-exec.sh`**: callers outside Claude Code, and from Claude Code only
+  a run that must outlive the session; its cold start never pays off for
+  minute-scale tasks. Codex family: the wrappers or `spawn_agent(reasoning_effort=…)`.
+- **Tiebreaker:** the larger the orchestrator's window, the more every bounded
+  task belongs in a fresh agent; it keeps its window for review.

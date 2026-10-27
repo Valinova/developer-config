@@ -7,7 +7,7 @@ Claude Code: `instructions/codex-delegation.md`).
 
 Produce a phased implementation plan from the agreed direction. Do not
 implement it. This workflow's gate is the plan/scope review
-(`model-selection.md` "External calls"); invoking it is the approval.
+(`dispatch-bootstrap.md` "External calls"); invoking it is the approval.
 
 ## Preamble
 
@@ -31,21 +31,21 @@ existing plan artifact.
 3. Give each phase observable success criteria and lightweight orchestrator
    checks for correctness, simplicity, and adherence to any user-supplied
    North Star. Each phase also names:
-   - its **rung**, decided by brief specificity under `model-selection.md`
-     "Effort", never by the operation's risk; a **seat** only when a user
+   - its **rung**, from the `model-selection.md` "Harness seats" range by the
+     phase's complexity; a **seat** only when a user
      override applies (the harness's implement default otherwise);
    - whether a **courier** runs and what it reads back — only when the success
      criterion is observable solely on a deployment;
    - whether the implementer may fan out the mechanical tail
-     (`codex-delegation.md` "Nested delegation"; `model-selection.md`
-     "Leaf fan-out");
+     (`codex-delegation.md` "Nested delegation");
    - its minimal test set per `testing.md` "Plan-time rule".
 4. Run the plan review: one cross-family reviewer at the harness's reviewer
-   seat, weight and rung per "External calls" and "Effort" — a full
-   adversarial plan review in Full mode, scope-only in Discover
-   ("Delivery pipeline modes").
+   seat, weight and rung per "Harness seats" — a full adversarial plan review
+   in Full mode, scope-only in Discover (`workflows/longrun.md` "Delivery
+   pipeline modes").
 5. Resolve findings before returning the plan: incorporate the mutually agreed
    conclusions; escalate only unresolved critical choices under principles §4.
+   Findings are handled as in `rev.md` after its Sequence.
 6. Return the revised plan.
 
 Persist the plan as a local markdown file, never committed (principles §13):

@@ -1,12 +1,14 @@
 # Codex dispatch defaults
 
 Before dispatch, read
+`~/Development/developer-config/instructions/dispatch-bootstrap.md` "External
+calls" and
 `~/Development/developer-config/instructions/model-selection.md`, especially
-"External calls", "Announce-then-proceed preamble",
-"Harness seats", "Roster", "Effort", and "Subagent fan-out". Those sections
+"Announce-then-proceed preamble",
+"Harness seats" and "Subagent fan-out". Those sections
 own shared policy; this card is not a substitute for them.
-The `claude -p` and Grok ACP process lifecycles are Codex-specific and are
-owned here; the Grok lane runs only when the user names Grok. An explicit user or per-dispatch model/reasoning choice always
+The `claude -p` process lifecycle is Codex-specific and is owned here. Grok
+is dormant; `grok/` holds its config. An explicit user or per-dispatch model/reasoning choice always
 wins among valid combinations under that policy.
 
 ## Native subagents
@@ -21,58 +23,10 @@ wins among valid combinations under that policy.
 - When a workflow calls for a cross-family Claude pass, use `claude -p` —
   never substitute another Codex subagent.
 
-## Cross-family Grok ACP dispatch
-
-Only when the user names Grok for a dispatch, delegate one leaf task through Grok Build's native
-ACP server. This is an external Grok process supervised by Codex, not a Codex
-native subagent and not `grok -p` or Pi; it does not change Codex's own
-seats:
-
-```bash
-~/.claude/scripts/grok-acp-exec.py <task-name> /tmp/grok-<task-name>-brief.md \
-  --cwd /absolute/path/to/repo --sandbox workspace \
-  --model <chosen-model> --effort <chosen-effort>
-```
-
-- Grok Build owns OAuth in `~/.grok`; the wrapper inherits the authenticated
-  CLI environment and never reads, copies, or logs auth files or tokens.
-- The wrapper runs `grok agent stdio` with ACP, `--no-subagents`, an OS-level
-  sandbox, all Git CLI calls disabled, and Claude/Cursor MCP discovery off for
-  that subprocess. `--no-subagents` is this ACP leaf only — not a
-  `claude -p` review rule (`codex-delegation.md` "Nested delegation"). Grok
-  leaves changes unstaged; Codex owns scope review, verification, and every
-  Git operation.
-- Use `workspace` to implement and `read-only` to investigate or review.
-  `strict` is available for untrusted repositories. The sandbox still allows
-  Grok's own session state and temporary files as documented by Grok Build.
-- Briefs name the scope, explicit file allowlist, anti-goals, and success
-  criteria. The allowlist limits edits, not investigation: Grok may inspect
-  broadly enough to validate downstream consumers. If correct completion needs
-  another file or an unresolved dependency, it reports
-  `scope_expansion_needed` with the exact files and reasons and does not claim
-  completion. Codex then expands the leaf assignment or moves the remaining
-  work to the canonical implementer. Tell Grok to report changed files and
-  out-of-scope findings; do not ask it to stage or commit.
-- Brief it per "Grok as a leaf" in `grok/model-defaults.md`; the wrapper does
-  not enforce token accounting.
-- Run the wrapper in a long-lived exec session. It streams raw ACP traffic to
-  `/tmp/grok-acp-<task>.events.jsonl`, Grok stderr to
-  `/tmp/grok-acp-<task>.stderr.log`, and the final answer to
-  `/tmp/grok-acp-<task>.result.md`. An ACP response whose `stopReason` is
-  not `end_turn` (e.g. the `--max-turns` circuit breaker) exits 1, still writes
-  its partial text to that result file (not stdout), and prints the stop reason
-  to stderr. Timeout or cancellation first sends `session/cancel`, then
-  terminates only the process created for that task, and exits 124 or 130
-  without writing a result.
-- One wrapper invocation is one fresh Grok session. Parallel work uses distinct
-  task names and non-overlapping file allowlists. There is deliberately no
-  resume, registry, background daemon, nested-agent support, or Pi fallback in
-  this first lane; add one only after a real need survives local use.
-
 ## Cross-family `claude -p` dispatch
 
 - Pass the selected Claude seat and rung as `--model <chosen>` and
-  `--effort <chosen>` under canonical "Roster" and "Effort". Include those
+  `--effort <chosen>` under canonical "Harness seats". Include those
   policy references in the brief for any child that will delegate further;
   review lenses and browser walks use the corresponding canonical seats.
 - Delegated fan-out follows canonical "Subagent fan-out".
@@ -91,8 +45,8 @@ seats:
   merely because the commit IDs changed.
 - **Fresh delegates do not require a fresh orchestrator.** Use them when
   independent eyes or newly affected ownership justify another lens. Carry
-  forward explicit model/delegate overrides that satisfy canonical "Roster"
-  and "Harness seats"; do not preserve an invalid seat assignment from an
+  forward explicit model/delegate overrides that satisfy canonical
+  "Harness seats"; do not preserve an invalid seat assignment from an
   earlier run. Resolve such a conflict before resuming the affected dispatch.
 - **Start a fresh orchestrator** for a genuinely different objective, stale or
   misleading context, or when a concise handoff carries the relevant evidence

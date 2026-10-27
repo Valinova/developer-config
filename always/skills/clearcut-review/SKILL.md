@@ -11,7 +11,7 @@ description: Reviews a stated scope of changes — the current branch against it
    `~/Development/developer-config/instructions/model-selection.md` for seats
    and effort, and the harness's model card (`<harness>/model-defaults.md`;
    Claude Code: `instructions/codex-delegation.md`) for IDs and wrappers.
-   Additional reviewer selection follows "External calls";
+   Additional reviewer selection follows `dispatch-bootstrap.md` "External calls";
    this skill does not invoke the delivery pipeline.
 3. Review correctness, regressions, performance, dead code, simplification, duplication, canonicalization, and meaningful test gaps.
 4. Implement and verify every clear-cut, valuable improvement — clear-cut per principles §3: one right answer, small, keeps or plainly corrects behaviour. Do not fix, report, or backlog nits, subjective preferences, speculative concerns, or low-value opportunities.

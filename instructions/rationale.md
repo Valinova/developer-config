@@ -195,18 +195,19 @@ resolution cost and keeps history linear and free of update-merge bubbles.
 
 ### effort
 
-The data log is `instructions/benchmarks.md`. Knees: Opus 5.5 at `medium` on
+Knees (vendor benchmarks): Opus 5.5 at `medium` on
 repo code and `high` on long agentic/terminal work; Sol at `high`; Astra
 gains on every benchmark from `medium` to `high` and nothing past it; Fable
-gains little past `high` (and `xhigh` has not held up in use). No family
-shows a notable `xhigh` gain — at best ≈+2 on agentic evals for 1.4–1.9x, and
-lower on merge-readiness evals, where out-of-scope changes grow with effort —
-so `high` is the ceiling. Sol above `high` is cheap and gains a little (max
-≈ Astra `medium` on FrontierCode Extended, 3.5 below it on DeepSWE), which
-is why the Codex step is Sol `high` → Astra `medium`, not a higher Sol rung.
-These measurements are Sol 6. On 2026-09-29 Sol 6.1 replaced it as the
-default for every Codex delegation, with its sweet spot at `medium`–`high` by
-task; Astra's margin over it shows only on deeply complex work.
+gains little past `high`. No family shows a notable `xhigh` gain — at best
+≈+2 on agentic evals for 1.4–1.9x, and lower on merge-readiness evals,
+where out-of-scope changes grow with effort. Sol above `high` is cheap and
+gains a little (max ≈ Astra `medium` on FrontierCode Extended, 3.5 below it
+on DeepSWE). These measurements are Sol 6; Sol 6.1 replaced it as the
+Codex default on 2026-09-29, and Astra's margin shows only on deeply complex
+work. Claude models stay capped at `high` because `xhigh` worsened results
+in the user's use, even on complex implementations. Codex models may run
+to `xhigh`: Sol is cheap and the user's experience favours `high`–`xhigh`;
+Codex reviews run `high`–`xhigh`.
 
 ### session-effort
 
@@ -225,33 +226,17 @@ gates (Astra when complex or cross-cutting), and Codex-authored work to Opus or,
 
 ### coderabbit
 
-CodeRabbit runs on the PR anyway and its findings flow into the PR-burndown
-contract, so a local CLI pass duplicated that cost plus the tokens to
-arbitrate it. `babysit` pushes once per round because a lone CI fix
-re-triggers a review before the pending one is even read; it stops after
-round 2 because two rounds cover nearly every PR, and any count threshold on
-remaining findings turns into a quota.
+Every PR review spends the author's rolling allowance, which past its top
+band refills one review an hour; the local CLI spends none. So a PR gets one
+review, on the opening push, which sees the whole diff: a later delta is
+small, sits on code that review covered, and re-reviewing it stalled rounds
+for an hour. The CLI (`--deep`) caught about half of what the PR review did
+on a PR-sized sample, so only a complex PR is worth waiting out a rate limit
+for, and a simple one stands on its gate.
 
-A round settles on CodeRabbit's status check, not on a review object: it
-posts a review only when it has findings, so a push that resolves them
-flips the check to pass and resolves the threads with nothing new posted.
-On 2026-09-09 an agent polling for a review on the new head waited
-indefinitely on an already-clean round.
-
-On a PR-sized sample, the local CLI (`--deep`) caught about half of what the
-PR review did, so it closes a round only where the diff's risk is low.
-Included PR reviews are the scarcer pool and the CLI has its own, larger
-usage, so a rate-limited round spends the CLI on a low-risk PR and nothing
-on a trivial one: waiting out the limit for a five-line diff (2026-10-25,
-PR #723) would have cost a review some real PR then lacks, for findings the
-gate already covers.
-
-A later round's delta is small and sits on a baseline the PR review already
-covered, so a second PR review re-spends the scarce pool on code it has seen
-and can stall the round for an hour on the rate limit (2026-10-26, PR #1065:
-four commits, +40/−17, gate and suite green, auto-review rate limited; the
-CLI over those commits took minutes). Rounds after the first therefore settle
-on CI plus the CLI over their own commits.
+A review settles on CodeRabbit's status check, not on a review object: it
+posts a review only when it has findings. On 2026-09-09 an agent polling for
+a review object waited indefinitely on an already-clean PR.
 
 ### opus-browser-walks
 

@@ -1,9 +1,11 @@
 # Grok Build dispatch defaults
 
 Before dispatch, read
+`~/Development/developer-config/instructions/dispatch-bootstrap.md` "External
+calls" and
 `~/Development/developer-config/instructions/model-selection.md`, especially
-"External calls", "Announce-then-proceed preamble",
-"Harness seats", "Roster", "Effort", and "Subagent fan-out". Those sections
+"Announce-then-proceed preamble",
+"Harness seats" and "Subagent fan-out". Those sections
 own shared policy; this card is not a substitute for them. The `claude -p`
 process lifecycle is owned in `codex/model-defaults.md` — follow it rather
 than restating it. An explicit user or per-dispatch model/reasoning choice
@@ -32,7 +34,7 @@ always wins among valid combinations.
 
 ## Fan-out
 
-Follow canonical "Subagent fan-out", including browser-driving seats.
+Follow canonical "Subagent fan-out"; browser-driving seats follow "Harness seats".
 
 ## Grok as a leaf
 

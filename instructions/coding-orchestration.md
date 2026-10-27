@@ -8,7 +8,7 @@ subscription/auth ownership, and the hardened wrapper scripts. Hermes-native
 `delegate_task` stays niche/lightweight (planning farm, trivial retrieval,
 summaries), never the implementer. Before dispatch, read
 `~/Development/developer-config/instructions/model-selection.md`, especially
-"Harness seats", "Roster", "Effort", and "Subagent fan-out". This file owns
+"Harness seats" and "Subagent fan-out". This file owns
 transports and farm contracts, not shared model policy. The `/longrun` family lives in
 `hermes/skills/` and uses the same names as Claude/Pi (`agentplan` →
 `execute-plan` → `rev` → `docs` → `longrun`).
@@ -19,11 +19,11 @@ Hermes delegates coding tasks to `codex exec` through the shared Codex wrappers,
 
 **When:** All Hermes-initiated coding work — features, refactors, bug fixes, implementation phases.
 
-**Model and effort:** Select from `model-selection.md` "Harness seats", "Roster", and "Effort"; pass those choices explicitly.
+**Model and effort:** Select from `model-selection.md` "Harness seats"; pass those choices explicitly.
 
 **How it works:**
 1. Hermes writes a brief to `/tmp/codex-<task>-brief.md` (follows `codex-delegation.md` grammar)
-2. From the repo root, Hermes runs `~/.claude/scripts/codex-exec.sh <task> <brief> --model <chosen-model> --effort <chosen-effort>`, then `codex-wait.sh <task>` via `terminal(background=true, notify_on_complete=true)`, routed through the dispatch guard below. The wrappers, resume, and waiter recovery are `codex-delegation.md` "Caller: Claude Code, Grok Build, and Hermes".
+2. From the repo root, Hermes runs `~/.claude/scripts/codex-exec.sh <task> <brief> --model <chosen-model> --effort <chosen-effort>`, then `codex-wait.sh <task>` via `terminal(background=true, notify_on_complete=true)`, routed through the dispatch guard below. The wrappers, resume, and waiter recovery are `codex-delegation.md` "Caller: Claude Code and Hermes".
 3. Codex CLI reads/writes files in the repo, manages its own session
 4. On completion: Hermes reads `/tmp/codex-<task>.post-run.md`, runs `git status` + `git diff --stat`, verifies (typecheck/lint/test), commits
 5. Hermes reports summary to the user
@@ -42,7 +42,7 @@ Hermes reaches the Claude seat selected under `model-selection.md` via `claude -
 
 **When:** The canonical harness and roster rules select a Claude seat for the task.
 
-**Model and effort:** Pass `--model <chosen-seat> --effort <chosen-effort>` from `model-selection.md` "Roster" and "Effort".
+**Model and effort:** Pass `--model <chosen-seat> --effort <chosen-effort>` from `model-selection.md` "Harness seats".
 
 **How it works:**
 1. Hermes writes a brief to `/tmp/brief.md`
@@ -56,7 +56,7 @@ Hermes reaches the Claude seat selected under `model-selection.md` via `claude -
 
 When the user is in an interactive Claude Code session (terminal or IDE), Claude Code invokes Codex directly for cross-family review. This is Claude Code's own internal toolchain — Hermes is not involved.
 
-**When:** A key gate under `model-selection.md` "External calls" (the plan/scope review, the final `rev`), or a Sol implement pass (`--model gpt-6.1-sol`) the user named for that dispatch.
+**When:** A key gate under `dispatch-bootstrap.md` "External calls" (the plan/scope review, the final `rev`), or a Sol implement pass (`--model gpt-6.1-sol`) the user named for that dispatch.
 
 **How it works:**
 1. Claude Code (Opus under the Fable orchestrator) produces the plan or diff
@@ -77,12 +77,12 @@ Native HTTP delegation would give Hermes a second token store competing with the
 
 - `delegate_task` with `acp_command="codex"` or `"claude"`: dead — neither CLI has `--acp`.
 - `delegate_task` with `delegation.provider: openai-codex`: not viable — the OAuth conflict above.
-- `delegate_task` native batch: niche/lightweight only — Hermes-specific tools, summaries, extraction, mechanical batches (`simplify-code`); never the serious-code implementer; DeepSeek only for trivial retrieval/summaries.
+- `delegate_task` native batch: niche/lightweight only — Hermes-specific tools, summaries, extraction, mechanical batches (`simplify-code`); never the serious-code implementer.
 
 ## Execution paths (preference order)
 
 1. **Subscription CLI harnesses for ALL farm-out work.**
-   - `claude -p` — Anthropic subscription OAuth, *not* direct-API billing. Apply `model-selection.md` "Orchestrator context discipline".
+   - `claude -p` — Anthropic subscription OAuth, *not* direct-API billing. Apply `claude-conventions.md` "Orchestrator context discipline".
    - `codex exec` — OpenAI subscription coding/review path. Always `</dev/null` in non-interactive contexts.
    - Fan-out follows `model-selection.md` "Subagent fan-out" and the process limits below.
 2. **Hermes-native `delegate_task` — niche/lightweight.** Use the native batch contract above.
@@ -92,10 +92,9 @@ If routing around path 1 for work that could use it, state why in the dispatch n
 ## Approved PR burndown contract
 
 PR burndown uses one subscription-OAuth `claude -p` orchestrator session.
-The Claude seat is Opus 5.5 (Fable only as a complex reviewer or arbiter);
-review effort and fan-out follow `model-selection.md`. Partition logical review scopes by diff size,
-subsystem boundaries, risk, and the value of independent review. Native
-Claude subagents inherit the session's effort. The orchestrator
+The Claude seat, review effort, and fan-out follow `model-selection.md`. Partition logical review scopes by diff size,
+subsystem boundaries, risk, and the value of independent review. The
+orchestrator
 partitions, validates, deduplicates, audits, and synthesizes; the subagents own
 deep code review.
 
@@ -114,7 +113,7 @@ strategic-analysis session is launched.
 Decision briefs are an approved subscription-OAuth Claude use for grounded,
 genuinely nuanced forks in Sentry triage and PR burndown.
 
-The Claude seat (Opus 5.5; Fable as arbiter on a complex fork) chairs and synthesizes; the cross-family challenger
+The Claude seat chairs and synthesizes; the cross-family challenger
 selected under `model-selection.md` takes an independent, read-only blind
 position. Review subagents do not participate in this decision gate;
 their PR code-review role is unchanged. Both participants must independently agree
@@ -123,12 +122,12 @@ options, and the brief preserves that dissent. Noise, under-evidenced questions,
 and decisions already answered by policy do not reach the user.
 
 The consumer selects each model's reasoning effort under `model-selection.md`
-"Effort". Service tier follows `codex-delegation.md`.
+"Harness seats". Service tier follows `codex-delegation.md`.
 
 ## Efficiency rules
 
-- **Effort:** apply `model-selection.md` "Effort" to the actual task.
-- **Detection before a review gate:** re-run a *specific finding* through the other family only at action boundaries: about to auto-PR, no-go-adjacent finding, or a charter contradiction. Whether a review call happens at all is `model-selection.md` "External calls".
+- **Effort:** apply `model-selection.md` "Harness seats" to the actual task.
+- **Detection before a review gate:** re-run a *specific finding* through the other family only at action boundaries: about to auto-PR, no-go-adjacent finding, or a charter contradiction. Whether a review call happens at all is `dispatch-bootstrap.md` "External calls".
 - **Never two models on detection output that a downstream filter/reviewer already de-risks.**
 - Quota headroom is the real currency; if one subscription runs hot, rebalance the defaults, not per-callsite.
 
@@ -150,6 +149,8 @@ Enforcement is mechanical (why: rationale.md#dispatch-loop):
 ## Auth doctrine (hard rules)
 
 - Subscription OAuth only for both CLIs. No `ANTHROPIC_API_KEY`/`OPENAI_API_KEY` in env for CLI sessions; no Doppler-injected Anthropic/OpenAI keys.
-- Claude seating: `model-selection.md` "Harness seats" and "Roster".
+- Interactive Claude Code and `claude -p` ride the Anthropic subscription. Hermes conversation does not: native `provider: anthropic` bills the API (extra usage), and `claude-subscription-directsdk-experimental` is not an automatic route (tried, not reliable). Claude farm-out stays `claude -p`.
+- The same subscription-over-metered rule seals **provider routing** on the harnesses sharing Pi's provider store (Pi, Hermes): a model goes through the provider that owns it — **DeepSeek only through `deepseek`, OpenAI models only through the `openai-codex` subscription** — unless the user explicitly names another route for that dispatch. A `provider/id` pair naming the model's vendor rather than an authenticated provider does not error; it falls through to OpenRouter and bills the metered key. Pi's exact IDs and the pre-dispatch resolution check live in `pi/model-defaults.md`.
+- Claude seating: `model-selection.md` "Harness seats".
 - `claude -p` waiting, diagnostics, and termination follow the process lifecycle in `codex/model-defaults.md`.
 - `claude -p` reported `total_cost_usd` is API-equivalent accounting against quota, not real billing.
