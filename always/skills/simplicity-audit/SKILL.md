@@ -25,7 +25,9 @@ The verdict reports these counts current → proposed.
 1. **Map.** Trace real entry points, callers, state transitions, side effects,
    and sibling paths — beyond the diff for a PR. Delegate the mapping where the
    harness supports it; judge from the brief. A broad hotspot gets mapped
-   whole, then one slice is bounded for the rest of the audit.
+   whole, then one slice is bounded for the rest of the audit. When the target
+   touches model-facing code, prompts and tool descriptions are owners too:
+   map them beside the code they describe.
 2. **Contract.** Separate the required behavior and its invariants
    (permissions, data integrity, identity, lifecycle, concurrency, recovery,
    public contracts) from implementation choices and speculative needs.
@@ -58,13 +60,15 @@ The verdict reports these counts current → proposed.
 | `surface:` | config, flags, seams, or generics with no second production caller |
 | `unreachable:` | recovery or compatibility paths with no reachable production state |
 | `silent:` | failure swallowed or defaulted where a loud error belongs |
+| `meaning-drift:` | a change alters what a field, function, or name means without moving or renaming it; a comment justifying where it lives is the tell |
+| `prompt-owner:` | a fact carried in a prompt or tool description that a code owner (schema, catalog, type) should carry and expose; fires on growth pressure, not only violation |
 | `keep:` | complexity that protects a named invariant |
 
 ✅ `src/sync/service.ts:40-118: second-owner: retry policy duplicated from queue/retry.ts:12. Both callers (worker.ts:30, cron.ts:55) reach it via queue. Delete the copy; route through queue.retry. Existing queue retry tests cover both.` — clear-cut
 
 ## Report
 
-1. **Verdict:** appropriately sized / locally overbuilt / needs architectural change, with concept counts current → proposed.
+1. **Verdict:** appropriately sized / locally overbuilt / needs architectural change, with concept counts current → proposed. For a PR, also the concepts it added vs removed: did it subtract, or fix inside a shape it should have changed?
 2. **Flow diagram,** current → proposed, small.
 3. **Findings,** ranked, in the grammar.
 4. **Tests:** retain, consolidate, move, delete, add — each with the regression it guards or the surviving protection.
