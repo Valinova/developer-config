@@ -145,8 +145,8 @@ Each phase names its minimal proof and test set, the owners, outcomes and failur
 paths it proves, and its scenario decision under "PR proof and regression
 scenarios". "No new test — covered by <file>" is a valid, stated answer. A new test
 *file* is justified in the plan or it does not ship.
-Reviewers reject the refused shapes and gate failures at phase review, not at
-the next audit.
+The orchestrator rejects the refused shapes and gate failures at its per-phase
+diff check (`workflows/execute-plan.md` "Phase loop"), not at the next audit.
 
 ## Pruning existing tests
 
