@@ -10,7 +10,7 @@ Run the full delivery pipeline autonomously. Invoking this workflow authorizes
 the commits, reviews, push, pull request, and babysit's one push
 required by the stages below, and the dev proof `testing.md` "PR proof and
 regression scenarios" requires, under its ask triggers. Its gates are the plan review, the final `rev`,
-and the seam review when a plan tears out what it built (`dispatch-bootstrap.md`
+and an interim review only where the approved plan names one (`dispatch-bootstrap.md`
 "External calls").
 
 ## Preamble
@@ -49,13 +49,17 @@ Iterative  scope note → implement with the user → rev → docs → PR → ba
 - **Gates:** the plan gate before code lands is a full adversarial plan review
   in Full and a scope-only review in Discover and Iterative; the rev gate's
   depth scales (below).
-- **One seam review before a tear-out.** When a plan's later phases delete
-  or re-key what its earlier phases built, run one cross-family review of
-  the built seam at that boundary, before the tear-out phase, and scope the
-  final rev to what that review did not see. A seam defect found under
-  deleted code costs a second pass over the tear-out's fixtures; found at
-  the boundary it costs one fix pass rev would have demanded anyway. This is
-  the only interim adversarial run; phases never each get one.
+- **Review at the start and the end; interim reviews are agreed, never
+  default.** Reviews run at planning and scoping (the plan gate) and at the
+  end (`rev`). An interim cross-family review runs only for a genuinely
+  complex boundary, typically later phases deleting or re-keying what
+  earlier phases built, and only when the plan names it and the user agreed
+  at the plan gate; the final rev then covers what it did not see. Phases
+  never each get one.
+- **An extended change ships in coherent chunks.** When one PR would be too
+  long for a scoped review (many phases or concerns), split it into coherent
+  chunks, each with its own scoped `rev`, rather than one large review at
+  the end.
 - **Discover** is chosen when the plan would have to guess at facts only a
   probe can settle (database shape, a spike, a failing test).
 - **Iterative** is chosen when the work's shape is not known up front and the

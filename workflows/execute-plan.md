@@ -10,10 +10,10 @@ PR creation belong to their own workflows.
 
 ## Preamble
 
-This workflow's only external call is the seam review below
+This workflow's only external call is an interim review the approved plan names
 (`dispatch-bootstrap.md` "External calls"); phases otherwise verify locally, full
-pre-commit gate included. State whether the plan has a tear-out boundary that
-triggers it, per "Announce-then-proceed preamble".
+pre-commit gate included. State whether the plan names one, per
+"Announce-then-proceed preamble".
 
 ## Start
 
@@ -37,9 +37,8 @@ For each bounded pass:
    green gate is a claim, not evidence; never commit on it.
 6. Stage only the phase's files and create a coherent, descriptive commit.
 
-Before a phase that deletes or re-keys what an earlier phase built, run the one
-seam review of the built seam (`workflows/longrun.md` "Delivery pipeline
-modes") at the harness's
+Where the approved plan names an interim review (`workflows/longrun.md`
+"Delivery pipeline modes"), run it at that boundary at the harness's
 reviewer seat (`model-selection.md` "Harness seats"), then continue.
 
 Keep writing passes sequential unless their file allowlists are disjoint.
