@@ -98,8 +98,11 @@ when" list is what a reader can hold, a dozen symptom issues is not.
 Three days after that format rule landed, twenty more issues complied with it
 and still proposed guards, lints and types for defects nobody had observed: a
 rule that gates format does not gate admission. Admission is now the rule,
-and `issue-bar-guard.py` asks for its `Bar:` line at the moment of filing,
+and `issue-bar-guard.py` stops the hand at the moment of filing,
 because a principle among forty is read only when something stops the hand.
+The answer lives in the command (`BAR_CHECKED=<kind>`), not the issue: a
+`Bar:` line in the body taught readers nothing they needed and crowded out
+the sketch and done-when lines they do (2026-10-28).
 Reachable prod risks need no repro to file: the audit's useful issues were
 user-reachable, while speculative guards stay out.
 

@@ -1,6 +1,6 @@
 ---
 name: simplicity-audit
-description: Audits a target (PR, branch, feature, directory, or hotspot) against the smallest clear design the codebase would support today and returns a verdict, ranked findings, and a bounded first slice without modifying code. Use when the user explicitly invokes "simplicity audit" or asks for a senior-engineer design or simplicity audit of a named target. Not for diff-level cleanups (code-simplifier) or branch review (rev).
+description: Audits a target (proposed PR scope, PR, branch, feature, directory, or hotspot) against the smallest clear design the codebase would support today and returns a verdict, ranked findings, and a bounded first slice without modifying code. Use when the user explicitly invokes "simplicity audit" or asks for a senior-engineer design or simplicity audit of a named target. Not for diff-level cleanups (code-simplifier) or branch review (rev).
 ---
 
 # Simplicity Audit
@@ -20,6 +20,11 @@ output shape — nothing the rubric already says.
 reachable states, independent decisions, failure paths, coordination points.
 The verdict reports these counts current → proposed.
 
+**Scope mode.** When the target is a proposed scope (bullets not yet built),
+skip the procedure and report: run principles §2 "Scope gate" on each bullet,
+reading the code it touches, and return one row per bullet (keep / cut /
+later, with a one-line reason), then the kept scope for `agentplan`.
+
 ## Procedure
 
 1. **Map.** Trace real entry points, callers, state transitions, side effects,
@@ -38,7 +43,9 @@ The verdict reports these counts current → proposed.
 4. **Diff.** Each gap between current and counterfactual is a candidate. Ask:
    what real caller or failure makes it necessary; can the existing owner
    handle it; does the remedy reduce concepts or only move code? Complexity
-   that protects a demonstrated invariant is a `keep` finding.
+   that protects a demonstrated invariant is a `keep` finding. A remedy that
+   adds handling for an unobserved state is not a candidate: list it as later
+   (principles §6).
 5. **Tests.** Apply the testing authoring gate. A test that asserts the
    contract is evidence for step 2; one that asserts internals or needs a
    production-unused seam is a finding. Name the surviving protection before

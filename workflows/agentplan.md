@@ -21,11 +21,13 @@ existing plan artifact.
 
 ## Steps
 
-1. Restate the relevant project guidance and the engineering-principles
-   constraints that bind this plan, naming the sections it leans on — the
-   ambient principles doctrine is canonical; do not plan from a remembered
-   subset. Apply the principles §4 "Ship gate" at plan time: name the change's
-   benefit and the surfaces it could regress.
+1. Run principles §2 "Scope gate" over the scope unless `simplicity-audit`
+   scope mode already did; plan only what it keeps. Restate the relevant
+   project guidance and the engineering-principles constraints that bind
+   this plan, naming the sections it leans on — the ambient principles
+   doctrine is canonical; do not plan from a remembered subset. Apply the
+   principles §4 "Ship gate" at plan time: name the change's benefit and
+   the surfaces it could regress.
 2. Divide implementation into bounded agent passes that avoid context
    degradation (roughly 250K tokens as a guide, not a figure to compute).
 3. Give each phase observable success criteria and lightweight orchestrator

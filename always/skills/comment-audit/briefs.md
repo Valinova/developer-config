@@ -73,9 +73,9 @@ what you cannot confirm. Reading only.
   problem, every instance, blast radius, direction; security, money, and data
   first. Shims whose removal needs deployment evidence go in one issue.
   Search the tracker first; an existing issue gets a comment, not a twin.
-  Each opens with the `Bar:` line from `principles.md` §8 (an observed
-  symptom or a deletion); anything that cannot state one stays in this
-  report, counted, and is not filed.
+  Each passes the `principles.md` §8 bar (observed, reachable, or a
+  deletion), checked before filing and not written into the issue; anything
+  that cannot pass stays in this report, counted, and is not filed.
 - **Constraint comments** ("do not remove", "talk to X first"): name the
   cheapest type, test, or lint that would enforce the constraint so the
   comment can go. It is a list-B follow-up by default; list A only when the
