@@ -3,8 +3,8 @@
 
 The map below enforces SETUP.md's contract; update both together. Resolve
 relative symlinks and command-link chains before comparing targets. Only
-repo-pointing extras in managed directories are errors; foreign entries are
-informational. Hand-merged configs are parsed with Python 3.11+ tomllib.
+repo-pointing extras in managed directories are errors; foreign entries,
+including links into the gitignored machine-owned local/, are informational. Hand-merged configs are parsed with Python 3.11+ tomllib.
 Never write live files. --generate rebuilds codex/AGENTS.md; --check checks
 only that generated file. Exit 1 for drift, 0 when checks pass.
 """
@@ -168,7 +168,9 @@ def audit_links(expected, managed, root, repo, harness):
                 findings.append((kind, path, want, actual))
             elif path.resolve() != target.resolve():
                 findings.append(("WRONG_TARGET", path, want, actual))
-        if path.is_symlink() and path.resolve().is_relative_to(repo):
+        resolved = path.resolve()
+        if (path.is_symlink() and resolved.is_relative_to(repo)
+                and not resolved.is_relative_to(repo / "local")):
             if not path.exists():
                 findings.append(("DANGLING", path, want, actual))
             if target is None:

@@ -6,3 +6,4 @@ __pycache__/
 .auth/
 *.log
 HANDOFF-*.md
+/local/

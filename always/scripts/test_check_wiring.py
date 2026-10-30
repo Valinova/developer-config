@@ -86,6 +86,23 @@ class MergeTests(unittest.TestCase):
             self.assertFalse(MODULE.audit_pi_mcp(root))
 
 
+class LinkTests(unittest.TestCase):
+    # A machine-owned skill under the gitignored local/ must not read as drift,
+    # while any other unmapped link into the checkout still does.
+    def test_local_links_are_foreign_and_other_repo_links_unexpected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory).resolve()
+            repo, root = base / "repo", base / "home"
+            for name in ("local/skills/private", "stray"):
+                (repo / name).mkdir(parents=True)
+            (root / "skills").mkdir(parents=True)
+            (root / "skills/private").symlink_to(repo / "local/skills/private")
+            (root / "skills/stray").symlink_to(repo / "stray")
+            findings = MODULE.audit_links({}, {root / "skills"}, root, repo, "Claude")
+            self.assertEqual({(kind, path.name) for kind, path, _, _ in findings},
+                             {("FOREIGN", "private"), ("UNEXPECTED", "stray")})
+
+
 class CodexAgentsTests(unittest.TestCase):
     # Config checks cannot detect missing rules or drift in the generated root.
     def test_committed_codex_agents_is_current(self):

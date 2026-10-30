@@ -294,10 +294,12 @@ directory.
 Canonical shared directories live under `always/skills/`; harness-specific
 directories live under `claude/skills/`, `codex/skills/`, `pi/skills/`, and
 `grok/skills/`. Each live skill path is a per-skill symlink to exactly one of
-those owners.
+those owners. The exception is `local/skills/<name>`: gitignored, machine-owned
+skills that stay out of this public repo, linked by hand into the harnesses that
+want them; the checker reports those links as foreign, not drift.
 
-The shared set is `clearcut-review`, `code-simplifier`, `com`, `comall`,
-`comment-audit`, `docs`, `no-use-effect`, and `simplicity-audit` — all eight linked into
+The shared set is `browser-test`, `clearcut-review`, `code-simplifier`, `com`, `comall`,
+`comment-audit`, `docs`, `no-use-effect`, and `simplicity-audit` — all nine linked into
 Claude, Codex, Pi, and Grok Build. Keep this list current when adding a shared
 skill: a skill nobody enumerates is a skill nobody links (`code-simplifier` sat
 unlinked in every harness for exactly that reason).
@@ -317,8 +319,8 @@ Workflows that carry consequential intent include `agents/openai.yaml` with
 but cannot activate from conversational similarity. That is every skill under
 `codex/skills/`, plus `clearcut-review`, `com`, `comall`, `comment-audit`, `docs`, and `simplicity-audit` from `always/skills/`. Standing policies such as `no-use-effect` ship an
 `agents/openai.yaml` carrying an `interface:` block and deliberately no
-`policy:` block, so they stay implicitly discoverable; `code-simplifier`
-carries no `agents/` directory at all and is likewise discoverable.
+`policy:` block, so they stay implicitly discoverable; `code-simplifier` and
+`browser-test` carry no `agents/` directory at all and are likewise discoverable.
 
 ## Instruction hierarchy (who loads what)
 
@@ -342,6 +344,8 @@ instructions/dispatch-bootstrap.md  Claude Code + Codex + Grok Build always-load
                                     the External-calls default (none unless decided)
 instructions/model-selection.md     canonical model profiles, harness seats, and effort —
                                     always loaded by Claude Code + Codex; others read on dispatch
+instructions/security.md            supply chain, secrets, untrusted input — not auto-loaded;
+                                    every harness reaches it through the principles §2 pointer
 instructions/agent-guidance.md      reference, not auto-loaded
 codex/model-defaults.md              Codex dispatch mechanics, always loaded in codex/AGENTS.md
 pi/model-defaults.md                 Pi dispatch projection, loaded via APPEND_SYSTEM.md
