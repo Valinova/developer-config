@@ -47,12 +47,12 @@ Default to subtracting: the smallest change that solves the problem. Before addi
 
 `~/Development/developer-config/instructions/testing.md` owns test strategy (where tests live, what to mock, what to refuse) — read it before writing, changing, reviewing, or deleting tests. Two rules travel with every change:
 
-- Follow [PR proof and regression scenarios](./testing.md#pr-proof-and-regression-scenarios) for dev proof and the PR scenario decision. A shared harness or mock edit needs a consumer suite outside the original happy path.
+- Follow `testing.md` "PR proof and regression scenarios" for dev proof and the PR scenario decision. A shared harness or mock edit needs a consumer suite outside the original happy path.
 - **A test counts only after it is seen failing for the intended reason**: for a bug, on the pre-fix code; for new logic, before the code exists or by breaking it on purpose.
 
 ### Ship gate
 
-Every delivery, a PR or a direct merge to main, ships only when it is clearly beneficial and non-regressing. At planning and finalizing, name the real benefit and the surfaces the change could regress (shared mocks, list universes, sibling callers, public contracts). Each named surface is proven, by fresh proof or by earlier proof the change cannot have invalidated (`testing.md`); re-proving what a minor change cannot touch is waste. Full confidence is rare, so a regression that escapes proof must still fail loudly (§6: a typed error, a Sentry event, a watched log) and be seen and recoverable, never silent. Loud failure is the net under proof, not a substitute for it. **Never ship a known regression**: close it in the same change, or stop and replan. Accepted residual risk is rare and explicit: the plan and the PR or delivery brief name why it is accepted and the verification evidence under [PR proof and regression scenarios](./testing.md#pr-proof-and-regression-scenarios).
+Every delivery, a PR or a direct merge to main, ships only when it is clearly beneficial and non-regressing. At planning and finalizing, name the real benefit and the surfaces the change could regress (shared mocks, list universes, sibling callers, public contracts). Each named surface is proven, by fresh proof or by earlier proof the change cannot have invalidated (`testing.md`); re-proving what a minor change cannot touch is waste. Full confidence is rare, so a regression that escapes proof must still fail loudly (§6: a typed error, a Sentry event, a watched log) and be seen and recoverable, never silent. Loud failure is the net under proof, not a substitute for it. **Never ship a known regression**: close it in the same change, or stop and replan. Accepted residual risk is rare and explicit: the plan and the PR or delivery brief name why it is accepted and the verification evidence under `testing.md` "PR proof and regression scenarios".
 
 ## 5. Canonical sources of truth
 
@@ -75,7 +75,7 @@ A failure is visible and recorded. Whether it stops the user or lets them procee
 
 ## 7. Branch, worktree & commit management
 
-`instructions/git-operations.md` owns git, branch, worktree, and commit operations (permissions, backstop hook, commit hygiene, rebase policy); `instructions/durable-worktrees.md` owns worktree layout. Read `git-operations.md` before any git write or edit-capable dispatch; read `durable-worktrees.md` before creating or repurposing a durable worktree. The invariant: **explicit direction IS the approval; anything unrecoverable requires my approval.**
+`~/Development/developer-config/instructions/git-operations.md` owns git, branch, worktree, and commit operations (permissions, backstop hook, commit hygiene, rebase policy); `~/Development/developer-config/instructions/durable-worktrees.md` owns worktree layout. Read `git-operations.md` before any git write or edit-capable dispatch; read `durable-worktrees.md` before creating or repurposing a durable worktree. The invariant: **explicit direction IS the approval; anything unrecoverable requires my approval.**
 
 ## 8. High-value bias (80/20)
 
@@ -91,7 +91,7 @@ A failure is visible and recorded. Whether it stops the user or lets them procee
   read server logs. Browser-visible PR outcomes require rendered proof under
   `testing.md` "PR proof and regression scenarios", even when their calculations
   can also be checked below the UI. (why: rationale.md#browser-cost)
-- **Browser authority:** a browser session in the repo-approved dev environment with test credentials needs no asking; it is spent like any other token. The ask triggers are [PR proof](./testing.md#pr-proof-and-regression-scenarios)'s: a metered budget, or anything outside that environment.
+- **Browser authority:** a browser session in the repo-approved dev environment with test credentials needs no asking; it is spent like any other token. The ask triggers are `testing.md` "PR proof and regression scenarios"'s: a metered budget, or anything outside that environment.
 - **How to drive it:** the `browser-test` skill.
 - **Run ephemera never land in the worktree.** Browser profiles, driver scripts, dev-server logs/pids, screenshots, and probe outputs go in the session scratchpad (or `/tmp/<task>/`), never in the repo, gitignored or not; delete them when the run ends. What's worth keeping goes in the report or memory, not a leftover folder. (why: rationale.md#run-ephemera)
 
