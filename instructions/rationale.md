@@ -105,6 +105,11 @@ The answer lives in the command (`BAR_CHECKED=<kind>`), not the issue: a
 the sketch and done-when lines they do (2026-10-28).
 Reachable prod risks need no repro to file: the audit's useful issues were
 user-reachable, while speculative guards stay out.
+The bar scopes done-when lines too (2026-10-30): one root grew into restyling
+look-alikes that already read their owner, and the correction overshot into
+cutting copies that disagreed. One test settles both: a line is a copy of the
+rule or a symptom it settles. Demand suppressed by a weak feature still
+counts as likely use.
 
 ### browser-cost
 
