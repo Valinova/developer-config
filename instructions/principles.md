@@ -26,7 +26,7 @@ Default to subtracting: the smallest change that solves the problem. Before addi
 - Fix the real type (`unknown` with guards, proper types, generics); never suppress errors with `any` or `@ts-ignore`.
 - **Model the domain in types.** Variants are a discriminated union or state machine, never booleans that must stay in sync or a bag of optional fields; every switch over them is exhaustive, checked by the compiler or linter.
 - Reduce complexity by simplifying logic, never by redistributing it. Pass-through wrappers are one example, whatever the lint score says.
-- Ask before adding a dependency; prefer ~30 lines of owned code over a small package. The package version being added must be at least 48 hours old — verify the bun/pnpm minimum-release-age cooldown applies.
+- Before adding, upgrading or removing a dependency, or changing how code handles secrets, auth or untrusted input, read `~/Development/developer-config/instructions/security.md`.
 
 ## 3. Surgical changes
 
