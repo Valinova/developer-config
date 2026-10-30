@@ -4,8 +4,7 @@
 # Two uses:
 #   - PR review: copy into a repo's .coderabbit.yaml (a repo file replaces any
 #     org central config, and CodeRabbit can't read this repo across orgs).
-#   - Local CLI: coderabbit review --committed --base origin/<default> \
-#       -c <this file> AGENTS.md
+#   - CLI fallback: invocation and review policy live in instructions/git-operations.md.
 # Edit here first, then re-copy.
 reviews:
   path_instructions:
