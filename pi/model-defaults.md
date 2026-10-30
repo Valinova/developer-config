@@ -20,15 +20,15 @@ still apply.
 ## Pi seat
 
 - The session model is the machine's local config (`model-selection.md`
-  "Harness seats"). Each `Agent` dispatch's model follows the same
+  "Harness seats"). Each `subagent` dispatch's model follows the same
   two-family rule, translated through the ID map below.
-- Native Anthropic on Pi bills the API: an `anthropic/…` `Agent` runs only
+- Native Anthropic on Pi bills the API: an `anthropic/…` `subagent` runs only
   when the user names it, and the subscription-only Opus rule in canonical
   "Harness seats" does not authorize it.
 
 ## Exact Pi model IDs
 
-Every fresh `Agent` call needs `provider/id` — use this map, do not guess
+Every fresh `subagent` call needs `provider/id` — use this map, do not guess
 versioned slugs:
 
 | Family | Pi ID |
@@ -61,8 +61,10 @@ lookup:** never Haiku, never Sonnet, and Pi does not farm `claude -p`.
 
 ## Dispatch mechanics
 
-- **Every fresh dispatch names `model` and `thinking`.** Tintin agent profiles
-  own roles and tools only — not model defaults. Resume keeps the existing
+- **Every fresh dispatch names model and thinking** in one field:
+  `model: "<provider/id>:<level>"` (pi-subagents ignores a separate
+  `thinking` on dispatch). Agent profiles under `pi/agents/` own roles and
+  tools only — not model defaults; bundled builtins are disabled. Resume keeps the existing
   session model.
 - Choose the seat and rung from canonical "Harness seats", then translate the model through the ID map above.
   Interactive session model/thinking is TUI state in
@@ -94,16 +96,16 @@ leaves the previous post-run file in place until it closes). Confirm the route f
 `grep -oE '"(provider|model)":"[^"]+"' /tmp/pi-<task>.log | sort | uniq -c`.
 
 **Nesting on DeepSeek.** A brief that allows nesting must pin every
-nested `Agent` to `deepseek/deepseek-flash` at `high`, with disjoint file
+nested `subagent` to `deepseek/deepseek-flash:high`, with disjoint file
 lists per nested agent.
 
 **Nested dispatch inside a delegated run.** A Pi leaf that nests falls back
 to its own seat choice unless the brief's pin is stated as an override. In a
-brief that allows nesting, write it as: "Every nested `Agent` call's arguments
-set `model: "<provider/id>"` and `thinking: "<level>"` exactly as given here;
+brief that allows nesting, write it as: "Every nested `subagent` call's arguments
+set `model: "<provider/id>:<level>"` exactly as given here;
 this overrides any seat default." Then verify at the
 first wait, not at the end:
-`grep -oE '"name":"Agent","arguments":\{[^}]*"model":"[^"]+"' /tmp/pi-<task>.log`
+`grep -oE '"name":"subagent","arguments":\{[^}]*"model":"[^"]+"' /tmp/pi-<task>.log`
 lists each nested dispatch's model. A mismatch is a brief-compliance finding:
 decide keep-or-stop with the user; don't let it pass silently.
 

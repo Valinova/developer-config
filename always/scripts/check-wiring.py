@@ -48,7 +48,6 @@ LINKS = {
     "Pi": {
         "AGENTS.md": "instructions/principles.md",
         "settings.json": "pi/settings.json",
-        "subagents.json": "pi/subagents.json",
         "APPEND_SYSTEM.md": "pi/model-defaults.md",
         "scripts": "always/scripts",
     },

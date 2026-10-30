@@ -1,13 +1,20 @@
 {
-  "lastChangelogVersion": "1.0.4",
+  "lastChangelogVersion": "1.4.0",
   "theme": "dark",
-  "defaultProvider": "xai",
-  "defaultModel": "grok-4.6",
+  "defaultProvider": "deepseek",
+  "defaultModel": "deepseek-flash",
   "defaultThinkingLevel": "high",
   "packages": [
-    "npm:@tintinweb/pi-subagents",
-    "npm:pi-service-tier",
-    "git:github.com/algal/pi-openai-server-compaction",
-    "npm:pi-web-access"
-  ]
+    "npm:pi-subagents@0.83.0",
+    "npm:pi-service-tier@0.6.0",
+    "git:github.com/algal/pi-openai-server-compaction@8a3de2f3b0c178fdd6f73f2f94172dfc3943e466",
+    "npm:pi-web-access@0.45.0"
+  ],
+  "npmCommand": [
+    "pnpm",
+    "--config.node-linker=hoisted"
+  ],
+  "subagents": {
+    "disableBuiltins": true
+  }
 }

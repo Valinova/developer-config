@@ -36,7 +36,6 @@ The repo is cloned at `~/Development/developer-config` on every machine
 | global `agent-browser` (`pnpm add -g agent-browser`) | install | drives the system Google Chrome, so skip `agent-browser install` where Chrome exists (`agent-browser doctor` checks) |
 | shell rc (`~/.bashrc` / `~/.zshrc`) | merge | `alias claude-pw='claude --mcp-config ~/.claude/mcp/playwright.json'` and `alias claude-pw-headed='PLAYWRIGHT_MCP_BROWSER_CONFIG=~/.claude/mcp/playwright-browser-headed.json claude --mcp-config ~/.claude/mcp/playwright.json'`; preserve everything else |
 | `~/.pi/agent/settings.json` | symlink | `pi/settings.json` |
-| `~/.pi/agent/subagents.json` | symlink | `pi/subagents.json` (Tintin defaults disabled) |
 | `~/.pi/agent/APPEND_SYSTEM.md` | symlink | `pi/model-defaults.md` |
 | `~/.pi/agent/mcp.json` Convex entry | merge | Add the machine-owned `mcpServers.convex` entry described below; preserve unrelated servers |
 | `~/.pi/agent/agents/<f>` | symlink each | `pi/agents/<f>` (role/tools only; model and thinking stay dispatch-owned) |
@@ -179,12 +178,14 @@ pure-imports pattern does NOT work for it) and it loads only **one** global
 context file. So Pi receives the universal root doctrine (`principles.md`) and
 nothing is duplicated.
 
-Pi dispatches through the `@tintinweb/pi-subagents` package (declared in
-`pi/settings.json`); `coding-orchestration.md` and `codex-delegation.md` are
+Pi dispatches through the `pi-subagents` package's `subagent` tool (declared
+in `pi/settings.json`, bundled builtin agents disabled there; packages install
+through pnpm via `npmCommand` (hoisted linker: Pi resolves extension
+dependencies from the install root) and are pinned to exact versions); `coding-orchestration.md` and `codex-delegation.md` are
 deliberately not wired in. `pi/model-defaults.md`, loaded through
 `~/.pi/agent/APPEND_SYSTEM.md` (a separate system-prompt slot, so Codex never
 sees it), owns the exact provider/model IDs, and the rule that every
-fresh `Agent()` call names its model and thinking level; role profiles under
+fresh `subagent` call names its model and thinking level; role profiles under
 `pi/agents/` never pin one, and there is no `pi-root.md`. On a shared fact
 `model-selection.md` wins. The wrappers are on Pi's `PATH` through
 `~/.pi/agent/scripts` but are not its dispatch path; add a purpose-built owner
