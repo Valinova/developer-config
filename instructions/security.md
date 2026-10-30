@@ -11,13 +11,15 @@ procedure: apply judgment.
   (prefer ~30 lines of owned code); keep maintained dependencies for crypto, auth, TLS and
   complex formats.
 - pnpm or bun, never npm. Install scripts stay blocked; allowlisting one is a decision:
-  read what it runs first, and run it in a sandbox when unsure.
+  read what it runs first, and run it in a sandbox when unsure. In bun that takes
+  `trustedDependencies: []`; absent, bun runs scripts for its built-in trusted list.
 - Apps pin exact versions, commit the lockfile, and install frozen in CI.
 - Cooldown: no version younger than 48 hours, enforced by the package manager's minimum
   release age; exceptions are named exact versions.
-- Registry only, direct or transitive: no git, URL or tarball dependencies. Where the
-  package manager supports it, refuse trust downgrades; exceptions are exact versions with
-  the publisher verified.
+- Registry only, direct or transitive: no git, URL or tarball dependencies. Refuse trust
+  downgrades where supported; exceptions are exact versions with the publisher verified.
+  bun refuses neither, so a bun repo fails its gate and root `postinstall` on any
+  non-registry `bun.lock` entry, and the cooldown is its only trust-downgrade cover.
 - `outdated` sees only direct dependencies; `audit` is the view of transitive ones.
   Overrides are floors, removed when nothing needs them; accepted findings say why.
 - Parsers of untrusted input stay minimal, bounded and fail closed.
