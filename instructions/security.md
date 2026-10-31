@@ -38,7 +38,9 @@ runs with the agent's host permissions.
   Playwright version, bumped under the cooldown above.
 - A stale copy is dangerous only when launched: `playwright uninstall` (global
   install) removes every Playwright browser no installed project still references.
-- Audit: confirm each external-facing launcher resolves to system Chrome (Hermes
-  `AGENT_BROWSER_EXECUTABLE_PATH`, Playwright MCP default, walk `channel: 'chrome'`)
-  and that Chrome's updater is current; delete stray Chromium outside Playwright's
-  store (`~/.cache/puppeteer`, `~/.hermes/tools/chromium-*`); then `playwright uninstall`.
+- Audit on a Playwright bump or new machine: confirm each external-facing launcher
+  resolves to system Chrome (`agent-browser doctor` with no fallback listed, Playwright
+  MCP default, walk `channel: 'chrome'`, Hermes `AGENT_BROWSER_EXECUTABLE_PATH` where
+  installed) and that Chrome's updater is current; delete stray Chromium outside
+  Playwright's store (`~/.cache/puppeteer`, `~/.hermes/tools/chromium-*`, snap/apt
+  `chromium`); then `playwright uninstall`.
