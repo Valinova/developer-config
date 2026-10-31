@@ -10,6 +10,8 @@ Cheaper checks come first; browser authority is in `principles.md` §9.
 owns scenario selection, fixed outcomes and proof evidence: browser-visible PR
 outcomes need rendered proof even when calculations can be checked below the UI.
 Do the walk yourself; delegate it only when it is long enough to bury your context.
+Before choosing or launching a browser binary, follow the
+[security owner](../../../instructions/security.md#browser-runtimes).
 
 ## What you need
 

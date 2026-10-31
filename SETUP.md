@@ -31,8 +31,9 @@ The repo is cloned at `~/Development/developer-config` on every machine
 | `~/.claude/mcp/playwright-browser.json` | symlink | `always/mcp/playwright-browser.json` (headless Chromium options, the default) |
 | `~/.claude/mcp/playwright-browser-headed.json` | symlink | `always/mcp/playwright-browser-headed.json` (headed variant, selected per session via `PLAYWRIGHT_MCP_BROWSER_CONFIG`) |
 | `~/.config/pnpm/config.yaml` | merge | `minimumReleaseAge: 2880` (48 h); every unpinned `pnpm add -g` / `pnpm dlx` below then takes the newest version at least that old; preserve every unrelated key |
+| `~/.npmrc` | merge | `min-release-age=2` (48 h, in days); covers `npx` and every npm install outside a repo's own `.npmrc`; preserve every unrelated key |
 | `~/.bunfig.toml` | merge | `[install] minimumReleaseAge = 172800` (48 h, in seconds); covers `bunx` and every install outside a repo's own `bunfig.toml`; preserve every unrelated key |
-| global `playwright` (`pnpm add -g playwright && playwright install chromium`) | install | imported by `always/scripts/lib/playwright-walk.mjs`, which launches the bundled Chromium |
+| global `playwright` (`pnpm add -g playwright`; where Google Chrome is missing, `playwright install chrome`) | install | imported by `always/scripts/lib/playwright-walk.mjs`, which launches the system Google Chrome |
 | global `agent-browser` (`pnpm add -g agent-browser`) | install | drives the system Google Chrome, so skip `agent-browser install` where Chrome exists (`agent-browser doctor` checks) |
 | shell rc (`~/.bashrc` / `~/.zshrc`) | merge | `alias claude-pw='claude --mcp-config ~/.claude/mcp/playwright.json'` and `alias claude-pw-headed='PLAYWRIGHT_MCP_BROWSER_CONFIG=~/.claude/mcp/playwright-browser-headed.json claude --mcp-config ~/.claude/mcp/playwright.json'`; preserve everything else |
 | `~/.pi/agent/settings.json` | symlink | `pi/settings.json` |

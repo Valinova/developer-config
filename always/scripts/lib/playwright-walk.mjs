@@ -6,7 +6,8 @@
 //
 // Contract:
 //   - Playwright comes from the machine's global pnpm install
-//     (`pnpm add -g playwright && playwright install chromium`, SETUP.md).
+//     (`pnpm add -g playwright`, SETUP.md) and drives the system Google Chrome,
+//     which its vendor keeps patched; a bundled Chromium would go stale.
 //     No repo ever adds it as a dependency for walks.
 //   - Every artifact of a walk (profile, screenshots, logs, scripts) lives in one
 //     dir outside any repo: `dir` (e.g. the session scratchpad), else $WALK_DIR,
@@ -54,6 +55,7 @@ export async function openWalk({ task, dir: base, headed = process.env.WALK_HEAD
   const dir = walkDir(task, base)
   const { chromium } = await import(pathToFileURL(resolveGlobalPlaywright()).href)
   const context = await chromium.launchPersistentContext(join(dir, 'profile'), {
+    channel: 'chrome',
     headless: !headed,
     viewport,
     args: ['--password-store=basic']

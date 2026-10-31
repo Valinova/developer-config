@@ -25,3 +25,20 @@ procedure: apply judgment.
 - Parsers of untrusted input stay minimal, bounded and fail closed.
 - CI and agent tooling are supply chain too: Actions pinned by commit SHA, least-privilege
   tokens, MCP servers and skill scripts pinned like app dependencies.
+
+## Browser runtimes
+
+Browser engine CVEs are frequent and severe; a page that exploits a stale engine
+runs with the agent's host permissions.
+
+- A browser that reaches anything beyond localhost drives the system Google Chrome
+  (Playwright `channel: 'chrome'`, Hermes `AGENT_BROWSER_EXECUTABLE_PATH`), which
+  its updater keeps patched. Never point it at a bundled Chromium.
+- A bundled Chromium is for localhost tests only; it follows the project's
+  Playwright version, bumped under the cooldown above.
+- A stale copy is dangerous only when launched: `playwright uninstall` (global
+  install) removes every Playwright browser no installed project still references.
+- Audit: confirm each external-facing launcher resolves to system Chrome (Hermes
+  `AGENT_BROWSER_EXECUTABLE_PATH`, Playwright MCP default, walk `channel: 'chrome'`)
+  and that Chrome's updater is current; delete stray Chromium outside Playwright's
+  store (`~/.cache/puppeteer`, `~/.hermes/tools/chromium-*`); then `playwright uninstall`.
