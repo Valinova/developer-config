@@ -3,7 +3,7 @@
 Shared body for every harness's `babysit` skill. Seats, lanes, and the reviewer
 come from `model-selection.md` "Harness seats"; IDs, wrappers, and sandbox
 limits come from the harness's model card (`<harness>/model-defaults.md`;
-Claude Code: `instructions/codex-delegation.md`).
+Codex and Claude Code: `instructions/codex-delegation.md`).
 
 Take the current branch's open pull request through one round of CodeRabbit
 and CI, then report. Independently runnable and the final `longrun` stage; it
@@ -15,7 +15,7 @@ say so and stop.
 
 1. **Wait** for every check, CodeRabbit's status check included (`gh pr checks
    --watch`). A pass with no review object is a clean review; "Review rate
-   limited" means none ran, and `git-operations.md` "CodeRabbit" decides what
+   limited" means none ran, and `coderabbit/README.md` decides what
    replaces it. If the repo's `.coderabbit.yaml` lacks
    `reviews.auto_review.auto_incremental_review: false`, tell the user: the
    push will spend a second review.
@@ -28,7 +28,7 @@ say so and stop.
    on its thread mentioning `@coderabbitai` with the reason; it confirms with
    "Learnings Added". Resolving threads and reactions teach it nothing.
 4. **Push once**, after verifying the remote target, and wait for its CI. A
-   second review needs the user's yes (`git-operations.md` "CodeRabbit").
+   second review needs the user's yes (`coderabbit/README.md`).
 
 Report merge-ready only when the PR meets principles §4 "Ship gate" and no
 accepted finding is open; otherwise report what remains. Merge only when the

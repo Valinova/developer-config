@@ -3,7 +3,7 @@
 Shared body for every harness's `rev` skill. Seats, lanes, and the reviewer
 come from `model-selection.md` "Harness seats"; IDs, wrappers, and sandbox
 limits come from the harness's model card (`<harness>/model-defaults.md`;
-Claude Code: `instructions/codex-delegation.md`).
+Codex and Claude Code: `instructions/codex-delegation.md`).
 
 Review the committed branch. This workflow IS the diff review
 (`dispatch-bootstrap.md` "External calls"), independently runnable and also the

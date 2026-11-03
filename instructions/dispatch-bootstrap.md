@@ -1,17 +1,17 @@
 # Dispatch bootstrap
 
-Always loaded by Claude Code and Codex with model policy and testing.
-`codex-delegation.md` (briefs, wrappers) is read on dispatch.
+Always loaded by Claude Code, Codex and Grok Build. `model-selection.md` and
+`codex-delegation.md` are read on dispatch.
 
-**A check killed for memory is a memory problem, not a code failure.** On
-WSL, earlyoom kills heavy check processes first (`tsgo`, `vitest`, `eslint`,
-`turbo`, `bun`, `node`) when the machine runs out of memory. If a
+Fable orchestrators blocked on work that may exceed an hour also read
+`codex-delegation.md` "Prompt-cache heartbeat (Claude Code)".
+
+**A check killed for memory is a memory problem, not a code failure.** If a
 gate, typecheck, lint, or test dies with `Killed`, exit 137 or 143, or stops
-with no output, run `journalctl -u earlyoom -n 5` and `free -h`. When earlyoom
-killed it, tell the user plainly that the run was killed for memory, and that
-its result says nothing about the code. Don't change code in response. Wait
-until other sessions' heavy work has settled (check `free -h` every few
-minutes), then retry once. Never retry in a loop.
+with no output, run `journalctl -u earlyoom -n 5` and `free -h`. If earlyoom
+killed it, say so plainly: the result says nothing about the code, so don't
+change code. Wait until other sessions' heavy work settles, then retry once,
+never in a loop.
 
 **Delegate in three cases:**
 
@@ -33,13 +33,18 @@ minutes), then retry once. Never retry in a loop.
 
 Otherwise do it yourself: a handful of reads or edits isn't worth a helper.
 
-**Read before you dispatch.** Before any dispatch (`Agent` tool,
-`claude-exec.sh`, `codex-exec.sh`, `pi-exec.sh`) or any
+**Read before you dispatch.** Before any dispatch (`Agent`, `spawn_agent`,
+`claude -p`, `claude-exec.sh`, `codex-exec.sh`, `pi-exec.sh`) or any
 workflow skill (`agentplan`, `execute-plan`, `rev`, `docs`, `full-docs`,
 `comment-audit`, `babysit`, `longrun`), read
-`~/Development/developer-config/instructions/codex-delegation.md` in full.
+`~/Development/developer-config/instructions/model-selection.md` unless it is
+already loaded, and
+`~/Development/developer-config/instructions/codex-delegation.md`: all of it,
+except that a native `Agent` or `spawn_agent` dispatch can stop at its
+"Wrapper dispatch" heading (`sed '/^## Wrapper dispatch/q'`).
 Every brief that lets a leaf delegate further must require the same read
-plus the leaf's harness model card (Claude Code: `codex-delegation.md`).
+plus the leaf's harness model card when it has one (Codex and Claude Code
+use the shared `codex-delegation.md`).
 
 **External calls** dispatch another model for independent judgment (a plan
 or diff review, `rev`, an escalation, any cross-family opinion); local checks,

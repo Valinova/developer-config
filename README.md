@@ -24,9 +24,10 @@ Pi's machine-owned configs.
 One line per top-level entry; each file's header and `SETUP.md` own the detail.
 
 ```
-instructions/     The doctrine, one owner per fact: principles, git-operations,
-                  dispatch-bootstrap, model-selection, testing (Claude Code + Codex
-                  always loaded); claude-conventions (Claude only); codex-delegation
+instructions/     The doctrine, one owner per fact: principles, dispatch-bootstrap
+                  (Claude Code + Codex always loaded); model-selection (on dispatch);
+                  git-operations, testing, issues (on demand);
+                  claude-conventions (Claude only); codex-delegation
                   (read on dispatch); coding-orchestration, agent-guidance,
                   durable-worktrees, rationale (reference, not auto-loaded).
 claude-root.md    Becomes ~/.claude/CLAUDE.md via symlink. Pure @imports.
@@ -43,7 +44,7 @@ always/
   mcp/            On-demand MCP server definitions (Playwright).
   settings.json   User-global ~/.claude/settings.json.
 claude/skills/    Claude stubs over workflows/.
-codex/            AGENTS.md (generated shared core + model-defaults.md), permissions.md and
+codex/            AGENTS.md (generated principles + dispatch bootstrap), permissions.md and
                   command-safety.rules (automatic review; unrecoverable + Doppler prd blocks); skills/:
                   stubs over workflows/ plus Codex-only skills.
 grok/             model-defaults.md (Grok Build card); skills/: stubs over workflows/.
@@ -66,8 +67,8 @@ coderabbit/       Canonical CodeRabbit path-instruction snippets, copied per rep
 ┌────────────┐ ┌─────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐
 │instructions│ │ always/ │ │claude/   │ │ codex/   │ │ pi/      │ │ grok/    │
 │ DOCTRINE   │ │ SHARED  │ │skills/   │ │ skills/ +│ │ skills/ +│ │ skills/ +│
-│ principles │ │ skills/ │ │ stubs    │ │ model-   │ │ model-   │ │ model-   │
-│ model-sel. │ │ commands│ │ over     │ │ defaults │ │ defaults │ │ defaults │
+│ principles │ │ skills/ │ │ stubs    │ │ AGENTS.md│ │ model-   │ │ model-   │
+│ model-sel. │ │ commands│ │ over     │ │ generated│ │ defaults │ │ defaults │
 │ codex-deleg│ │ scripts │ │workflows/│ │ stubs    │ │ settings,│ │ stubs    │
 │ conventions│ │settings │ │          │ │          │ │ extens.  │ │          │
 │ bootstrap  │ │         │ │          │ │          │ │          │ │          │
@@ -78,8 +79,8 @@ coderabbit/       Canonical CodeRabbit path-instruction snippets, copied per rep
       ▼             ▼           ▼            ▼            ▼            ▼
 ┌──────────────┐ ┌──────────────┐ ┌────────────┐ ┌─────────────────────┐
 │ CLAUDE CODE  │ │    CODEX     │ │     PI     │ │     GROK BUILD      │
-│ shared core +│ │ shared core +│ │ principles │ │ rules/*.md:         │
-│ conventions  │ │ Codex card   │ │ + pi/model-│ │  principles + git + │
+│ shared core +│ │ principles + │ │ principles │ │ rules/*.md:         │
+│ conventions  │ │ bootstrap    │ │ + pi/model-│ │  principles + git + │
 │ (@imports)   │ │ (generated)  │ │ defaults   │ │  bootstrap +        │
 │ codex-deleg  │ │ codex-deleg  │ │ skills:    │ │  grok/model-defaults│
 │ on dispatch  │ │ on dispatch  │ │  always/+pi│ │  (model-sel./codex- │

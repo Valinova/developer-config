@@ -2,8 +2,9 @@
 
 Owns how tests are chosen, written, reviewed, and pruned in every repo;
 `principles.md` §4 carries the always-loaded core and points here. Read this
-file before writing, changing, reviewing, or deleting tests. Project-level
-`AGENTS.md` / `CLAUDE.md` may name the repo's boundary harness and fixtures.
+file before planning verification or writing, changing, reviewing, or deleting
+tests. Project-level `AGENTS.md` / `CLAUDE.md` may name the repo's boundary
+harness and fixtures.
 (why: rationale.md#test-strategy)
 
 ## PR proof and regression scenarios
@@ -65,7 +66,6 @@ inspect impact and rerun only the smallest invalidated proof; a new SHA alone is
 not a rerun trigger. Use judgment to run heavier end-to-end checks at meaningful
 verification points when a change could reasonably affect their protected behavior,
 not after every small edit or commit. Required automated gates remain separate.
-Keep run ephemera outside the worktree per `principles.md` §9.
 
 ## Live proof and deterministic tests
 

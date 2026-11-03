@@ -1,26 +1,29 @@
-# Codex delegation — brief template
+# Codex delegation — briefs and mechanics
 
-CLI-agnostic guidance for delegating work to `codex exec` from a non-Codex agent (Hermes, Claude Code, etc.).
+Guidance for native Codex subagents and CLI delegation (`codex exec`,
+`claude -p`, and `pi -p`) from Codex, Hermes, Claude Code, etc.
 
-`model-selection.md` owns "Harness seats" and "Subagent fan-out" and is
-always loaded by Claude Code and Codex. This file owns
-briefs and wrapper mechanics, not model policy. Incident history behind the
-rules: `rationale.md` (not loaded).
+`model-selection.md` owns "Harness seats" and "Subagent fan-out". This file owns
+briefs, native Codex mechanics, and shared CLI lifecycle, not model policy.
+Incident history behind the rules: `rationale.md` (not loaded).
 
 ## Hard rules
 
-- **Always redirect stdin from `/dev/null`** when running `codex exec` non-interactively; without it codex blocks on stdin (why: rationale.md#codex-stdin).
-  ```bash
-  codex exec --skip-git-repo-check --sandbox workspace-write "$(cat /tmp/brief.md)" </dev/null
-  ```
-- **Write the brief to a file, pass via `$(cat ...)`** — don't inline long prompts on the command line.
 - **Delegated CLI agents make no git writes.** The invoking agent or wrapper owns staging, committing, fetching, pushing, and branch/worktree management under the user's authorization, in every checkout, whether or not the child sandbox can write the index. The interactive Codex app may perform authorized git operations itself; a delegated CLI invocation of a delivery skill reports its edits and hands git operations back to its invoker.
-- **Dispatch from a shell that can't be killed mid-flight — and that exits immediately after dispatching.** In Claude Code, run the dispatch wrapper in its own `run_in_background` Bash call **with the dispatch as the final command — never chain `codex-wait.sh` (or anything else) after it in the same call**. Attach `codex-wait.sh` in a SEPARATE Bash call — killing a lone wait only loses the notification. Codex workers detach via `setsid`; the PreToolUse hook `always/scripts/foreground-dispatch-guard.py` enforces dispatch shape in every permission mode including bypass (why: rationale.md#dispatch-shell). Recovery starts with `codex-status.sh` / `claude-status.sh`: reattach to a live run; only after a confirmed failure, diff against the pre-dispatch snapshot and resume or re-dispatch under a fresh `-r2` name (a repair brief may keep salvageable partial work in the tree).
-- **A dispatcher's completion is not the run's.** The wrapper exits 0 as soon as the detached run is healthy, so the harness reports the dispatch call "completed" while the work is still going. The run's signals are `codex-wait.sh` / `claude-wait.sh` (notification) and `codex-status.sh` / `claude-status.sh` (verdict) — never the dispatch call's own exit.
-- **Never kill codex runs by pattern.** `pkill -f "codex exec"` (or any pattern kill) has shared blast radius (why: rationale.md#pattern-kill). Verify liveness first; kill only a PID proven to belong to your task, or simply re-dispatch under a fresh `-r2` name when the stalled run made no file changes.
-- **One session per task.** Parallel tasks use distinct names. Recommended max parallel = 3, provisional: revert to 2 if health checks start flagging `stalled` runs or wall-clock degrades (why: rationale.md#parallel-limit). Higher than 3 only deliberately.
 - **Split large asks into diagnose → apply.** A single long-running task that crashes loses all in-process context.
-- **Briefs assume ambient principles.** A delegated leaf inherits the engineering principles from its harness's global file (`~/.codex/AGENTS.md` links to generated `codex/AGENTS.md`; `~/.pi/agent/AGENTS.md` links to `instructions/principles.md`), so briefs never restate the doctrine. A brief names the two or three `principles.md` sections the task is most likely to violate, by number, and restates nothing else. If a leaf machine's global file does not resolve, fix the wiring per SETUP.md instead of compensating inside the brief.
+- **Briefs assume ambient principles.** A delegated leaf inherits the engineering principles from its harness's global file (`~/.codex/AGENTS.md` links to generated `codex/AGENTS.md`; `~/.pi/agent/AGENTS.md` links to `instructions/principles.md`), so briefs never restate the principles. A brief names the two or three `principles.md` sections the task is most likely to violate, by number. Carry the relevant author compensation or reviewer lens from `model-selection.md` "Family tendencies" in the brief; a non-delegating leaf need not load the whole model policy. If a leaf machine's global file does not resolve, fix the wiring per SETUP.md instead of compensating inside the brief.
+
+## Native subagents
+
+- **`spawn_agent` takes `model` and `reasoning_effort` per spawn.** Choose
+  both from the canonical policy and use the live tool schema. Full-history
+  forks (`fork_turns="all"`, including the default) inherit the parent's model
+  and effort and reject overrides. For a different model or rung, pass an
+  explicit override with `fork_turns="none"` and a brief, or a supported
+  partial-history fork. Machine defaults in `~/.codex/config.toml` are setup
+  mechanics; see SETUP.md.
+- When a workflow calls for a cross-family Claude pass, use `claude -p` —
+  never substitute another Codex subagent.
 
 ## Required brief sections
 
@@ -40,6 +43,7 @@ Every brief must include:
    UNSTAGED_EXTRAS: <files changed outside the allowlist + why; empty if none>
    OUT_OF_SCOPE_FINDINGS: <bullets on anything noticed but not touched, each with blast radius and, when a concrete fix is ready, the path to a patch file in the task's scratch dir; empty if none>
    ```
+   Out-of-scope proposals stay outside the worktree until the user applies them (why: rationale.md#agent-proposals).
    Report only this run's edits; pre-existing WIP is not an extra. The invoker checks the report against the pre-dispatch snapshot, including untracked files. The wrapper preserves the final message as text; its separate staged/unstaged diff sections are diagnostics, not instructions to stage.
 
 ### Brief style
@@ -69,6 +73,58 @@ decides the rung per diff. **Nobody pushes under a live editing lane:** a courie
 3. Run the declared success criteria **and the project's full pre-commit gate in your own shell, reading the exit code**, before committing. A leaf's report that the gate is green is a claim, never evidence (why: rationale.md#pre-commit-gate).
 4. If fixes are needed, write a follow-up brief and either resume the codex session (preserves context) or dispatch a new one.
 5. Git is the invoker's alone, following `git-operations.md` and only as the user or workflow authorized: stage explicit paths per `git-operations.md` "Commits", checked against the pre-dispatch snapshot; commit on Codex's behalf, push, and handle checkout/stash/branch creation before and after the run.
+
+## Resume or start fresh for adversarial review
+
+- **Resume the relevant review orchestrator** for the same review, follow-up
+  fixes, or related integration when its findings and decisions still help.
+  Identify the exact session; follow its lane's process lifecycle if it is
+  still running rather than starting a replacement review.
+- Give a compact delta brief: exact new base/head, changed owners and affected
+  contracts, prior finding dispositions, and validation added or invalidated
+  since the last pass. Link the retained review evidence instead of replaying
+  raw logs. Reuse completed evidence that remains valid; review materially
+  invalidated areas and their affected consumers, not the whole change again
+  merely because the commit IDs changed.
+- **Fresh delegates do not require a fresh orchestrator.** Use them when
+  independent eyes or newly affected ownership justify another lens. Carry
+  forward explicit model/delegate overrides that satisfy canonical
+  "Harness seats"; do not preserve an invalid seat assignment from an
+  earlier run. Resolve such a conflict before resuming the affected dispatch.
+- **Start a fresh orchestrator** for a genuinely different objective, stale or
+  misleading context, or when a concise handoff carries the relevant evidence
+  more efficiently than the existing history. Include the same delta brief
+  and valid review evidence so fresh eyes do not repeat completed work.
+- Resumption avoids reconstructing useful context; `--resume` does not
+  guarantee fewer billed tokens. Retained context, cache behavior, and repeated
+  work all affect cost. Choose by relevance and the work remaining, without
+  arbitrary turn, token, or elapsed-time thresholds.
+
+## Prompt-cache heartbeat (Claude Code)
+
+Only while the Fable orchestrator is blocked on named work (a native or wrapper
+run, migration, or live proof) that may exceed an hour with no other turn
+expected; ordinary waits need nothing, because the completion notification is
+the next request. Use `ScheduleWakeup` with `delaySeconds: 3000`, `noop: true`;
+each wake checks the task's status, then reschedules or stops (`stop: true`).
+For wrappers, use `codex-status.sh <task>`, `claude-status.sh <task>`, or for Pi
+`pi/model-defaults.md` "Waiting". One heartbeat per task; stop it the turn the
+work closes, fails, or is abandoned. Never otherwise poll work the harness
+notifies on (why: rationale.md#prompt-cache-heartbeat).
+
+## Wrapper dispatch
+
+Applies to `codex-exec.sh`, `claude-exec.sh` and `pi-exec.sh`; a native `Agent` or `spawn_agent` dispatch can stop reading above this heading.
+
+- **Always redirect stdin from `/dev/null`** when running `codex exec` non-interactively; without it codex blocks on stdin (why: rationale.md#codex-stdin).
+  ```bash
+  codex exec --skip-git-repo-check --sandbox workspace-write "$(cat /tmp/brief.md)" </dev/null
+  ```
+- **Write the brief to a file, pass via `$(cat ...)`** — don't inline long prompts on the command line.
+- **Dispatch from a shell that can't be killed mid-flight — and that exits immediately after dispatching.** In Claude Code, run the dispatch wrapper in its own `run_in_background` Bash call **with the dispatch as the final command — never chain `codex-wait.sh` (or anything else) after it in the same call**. Attach `codex-wait.sh` in a SEPARATE Bash call — killing a lone wait only loses the notification. Codex workers detach via `setsid`; the PreToolUse hook `always/scripts/foreground-dispatch-guard.py` enforces dispatch shape in every permission mode including bypass (why: rationale.md#dispatch-shell). Recovery starts with `codex-status.sh` / `claude-status.sh`: reattach to a live run; only after a confirmed failure, diff against the pre-dispatch snapshot and resume or re-dispatch under a fresh `-r2` name (a repair brief may keep salvageable partial work in the tree).
+- **A dispatcher's completion is not the run's.** The wrapper exits 0 as soon as the detached run is healthy, so the harness reports the dispatch call "completed" while the work is still going. The run's signals are `codex-wait.sh` / `claude-wait.sh` (notification) and `codex-status.sh` / `claude-status.sh` (verdict) — never the dispatch call's own exit.
+- **Never kill codex runs by pattern.** `pkill -f "codex exec"` (or any pattern kill) has shared blast radius (why: rationale.md#pattern-kill). Verify liveness first; kill only a PID proven to belong to your task, or simply re-dispatch under a fresh `-r2` name when the stalled run made no file changes.
+- **One session per task.** Parallel tasks use distinct names. Recommended max parallel = 3, provisional: revert to 2 if health checks start flagging `stalled` runs or wall-clock degrades (why: rationale.md#parallel-limit). Higher than 3 only deliberately.
 
 ## Session registry (all callers)
 
@@ -120,6 +176,9 @@ A user-named override lane (`model-selection.md` "Harness seats"). Delegated `pi
 
 The lane for reaching a Claude seat from outside Claude Code (Codex, Pi, Hermes). From a Claude Code orchestrator the same-family lane is the native `Agent`, which takes `model` and `effort`; `claude-exec.sh` is used there only for a run that must outlive the session (`model-selection.md` "Fresh window or inherited context"). Deliberately simpler than the Codex wrappers (why: rationale.md#claude-exec-simplicity).
 
+Raw calls pass `claude -p --model <chosen> --effort <chosen>`, choosing both
+from `model-selection.md` "Harness seats".
+
 ```bash
 ~/.claude/scripts/claude-exec.sh <task-name> /tmp/claude-<task-name>-brief.md [--effort LEVEL] [--model SLUG] [--resume] [--foreground]
 ~/.claude/scripts/claude-wait.sh <task-name> [timeout-seconds]
@@ -134,3 +193,29 @@ Differences from Codex that change the brief:
 - Same dispatch rules: `claude-exec.sh` in its own `run_in_background` Bash call as the final command, `claude-wait.sh` in a separate call (`foreground-dispatch-guard.py` enforces both); same 45s first-event check; same registry-based recovery after a session restart (`claude-wait.sh` is idempotent). `claude-wait.sh` and `claude-status.sh` are resume-aware — a run starts at the task's most recent `start` **or** `resume_started` event (`lib/wrapper-common.sh` owns that rule), so neither is answered by the previous run's close line.
 - **Nested delegation** follows Required brief sections §6: implement briefs use its omit-default; reviewer nesting follows `model-selection.md` "Subagent fan-out", and omission does not forbid it.
 - All other brief sections and post-run discipline apply unchanged. The brief carries the distilled context — file:line pointers, the plan phase, the allowlist — because nothing from the orchestrator's window reaches the child except that file.
+
+### Raw `claude -p` process lifecycle (hard rule)
+
+- Run `claude -p` in a long-lived exec session and wait for its terminal
+  result. In the default text mode it normally emits the review only when the
+  run completes; 20-plus minutes without stdout is not evidence of failure.
+- Do not pass `--max-turns`, `--max-budget-usd`, or wrap the run in a shell
+  timeout. Subscription quota accounting is not a per-dispatch spending
+  boundary.
+- Poll non-destructively for completion. Every ten minutes, perform a
+  diagnostic checkpoint: confirm the original session/process is alive,
+  record elapsed time, inspect available process-tree activity, and check for
+  new stdout, stderr, or a terminal exit. For positive evidence of progress —
+  text mode emits no stdout until the end — check that the run's session
+  transcript (the most recently modified `*.jsonl` under
+  `~/.claude/projects/`, matching the run's start time) is still growing.
+  Report a concise status to the user. A quiet stdout with a growing
+  transcript is a healthy run, not a wedge; a healthy checkpoint always means
+  continue waiting, and there is no elapsed-time kill threshold.
+- Never signal the process or launch a duplicate run because it is quiet or
+  long-running. If diagnostics provide concrete evidence of a probable wedge,
+  report that evidence and ask the user before terminating or retrying.
+  Explicit user cancellation is the only preemptive stop. A hard CLI failure
+  should exit nonzero with an error; preserve and report it.
+- Independent investigation may continue while Claude runs, but do not mutate
+  the artifact Claude is reviewing until its result returns.

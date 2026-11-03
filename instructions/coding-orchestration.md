@@ -46,7 +46,7 @@ Hermes reaches the Claude seat selected under `model-selection.md` via `claude -
 
 **How it works:**
 1. Hermes writes a brief to `/tmp/brief.md`
-2. Hermes launches `cat /tmp/brief.md | claude -p '...' --model <chosen-seat> --effort <chosen-effort> --dangerously-skip-permissions` via `terminal(background=true, notify_on_complete=true)`, routed through the dispatch guard below. Follow the process lifecycle in `codex/model-defaults.md`.
+2. Hermes launches `cat /tmp/brief.md | claude -p '...' --model <chosen-seat> --effort <chosen-effort> --dangerously-skip-permissions` via `terminal(background=true, notify_on_complete=true)`, routed through the dispatch guard below. Follow the process lifecycle in `instructions/codex-delegation.md` "Raw `claude -p` process lifecycle".
 3. Claude Code reads files, reasons, writes output
 4. Hermes reviews result, reports to the user
 
@@ -152,5 +152,5 @@ Enforcement is mechanical (why: rationale.md#dispatch-loop):
 - Interactive Claude Code and `claude -p` ride the Anthropic subscription. Hermes conversation does not: native `provider: anthropic` bills the API (extra usage), and `claude-subscription-directsdk-experimental` is not an automatic route (tried, not reliable). Claude farm-out stays `claude -p`.
 - The same subscription-over-metered rule seals **provider routing** on the harnesses sharing Pi's provider store (Pi, Hermes): a model goes through the provider that owns it — **DeepSeek only through `deepseek`, OpenAI models only through the `openai-codex` subscription** — unless the user explicitly names another route for that dispatch. A `provider/id` pair naming the model's vendor rather than an authenticated provider does not error; it falls through to OpenRouter and bills the metered key. Pi's exact IDs and the pre-dispatch resolution check live in `pi/model-defaults.md`.
 - Claude seating: `model-selection.md` "Harness seats".
-- `claude -p` waiting, diagnostics, and termination follow the process lifecycle in `codex/model-defaults.md`.
+- `claude -p` waiting, diagnostics, and termination follow the process lifecycle in `instructions/codex-delegation.md` "Raw `claude -p` process lifecycle".
 - `claude -p` reported `total_cost_usd` is API-equivalent accounting against quota, not real billing.

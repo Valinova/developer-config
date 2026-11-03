@@ -10,7 +10,7 @@ description: Reviews a stated scope of changes — the current branch against it
    improve the result. Before dispatch, read
    `~/Development/developer-config/instructions/model-selection.md` for seats
    and effort, and the harness's model card (`<harness>/model-defaults.md`;
-   Claude Code: `instructions/codex-delegation.md`) for IDs and wrappers.
+   Codex and Claude Code: `instructions/codex-delegation.md`) for IDs and wrappers.
    Additional reviewer selection follows `dispatch-bootstrap.md` "External calls";
    this skill does not invoke the delivery pipeline.
 3. Review correctness, regressions, performance, dead code, simplification, duplication, canonicalization, and meaningful test gaps.

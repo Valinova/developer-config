@@ -1,12 +1,10 @@
 # Claude Code conventions
 
-Behavior rules that apply only to Claude Code sessions (Codex and other agents
-never load this file). Reasoning behind them: `rationale.md` (not loaded).
+Rules that apply only to Claude Code sessions.
 
 ## Artifacts — ask, don't default
 
-- **Don't auto-generate a claude.ai artifact** (why: rationale.md#artifacts). Default to a plain answer in the terminal; one-off analyses, summaries, and explanations stay as text.
-- When a standalone rendered visual deliverable *is* warranted (a mock, a dashboard, a rendered diagram, a viz), ask before building: (1) do I want a rendered artifact, or just the answer? (2) where should it live — an ephemeral artifact on claude.ai, or a **file in the repo** (a real component, a checked-in mock/doc)? Repo-bound work is a Write/Edit, not an artifact. Skip the ask only when I explicitly say "make an artifact" / "render it" / "mock this up as a page," or asked to *share* a standalone visual page. ASCII or Mermaid sketches in a plain answer follow `principles.md` §1 and need no ask.
+Don't auto-generate a claude.ai artifact; answers stay as terminal text (why: rationale.md#artifacts). ASCII or Mermaid sketches in plain answers need no ask. When a rendered visual is warranted (a mock, a dashboard, a diagram), first ask whether I want it rendered and whether it lives on claude.ai or as a file in the repo. Skip the ask only when I say "make an artifact", "render it" or "mock this up as a page", or ask to share a standalone page.
 
 ## Memory — ask before saving
 
@@ -18,24 +16,11 @@ in the repo (a comment at the site, or `AGENTS.md` for a recurring trap).
 
 ## Edit tracked files with the Edit tool, never an in-place shell rewrite
 
-Break and restore an owner with Edit. A shell in-place rewrite of a tracked
-file (`sed -i`, `perl -pi`, `cp`/`mv` over it, a heredoc overwrite) trips
-Claude Code's command safety prompt, which a subagent cannot answer, so its
-pass stalls. Every implementer brief restates it (why:
+A shell in-place rewrite of a tracked file (`sed -i`, `perl -pi`, `cp`/`mv`
+over it, a heredoc overwrite) trips a safety prompt a subagent cannot answer,
+so its pass stalls. Every implementer brief restates it (why:
 rationale.md#tracked-file-edits).
 
-## Prompt-cache heartbeat during long waits
+## Report what you verified
 
-(why: rationale.md#prompt-cache-heartbeat)
-
-- **When:** only while the Fable orchestrator is blocked on work that may run
-  longer than an hour with no other turn expected — a long Codex/pi/`claude -p`
-  run, a slow migration, a live proof. Ordinary waits need nothing: the
-  completion notification is itself the next request.
-- **How:** `ScheduleWakeup`, `delaySeconds: 3000`, `noop: true`. Each wake
-  checks the run's status (`codex-status.sh <task>`, `claude-status.sh
-  <task>`, or for Pi per `pi/model-defaults.md` "Waiting") and either
-  reschedules or stops the loop (`stop: true`) and proceeds.
-- **Always remove it.** One heartbeat per named run; stop it the turn the run
-  closes, fails, or is abandoned. If you cannot name the run it waits on, stop
-  it. Beyond this heartbeat, never poll work the harness already notifies on.
+Say which claims you verified and which you inferred (`model-selection.md` "Family tendencies").

@@ -23,8 +23,8 @@ unchanged code that participates in the same behavior.
    test will protect; prefer adding cases to the existing owner test file.
 4. Use native subagents when independent lenses materially improve coverage.
    Before dispatch, read
-   `~/Development/developer-config/codex/model-defaults.md` and its required
-   canonical policy sections to choose the model and effort. Keep initial
+   `~/Development/developer-config/instructions/dispatch-bootstrap.md` and
+   the shared guides it requires to choose the model and effort. Keep initial
    passes independent and review-only, then
    validate every finding against the code and canonical rules before acting.
    Require each reported finding to identify the expected-behavior owner, the

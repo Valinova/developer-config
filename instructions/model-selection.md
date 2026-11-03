@@ -4,15 +4,14 @@ Profiles, not rules — general criteria for what each model tends to be best
 at. They fill in a default when a dispatch doesn't specify one; the user
 overrides any of them where they see fit, for the unit they named, and the
 next unit derives its own. Hard model-specific constraints below still apply.
-Reasoning behind the rules: `rationale.md` (not loaded).
 
 ## Harness seats
 
 The roster and the shared policy (effort, reviewer selection) are canonical
-here. Harness cards own only mechanics — IDs, provider routing, CLI
-lifecycle, sandbox limits: `codex/`, `grok/`, `pi/`, and
-`hermes/model-defaults.md`. Farm-out mechanics (`claude -p` / `codex exec`
-lifecycle, Hermes paths, auth doctrine) live in `coding-orchestration.md`.
+here. `codex-delegation.md` owns briefs, native Codex mechanics, and shared CLI
+lifecycle; other harness mechanics — IDs, provider routing, sandbox limits —
+live in `grok/`, `pi/`, and `hermes/model-defaults.md`. Hermes paths and auth
+doctrine live in `coding-orchestration.md`.
 
 Every session starts in one of two families, by harness. Inside a range, the
 task's complexity picks the rung; complex work takes the higher side.

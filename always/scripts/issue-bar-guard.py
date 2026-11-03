@@ -32,7 +32,7 @@ API_ISSUES_PATH = re.compile(r"/issues(?=[\"'\s]|$)")
 SHELL_TOOLS = {"Bash", "bash", "run_terminal_command", "run_terminal_cmd"}
 
 REASON = (
-    "Issue bar (principles.md §8): before filing, check that it is observed "
+    "Issue bar (instructions/issues.md): before filing, check that it is observed "
     "(a user saw it, Sentry fired, or a data count shows wrong output today), "
     "reachable (<path> → <wrong outcome>), deletes (<what goes>), or directed "
     "(the user explicitly asked for this issue). A rule the code does not yet "

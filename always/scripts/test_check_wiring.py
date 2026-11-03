@@ -111,7 +111,7 @@ class CodexAgentsTests(unittest.TestCase):
         )
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
-    def test_generation_preserves_import_order_and_detects_drift(self):
+    def test_generation_preserves_source_order_and_detects_drift(self):
         with tempfile.TemporaryDirectory() as directory:
             repo = Path(directory)
             script = repo / "always/scripts/check-wiring.py"
@@ -119,16 +119,8 @@ class CodexAgentsTests(unittest.TestCase):
             shutil.copyfile(SPEC.origin, script)
             (repo / "instructions").mkdir()
             (repo / "codex").mkdir()
-            (repo / "claude-root.md").write_text(
-                "Manifest prose is not an instruction.\n"
-                "@~/Development/developer-config/instructions/second.md\n"
-                "@~/Development/developer-config/instructions/claude-conventions.md\n"
-                "@~/Development/developer-config/instructions/first.md\n"
-            )
-            (repo / "instructions/second.md").write_text("Second — [link](./rule.md)\n")
-            (repo / "instructions/first.md").write_text("First\n")
-            (repo / "instructions/claude-conventions.md").write_text("Claude only\n")
-            (repo / "codex/model-defaults.md").write_text("Codex card\n")
+            for source in MODULE.CODEX_SOURCES:
+                (repo / source).write_text(source + "\n")
             target = repo / "codex/AGENTS.md"
 
             def run(flag):
@@ -140,7 +132,7 @@ class CodexAgentsTests(unittest.TestCase):
             self.assertEqual(generated.returncode, 0, generated.stdout + generated.stderr)
             content = target.read_bytes()
             self.assertEqual(content.split(b"\n", 1)[1],
-                             "\nSecond — [link](./rule.md)\n\nFirst\n\nCodex card\n".encode())
+                             ("\n" + "\n\n".join(MODULE.CODEX_SOURCES) + "\n").encode())
             self.assertEqual(run("--check").returncode, 0)
             self.assertEqual(run("--generate").returncode, 0)
             self.assertEqual(target.read_bytes(), content)

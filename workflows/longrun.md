@@ -3,7 +3,7 @@
 Shared body for every harness's `longrun` skill. Seats, lanes, and the reviewer
 come from `model-selection.md` "Harness seats"; IDs, wrappers, and sandbox
 limits come from the harness's model card (`<harness>/model-defaults.md`;
-Claude Code: `instructions/codex-delegation.md`). Each stage runs this harness's own skill of
+Codex and Claude Code: `instructions/codex-delegation.md`). Each stage runs this harness's own skill of
 that name.
 
 Run the full delivery pipeline autonomously. Invoking this workflow authorizes

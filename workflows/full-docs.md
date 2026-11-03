@@ -3,7 +3,7 @@
 Shared body for every harness's `full-docs` skill. Seats, lanes, and the reviewer
 come from `model-selection.md` "Harness seats"; IDs, wrappers, and sandbox
 limits come from the harness's model card (`<harness>/model-defaults.md`;
-Claude Code: `instructions/codex-delegation.md`).
+Codex and Claude Code: `instructions/codex-delegation.md`).
 
 Run the `docs` skill (`always/skills/docs/SKILL.md`) over every core document
 in the repository — not only the ones the branch touched — then validate the

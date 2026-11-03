@@ -8,8 +8,8 @@ Before dispatch, read
 "Announce-then-proceed preamble",
 "Harness seats" and "Subagent fan-out". Those sections
 own shared policy; this card is not a substitute for them. The `claude -p`
-process lifecycle is owned in `codex/model-defaults.md` — follow it rather
-than restating it. An explicit user or per-dispatch model/reasoning choice
+process lifecycle is owned in `instructions/codex-delegation.md`
+"Raw `claude -p` process lifecycle" — follow it rather than restating it. An explicit user or per-dispatch model/reasoning choice
 always wins among valid combinations.
 
 ## Native subagents
@@ -28,8 +28,9 @@ always wins among valid combinations.
   canonical policy, including implementation overrides.
 - **Claude**: `claude -p` — never a Grok subagent standing in for Claude.
   Select the seat and effort from the canonical policy. Follow the process
-  lifecycle in `codex/model-defaults.md`; a quiet run is still running until
-  it returns or exits with a hard error.
+  lifecycle in `instructions/codex-delegation.md` "Raw `claude -p` process
+  lifecycle"; a quiet run is still running until it returns or exits with a
+  hard error.
 - Native Anthropic inside Grok Build does not exist. Claude is `claude -p`
   only.
 
