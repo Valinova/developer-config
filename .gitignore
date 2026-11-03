@@ -7,3 +7,7 @@ __pycache__/
 *.log
 HANDOFF-*.md
 /local/
+
+# Engine-generated types and tsconfig beside each Claude Code mod
+claude/mods/*/.claude-plugin/types/
+claude/mods/*/tsconfig.json

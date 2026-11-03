@@ -30,3 +30,4 @@ jobs:
       - uses: oven-sh/setup-bun@v2
       - run: bun pi/tests/destructive-guard.test.ts
       - run: bun pi/tests/bash-timeout-guard.test.ts
+      - run: bun test claude/mods/diagrams/tests/mermaid.test.ts

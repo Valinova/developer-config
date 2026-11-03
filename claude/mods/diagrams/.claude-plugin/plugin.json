@@ -1,0 +1,1 @@
+{ "name": "diagrams", "version": "0.1.0", "description": "Draws Mermaid flowcharts in replies as box diagrams, and asks Claude to use them" }
