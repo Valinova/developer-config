@@ -1,5 +1,5 @@
 {
-  "lastChangelogVersion": "1.4.0",
+  "lastChangelogVersion": "1.5.0",
   "theme": "dark",
   "httpIdleTimeoutMs": 90000,
   "defaultProvider": "deepseek",
@@ -17,5 +17,10 @@
   ],
   "subagents": {
     "disableBuiltins": true
+  },
+  "extensionChangelogVersions": {
+    "{\"source\":\"npm:pi-subagents@0.83.0\",\"scope\":\"user\"}": "0.83.0",
+    "{\"source\":\"git:github.com/algal/pi-openai-server-compaction@8a3de2f3b0c178fdd6f73f2f94172dfc3943e466\",\"scope\":\"user\"}": "0.1.0",
+    "{\"source\":\"npm:pi-web-access@0.45.0\",\"scope\":\"user\"}": "0.45.0"
   }
 }

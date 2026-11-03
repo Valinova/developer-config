@@ -23,6 +23,7 @@ const CALM: RGB[] = [[124, 63, 29], [217, 119, 87], [255, 179, 71]] // brown →
 const HOT: RGB[] = [[217, 119, 87], [255, 107, 74], [255, 77, 109]] // orange → hot pink-red, past 85%
 const POP: RGB = [34, 211, 238] // electric cyan
 const GOLD: RGB = [255, 179, 71]
+const CONTEXT_RAMP: RGB[] = [[56, 139, 253], [34, 211, 238], [52, 211, 153], GOLD, [255, 107, 74], [255, 77, 109]] // blue → cyan → green → gold → orange → hot pink
 
 type RGB = [number, number, number]
 type Mood = 'idle' | 'working' | 'waiting' | 'sleeping' | 'stuffed'
@@ -86,6 +87,11 @@ function along(stops: RGB[], t: number): RGB {
 function flicker(frame: number) {
   const x = Math.sin(frame * 12.9898) * 43758.5453
   return x - Math.floor(x)
+}
+
+// The scheme moves with fullness; a wave's crests run one shade further along it.
+function contextColor(percent: number, wave: number) {
+  return along(CONTEXT_RAMP, percent >= 85 ? 0.8 + 0.2 * wave : (percent / 100) * 0.75 + 0.3 * wave)
 }
 
 function hex([r, g, b]: RGB) {
@@ -191,9 +197,9 @@ export const register: Register = on => {
     const isBursting = working || seconds % BURST_EVERY_S < BURST_FOR_S
     const cellsFilled = (percent: number) => (Math.min(Math.max(percent, 0), 100) / 100) * CELLS
 
-    // Context: heights are only the wave's motion; lit cells carry the fill.
+    // Context: the wave lives only in the filled cells, and the rest lie flat, so
+    // its width reads as how close auto-compact is. Waves grow as it fills.
     const waveform = (percent: number) => {
-      const stops = percent >= 85 ? HOT : CALM
       const filled = cellsFilled(percent)
       const bursts = Math.floor(seconds / BURST_EVERY_S) * BURST_FOR_S + Math.min(seconds % BURST_EVERY_S, BURST_FOR_S)
       const t =
@@ -204,10 +210,11 @@ export const register: Register = on => {
       return (
         <Text>
           {Array.from({ length: CELLS }, (_, i) => {
-            const height = 0.5 + 0.3 * Math.sin(i * 1.3 + t) + 0.2 * Math.sin(i * 2.7 - t * 0.6)
-            const glyph = WAVE[Math.min(Math.floor(Math.max(height, 0) * WAVE.length), WAVE.length - 1)]
             const lit = Math.min(Math.max(filled - i, 0), 1)
-            const c = mix(TRACK_RGB, along(stops, i / (CELLS - 1)), lit)
+            const wave = 0.5 + 0.3 * Math.sin(i * 1.3 + t) + 0.2 * Math.sin(i * 2.7 - t * 0.6)
+            const height = lit > 0 ? 0.12 + Math.max(wave, 0) * (0.25 + 0.75 * (filled / CELLS)) : 0
+            const glyph = WAVE[Math.min(Math.floor(height * WAVE.length), WAVE.length - 1)]
+            const c = lit > 0 ? mix(TRACK_RGB, contextColor(percent, Math.max(wave, 0)), 0.4 + 0.6 * lit) : TRACK_RGB
             return <Text key={String(i)} color={hex(c)}>{glyph}</Text>
           })}
         </Text>
@@ -282,7 +289,7 @@ export const register: Register = on => {
         {s.contextTokens !== null ? (
           <Box gap={1}>
             {waveform(ctxPercent)}
-            <Text color={endColor(ctxPercent)}>{kTokens(s.contextTokens)}</Text>
+            <Text color={hex(contextColor(ctxPercent, 0.5))}>{kTokens(s.contextTokens)}</Text>
           </Box>
         ) : null}
         {s.weekPercent !== null ? (
