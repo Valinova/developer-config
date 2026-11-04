@@ -35,16 +35,25 @@ for (const [name, text] of untouched) {
   })
 }
 
-// Shared buses used to turn these different edge sets into the same connections.
-for (const dir of ['LR', 'TD']) for (const edges of [
-  'A --> C; A --> D; B --> D',
-  'A --> C; B --> C; B --> D',
-]) {
-  test(`${dir} preserves Mermaid for a boundary with multiple sources and targets: ${edges}`, () => {
-    const text = block(`flowchart ${dir}\nA[Alpha]; B[Bee]; C[Cee]; D[Dee]\n${edges}`)
-    expect(renderMarkdown(text)).toBe(text)
+// A shared bus would turn these different edge sets into the same connections, so each edge gets its own lane.
+const boundary = (dir: string, edges: string) => renderMarkdown(block(`flowchart ${dir}\nA[Alpha]; B[Bee]; C[Cee]; D[Dee]\n${edges}`))
+for (const dir of ['LR', 'TD']) {
+  test(`${dir} draws different edge sets across one boundary differently`, () => {
+    const [one, other] = [boundary(dir, 'A --> C; A --> D; B --> D'), boundary(dir, 'A --> C; B --> C; B --> D')]
+    for (const out of [one, other]) {
+      expect(out).not.toContain('```mermaid')
+      expect((out.match(/▼/g) ?? []).length).toBe(3)
+    }
+    expect(one).not.toBe(other)
   })
 }
+
+test('a review step joining a flow draws every label', () => {
+  // A decision and a side step sharing a target, plus an edge skipping a layer: left as raw Mermaid until lanes.
+  const out = renderMarkdown(block('flowchart TD\n  A[Ask] --> D[Chain]\n  A -->|separate| E[Current]\n  D --> E\n  R[Review] --> D\n  R -->|wrong| U[Uncommit]'))
+  expect(out).not.toContain('```mermaid')
+  for (const label of ['Ask', 'Chain', 'Current', 'Review', 'Uncommit', 'separate', 'wrong']) expect(out).toContain(label)
+})
 
 // Straight paths, ordinary fans and disjoint parallel branches remain supported when ambiguous buses fall back.
 for (const dir of ['LR', 'TD']) for (const edges of [
@@ -68,6 +77,20 @@ test('later TD edges cannot overwrite an earlier edge label', () => {
   expect(out).toContain('a very long label')
   expect(out).toMatch(/\bz\b/)
   expect((out.match(/▼/g) ?? []).length).toBe(2)
+})
+
+test('a line passing through a merge is not drawn as joining it', () => {
+  // Q's edge skips the layer where P and R merge into T; on one bus row it read as a third input.
+  const out = renderMarkdown(block('flowchart TD\nP[Pea]; Q[Queue]; R[Are]\nP --> T[Tee]\nR --> T\nQ --> Z[Zed]\nT --> Z'))
+  expect(out).not.toContain('```mermaid')
+  for (const junction of ['┼', '┴']) expect(out).not.toContain(junction)
+})
+
+test('a spilled label names the real source of an edge skipping a layer', () => {
+  // The edge's last segment starts at a placeholder slot, whose id used to reach the reply.
+  const out = renderMarkdown(block('flowchart TD\nA[Start] --> B[Step]\nB -->|another label too long| C[End]\nA -->|a label too long to fit| C'))
+  expect(out).toContain('Start → End: a label too long to fit')
+  expect(out).not.toContain('\0')
 })
 
 test('a loop back leaves its node from its own port, not the forward junction', () => {

@@ -83,7 +83,8 @@ export function parse(source: string): Graph | null {
 // ── layout ────────────────────────────────────────────────────────────────
 
 type Slot = { id: string; dummy: boolean }
-type Link = { from: string; to: string; label: string; up: boolean }
+/** `from` may be a dummy slot; `origin` is the node the edge really starts at. */
+type Link = { from: string; origin: string; to: string; label: string; up: boolean }
 
 function layer(g: Graph) {
   const order = [...g.nodes.keys()]
@@ -126,10 +127,10 @@ function layer(g: Graph) {
     for (let r = rank.get(e.from)! + 1; r < rank.get(e.to)!; r++) {
       const id = `\0${n++}`
       put(r, { id, dummy: true })
-      links.push({ from: prev, to: id, label: '', up: e.up })
+      links.push({ from: prev, origin: e.from, to: id, label: '', up: e.up })
       prev = id
     }
-    links.push({ from: prev, to: e.to, label: e.label, up: e.up })
+    links.push({ from: prev, origin: e.from, to: e.to, label: e.label, up: e.up })
   }
 
   // One barycenter pass: order each layer by the mean position of its parents.
@@ -208,18 +209,113 @@ const width = (g: Graph, s: Slot) => {
   return [...(n.shape === 'decision' ? `◇ ${n.label}` : n.label)].length + 4
 }
 
+const crossingFrom = (slots: Slot[], links: Link[]) => {
+  const ids = new Set(slots.map(s => s.id))
+  return links.filter(k => ids.has(k.from))
+}
+
+/**
+ * A gap's shared bus can invent connections between multiple sources and targets.
+ * It is safe when every connected group of its links is a star (one source or one
+ * target) and no two groups overlap along the bus, which would touch on its one row.
+ */
+function busIsAmbiguous(crossing: Link[], centre: (id: string) => number) {
+  const parent = new Map<string, string>()
+  const find = (x: string): string => { const p = parent.get(x) ?? x; if (p === x) return x; const r = find(p); parent.set(x, r); return r }
+  for (const k of crossing) parent.set(find('s:' + k.from), find('t:' + k.to))
+  const groups = new Map<string, { s: Set<string>; t: Set<string> }>()
+  for (const k of crossing) {
+    const r = find('s:' + k.from)
+    const g = groups.get(r) ?? { s: new Set(), t: new Set() }
+    g.s.add(k.from); g.t.add(k.to); groups.set(r, g)
+  }
+  if ([...groups.values()].some(g => g.s.size > 1 && g.t.size > 1)) return true
+  const spans = [...groups.values()]
+    .map(g => [...g.s, ...g.t].map(centre))
+    .map(at => [Math.min(...at), Math.max(...at)] as const)
+    .toSorted((a, b) => a[0] - b[0])
+  return spans.some(([start], i) => i > 0 && start <= spans[i - 1]![1])
+}
+
+type Span = { x: number; w: number }
+type Lane = { sx: number; tx: number; row: number }
+
+/** `k` columns on a slot's edge, spread around its centre; `null` when it has too few. */
+function ports({ x, w }: Span, k: number) {
+  if (w === 1) return k === 1 ? [x] : null
+  const lo = x + 1, hi = x + w - 2, room = hi - lo + 1
+  if (k > room) return null
+  const step = room >= 2 * k - 1 ? 2 : 1
+  const first = Math.max(lo, Math.min(x + Math.floor(w / 2) - Math.floor(((k - 1) * step) / 2), hi - (k - 1) * step))
+  return Array.from({ length: k }, (_, i) => first + i * step)
+}
+
+/**
+ * Gives each link of a gap its own source column, target column and row, so links
+ * never share a segment and a `┼` there is only ever a crossing. `null` when a slot
+ * has too few columns, or a stem would run into another link's whatever the row order.
+ */
+function laneRoutes(crossing: Link[], at: Map<string, Span>) {
+  const centre = (id: string) => at.get(id)!.x + Math.floor(at.get(id)!.w / 2)
+  const by = (key: (k: Link) => string) => {
+    const out = new Map<string, Link[]>()
+    for (const k of crossing) out.set(key(k), [...(out.get(key(k)) ?? []), k])
+    return out
+  }
+  const sx = new Map<Link, number>(), tx = new Map<Link, number>()
+  for (const [id, out] of by(k => k.from)) {
+    const cols = ports(at.get(id)!, out.length)
+    if (!cols) return null
+    out.toSorted((a, b) => centre(a.to) - centre(b.to)).forEach((k, i) => sx.set(k, cols[i]!))
+  }
+  for (const [id, into] of by(k => k.to)) {
+    const span = at.get(id)!
+    const only = into.length === 1 ? sx.get(into[0]!)! : null
+    // A lone link drops straight in when its source column lands on the slot.
+    if (only !== null && only > span.x && only < span.x + span.w - 1) { tx.set(into[0]!, only); continue }
+    const cols = ports(span, into.length)
+    if (!cols) return null
+    into.toSorted((a, b) => sx.get(a)! - sx.get(b)!).forEach((k, i) => tx.set(k, cols[i]!))
+  }
+  // A source stem sharing a column with another link's target stem must end above it.
+  const bent = crossing.filter(k => sx.get(k) !== tx.get(k)).toSorted((a, b) => sx.get(a)! - sx.get(b)!)
+  const ordered: Link[] = []
+  while (ordered.length < bent.length) {
+    const next = bent.find(k => !ordered.includes(k)
+      && !bent.some(o => o !== k && !ordered.includes(o) && sx.get(o) === tx.get(k)))
+    if (!next) return null
+    ordered.push(next)
+  }
+  const routes = new Map<Link, Lane>(crossing.map(k => [k, { sx: sx.get(k)!, tx: tx.get(k)!, row: Math.max(0, ordered.indexOf(k)) }]))
+  return { routes, rows: Math.max(1, ordered.length) }
+}
+
 function drawTD(g: Graph, layers: Slot[][], links: Link[], spill: string[]) {
   const c = new Canvas()
   const at = new Map<string, { x: number; y: number; w: number }>()
   const rowWidth = (l: Slot[]) => l.reduce((a, s) => a + width(g, s), 0) + Math.max(l.length - 1, 0) * 3
   const widest = Math.max(...layers.map(rowWidth))
-  layers.forEach((l, r) => {
+  layers.forEach(l => {
     let x = Math.floor((widest - rowWidth(l)) / 2)
     for (const s of l) {
-      at.set(s.id, { x, y: r * 7, w: width(g, s) })
+      at.set(s.id, { x, y: 0, w: width(g, s) })
       x += width(g, s) + 3
     }
   })
+  const lanes = new Map<Link, Lane>()
+  const laneRows: number[] = []
+  const centre = (id: string) => at.get(id)!.x + Math.floor(at.get(id)!.w / 2)
+  let y = 0
+  for (const l of layers) {
+    for (const s of l) at.get(s.id)!.y = y
+    const crossing = crossingFrom(l, links)
+    const routed = busIsAmbiguous(crossing, centre) ? laneRoutes(crossing, at) : undefined
+    if (routed === null) return null
+    routed?.routes.forEach((lane, k) => lanes.set(k, lane))
+    if (routed) for (let row = 0; row < routed.rows; row++) laneRows.push(y + 4 + row)
+    // Under a layer, a bus gap holds an exit, a forward bus, a loop-back bus and arrows; a lane gap one row per bent link.
+    y += routed ? routed.rows + 5 : 7
+  }
   for (const l of layers) for (const s of l) {
     const p = at.get(s.id)!
     const n = g.nodes.get(s.id)
@@ -228,12 +324,13 @@ function drawTD(g: Graph, layers: Slot[][], links: Link[], spill: string[]) {
   }
   for (const k of links) {
     const a = at.get(k.from)!, b = at.get(k.to)!
+    const lane = lanes.get(k)
     // An edge drawn against the flow (a loop back) leaves from its own port, so
     // its ▲ never sits on the junction the forward edges share.
     const port = k.up && g.nodes.has(k.from) ? Math.min(2, Math.floor(a.w / 2) - 2) : 0
-    const sx = a.x + Math.floor(a.w / 2) + port, tx = b.x + Math.floor(b.w / 2)
-    // Gap rows under a layer: y0 exit, y1 forward bus, y1 + 1 loop-back bus, y2 arrows.
-    const y0 = a.y + 3, y1 = a.y + (k.up ? 5 : 4), y2 = a.y + 6
+    const sx = lane?.sx ?? a.x + Math.floor(a.w / 2) + port, tx = lane?.tx ?? b.x + Math.floor(b.w / 2)
+    // Gap rows under a layer: y0 exit, y1 this link's bus or lane, y2 arrows.
+    const y0 = a.y + 3, y1 = lane ? y0 + 1 + lane.row : a.y + (k.up ? 5 : 4), y2 = b.y - 1
     c.vline(sx, y0 - (g.nodes.has(k.from) ? 0 : 1), y1)
     c.hline(y1, sx, tx)
     c.vline(tx, y1, y2 + (g.nodes.has(k.to) ? 0 : 1))
@@ -241,14 +338,16 @@ function drawTD(g: Graph, layers: Slot[][], links: Link[], spill: string[]) {
     if (k.up && g.nodes.has(k.from)) c.set(sx, y0, '▲')
     if (!k.up && g.nodes.has(k.to)) c.set(tx, y2, '▼')
   }
+  // Lanes never join, so a crossing there passes behind and `┼` always means a real junction.
+  for (const row of laneRows) c.mask[row]?.forEach((bits, x) => { if (bits === (U | D | L | R)) c.set(x, row, '│') })
   // Labels must see every edge and arrow before choosing a free position.
   for (const k of links) {
     if (k.label) {
-      const a = at.get(k.from)!, b = at.get(k.to)!
-      const lx = b.x + Math.floor(b.w / 2) + 2, y2 = a.y + 6
+      const b = at.get(k.to)!
+      const lx = (lanes.get(k)?.tx ?? b.x + Math.floor(b.w / 2)) + 2, y2 = b.y - 1
       const fits = [...k.label].every((_, i) => c.free(lx + i, y2)) && c.free(lx - 1, y2)
       if (fits) c.write(lx, y2, k.label)
-      else spill.push(`${k.from} → ${k.to}: ${k.label}`)
+      else spill.push(`${k.origin} → ${k.to}: ${k.label}`)
     }
   }
   return c.toString()
@@ -274,6 +373,9 @@ function drawLR(g: Graph, layers: Slot[][], links: Link[], spill: string[]) {
     }
     x += colWidth[r]! + gapAfter[r]!
   })
+  // simplified: only top-down has lanes, since a sideways box has one row to leave from. upgrade when: an LR drawing turning top-down reads worse often enough to notice.
+  const centre = (id: string) => at.get(id)!.y + Math.floor(at.get(id)!.h / 2)
+  if (layers.some(l => busIsAmbiguous(crossingFrom(l, links), centre))) return null
   for (const [id, p] of at) {
     const n = g.nodes.get(id)
     if (n) c.box(p.x, p.y, p.w, n.label, n.shape)
@@ -294,7 +396,7 @@ function drawLR(g: Graph, layers: Slot[][], links: Link[], spill: string[]) {
       const room = x1 - 1 - lx
       if ([...k.label].length <= room && c.text[ty - 1]?.slice(lx, lx + k.label.length).every(ch => ch === undefined) !== false) {
         c.write(lx, ty - 1, k.label)
-      } else spill.push(`${k.from} → ${k.to}: ${k.label}`)
+      } else spill.push(`${k.origin} → ${k.to}: ${k.label}`)
     }
   }
   return c.toString()
@@ -302,24 +404,9 @@ function drawLR(g: Graph, layers: Slot[][], links: Link[], spill: string[]) {
 
 function draw(g: Graph, dir: Dir) {
   const { layers, links } = layer(g)
-  // Shared buses can invent connections between multiple sources and targets.
-  // A gap is safe when every connected group of its links is a star: one source or one target.
-  for (const slots of layers) {
-    const ids = new Set(slots.map(s => s.id))
-    const crossing = links.filter(k => ids.has(k.from))
-    const parent = new Map<string, string>()
-    const find = (x: string): string => { const p = parent.get(x) ?? x; if (p === x) return x; const r = find(p); parent.set(x, r); return r }
-    for (const k of crossing) parent.set(find('s:' + k.from), find('t:' + k.to))
-    const groups = new Map<string, { s: Set<string>; t: Set<string> }>()
-    for (const k of crossing) {
-      const r = find('s:' + k.from)
-      const g = groups.get(r) ?? { s: new Set(), t: new Set() }
-      g.s.add(k.from); g.t.add(k.to); groups.set(r, g)
-    }
-    for (const g of groups.values()) if (g.s.size > 1 && g.t.size > 1) return null
-  }
   const spill: string[] = []
   const art = dir === 'TD' ? drawTD(g, layers, links, spill) : drawLR(g, layers, links, spill)
+  if (art === null) return null
   const label = (id: string) => g.nodes.get(id)?.label ?? id
   const notes = spill.map(s => s.replace(/^(\S+) → (\S+):/, (_, a: string, b: string) => `${label(a)} → ${label(b)}:`))
   return notes.length ? `${art}\n\n${notes.join('\n')}` : art
@@ -330,7 +417,8 @@ const widthOf = (art: string) => Math.max(...art.split('\n').map(l => [...l].len
 /** Draws a parsed flowchart, turned to the other direction when that fits and this does not. */
 export function render(g: Graph) {
   const art = draw(g, g.dir)
-  if (art === null || widthOf(art) <= MAX_WIDTH) return art
+  if (art === null) return g.dir === 'LR' ? draw(g, 'TD') : null
+  if (widthOf(art) <= MAX_WIDTH) return art
   const turned = draw(g, g.dir === 'LR' ? 'TD' : 'LR')
   return turned !== null && widthOf(turned) < widthOf(art) ? turned : art
 }
