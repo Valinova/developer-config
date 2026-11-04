@@ -39,7 +39,6 @@ for (const [name, text] of untouched) {
 for (const dir of ['LR', 'TD']) for (const edges of [
   'A --> C; A --> D; B --> D',
   'A --> C; B --> C; B --> D',
-  'A --> D; B --> C',
 ]) {
   test(`${dir} preserves Mermaid for a boundary with multiple sources and targets: ${edges}`, () => {
     const text = block(`flowchart ${dir}\nA[Alpha]; B[Bee]; C[Cee]; D[Dee]\n${edges}`)
@@ -47,9 +46,10 @@ for (const dir of ['LR', 'TD']) for (const edges of [
   })
 }
 
-// Straight paths and ordinary fans remain supported when ambiguous buses fall back.
+// Straight paths, ordinary fans and disjoint parallel branches remain supported when ambiguous buses fall back.
 for (const dir of ['LR', 'TD']) for (const edges of [
   'A[Start] --> B[End]',
+  'A[Start] --> B[End]; C[Other] --> D[Last]',
   'A[Start] --> B[End] & C[Other]',
   'A[Start] & B[Other] --> C[End]',
 ]) {

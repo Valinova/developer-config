@@ -303,10 +303,20 @@ function drawLR(g: Graph, layers: Slot[][], links: Link[], spill: string[]) {
 function draw(g: Graph, dir: Dir) {
   const { layers, links } = layer(g)
   // Shared buses can invent connections between multiple sources and targets.
+  // A gap is safe when every connected group of its links is a star: one source or one target.
   for (const slots of layers) {
     const ids = new Set(slots.map(s => s.id))
     const crossing = links.filter(k => ids.has(k.from))
-    if (new Set(crossing.map(k => k.from)).size > 1 && new Set(crossing.map(k => k.to)).size > 1) return null
+    const parent = new Map<string, string>()
+    const find = (x: string): string => { const p = parent.get(x) ?? x; if (p === x) return x; const r = find(p); parent.set(x, r); return r }
+    for (const k of crossing) parent.set(find('s:' + k.from), find('t:' + k.to))
+    const groups = new Map<string, { s: Set<string>; t: Set<string> }>()
+    for (const k of crossing) {
+      const r = find('s:' + k.from)
+      const g = groups.get(r) ?? { s: new Set(), t: new Set() }
+      g.s.add(k.from); g.t.add(k.to); groups.set(r, g)
+    }
+    for (const g of groups.values()) if (g.s.size > 1 && g.t.size > 1) return null
   }
   const spill: string[] = []
   const art = dir === 'TD' ? drawTD(g, layers, links, spill) : drawLR(g, layers, links, spill)
