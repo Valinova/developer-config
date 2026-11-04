@@ -110,6 +110,11 @@ look-alikes that already read their owner, and the correction overshot into
 cutting copies that disagreed. One test settles both: a line is a copy of the
 rule or a symptom it settles. Demand suppressed by a weak feature still
 counts as likely use.
+Lines became the closing criteria (2026-11-04): 27 of 43 open issues carried
+unticked boxes, and triage closed nine mostly done ones held open by leftovers
+such as recounts and telemetry. PR proof and loud failure catch regressions, so
+a line must be objective and settled by one PR, and leftovers never hold an
+issue open.
 
 ### browser-cost
 
