@@ -1,9 +1,7 @@
 import { atom, read, update } from 'claude-code'
-import type { Register, SessionContextUsage, SessionUsage } from 'claude-code'
+import type { Register, SessionContextUsage } from 'claude-code'
 
-import type { Snapshot } from '../types'
-
-const snapshot = atom({ plugin: 'usage-meters', key: 'snapshot' } as const, null, { shape: 'snapshot-3' })
+const compaction = atom({ plugin: 'usage-meters', key: 'compaction' } as const, null)
 const pet = atom({ plugin: 'usage-meters', key: 'pet' } as const, null)
 // Persisted so the brain shows at startup, before this session's first request reports a level.
 const effort = atom({ plugin: 'usage-meters', key: 'effort' } as const, null)
@@ -54,23 +52,13 @@ const SPARKS = ['✦', '✧', '⋆', '·']
 const ZZZ = ['z  ', 'zZ ', 'zZz']
 const ORBIT = ['◜', '◝', '◞', '◟']
 
-function toSnapshot(u: Pick<SessionUsage, 'context' | 'rateLimits'>, compactAt: number): Snapshot {
-  const week = u.rateLimits.find(l => l.kind === 'seven_day')
-  return {
-    contextTokens: u.context.tokens ?? null,
-    contextWindow: u.context.window,
-    compactAt,
-    weekPercent: week ? week.percentUsed : null,
-  }
-}
-
 // Where auto-compact fires: the compaction window (autoCompactWindow, or the
 // model's limit) less the reserve /context shows as the buffer.
-function compactPoint(context: SessionContextUsage) {
+function compactionPoint(context: SessionContextUsage) {
   const b = context.breakdown
-  if (!b) return context.window
+  if (!b) return { window: context.window, at: context.window }
   const buffer = b.categories.filter(c => c.kind === 'buffer').reduce((n, c) => n + c.tokens, 0)
-  return b.rawMaxTokens - buffer
+  return { window: context.window, at: b.rawMaxTokens - buffer }
 }
 
 function mix(a: RGB, b: RGB, t: number): RGB {
@@ -116,8 +104,8 @@ export const register: Register = on => {
 
   on('session.start', async ($, e, next) => {
     const result = await next(e)
-    const u = await $.session.usage({ breakdown: 'summary' })
-    await update($, snapshot, () => toSnapshot(u, compactPoint(u.context)))
+    const { context } = await $.session.usage({ breakdown: 'summary' })
+    await update($, compaction, () => compactionPoint(context))
 
     const now = await $.clock.now()
     const current = await read($, pet)
@@ -136,12 +124,11 @@ export const register: Register = on => {
   })
 
   on('session.measure', async ($, e, next) => {
-    const prev = await read($, snapshot)
-    const compactAt =
-      prev !== null && prev.contextWindow === e.context.window
-        ? prev.compactAt
-        : compactPoint((await $.session.usage({ breakdown: 'summary' })).context)
-    await update($, snapshot, () => toSnapshot(e, compactAt))
+    const known = await read($, compaction)
+    if (known?.window !== e.context.window) {
+      const { context } = await $.session.usage({ breakdown: 'summary' })
+      await update($, compaction, () => compactionPoint(context))
+    }
     return next(e)
   })
 
@@ -178,12 +165,17 @@ export const register: Register = on => {
   })
 
   on('ui.render', { component: 'SessionMode' }, async ($, e, next) => {
-    const s = await read($, snapshot)
-    if (s === null) return next(e)
+    const point = await read($, compaction)
+    if (point === null) return next(e)
+
+    // Read on every draw: a compaction moves these figures and raises no session.measure.
+    const usage = await $.session.usage()
+    const contextTokens = usage.context.tokens ?? null
+    const weekPercent = usage.rateLimits.find(l => l.kind === 'seven_day')?.percentUsed ?? null
 
     const { Box, Text } = $.ui.resolve(e)
     const now = await $.clock.now()
-    const ctxPercent = s.contextTokens !== null ? (s.contextTokens / s.compactAt) * 100 : 0
+    const ctxPercent = contextTokens !== null ? (contextTokens / point.at) * 100 : 0
 
     const mood: Mood =
       ctxPercent >= 85 ? 'stuffed'
@@ -286,16 +278,16 @@ export const register: Register = on => {
             <Text color={hex(GOLD)}>{levelIndex >= 0 ? ` ${EFFORT_LETTERS[levelIndex]}` : String(level)}</Text>
           </Text>
         ) : null}
-        {s.contextTokens !== null ? (
+        {contextTokens !== null ? (
           <Box gap={1}>
             {waveform(ctxPercent)}
-            <Text color={hex(contextColor(ctxPercent, 0.5))}>{kTokens(s.contextTokens)}</Text>
+            <Text color={hex(contextColor(ctxPercent, 0.5))}>{kTokens(contextTokens)}</Text>
           </Box>
         ) : null}
-        {s.weekPercent !== null ? (
+        {weekPercent !== null ? (
           <Box gap={1}>
-            {ember(s.weekPercent)}
-            <Text color={endColor(s.weekPercent)}>{`${Math.round(s.weekPercent)}%`}</Text>
+            {ember(weekPercent)}
+            <Text color={endColor(weekPercent)}>{`${Math.round(weekPercent)}%`}</Text>
           </Box>
         ) : null}
         <Text>

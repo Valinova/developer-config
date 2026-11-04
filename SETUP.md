@@ -416,6 +416,7 @@ python3 always/scripts/test_issue_bar_guard.py
 bun pi/tests/destructive-guard.test.ts
 bun pi/tests/bash-timeout-guard.test.ts
 bun test claude/mods/diagrams/tests/mermaid.test.ts
+claude plugin test claude/mods/usage-meters
 ```
 
 Ask: "check SETUP.md compliance" — that's the whole drift audit.
