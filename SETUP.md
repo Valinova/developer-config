@@ -284,6 +284,10 @@ where a browser from Zed is wanted; that setting is machine-local.
 `always/scripts/reap-orphan-mcp.sh` reaps orphaned Playwright MCP servers older than two hours (Codex workers excluded) and SIGKILLs any one-shot `tsc` older than ten minutes, logging to `~/.local/state/reap-orphan.log`.
 It runs from the user crontab every 5 minutes; on a new machine add this line with `crontab -e`:
 `*/5 * * * * $HOME/.claude/scripts/reap-orphan-mcp.sh`.
+Global `agent-browser` and `playwright` stay current through a daily crontab line. `--latest` is required: plain `update` stays inside the installed range, and caret ranges on `0.x` packages never cross a minor version. The pnpm `minimumReleaseAge` cooldown still applies to every update:
+`0 9 * * * PNPM_HOME=$HOME/.local/share/pnpm PATH=$HOME/.local/share/pnpm/bin:/usr/bin:/bin pnpm update -g --latest agent-browser playwright >> $HOME/.local/state/pnpm-global-update.log 2>&1`.
+On Linux, Chrome has no self-updater, and unattended-upgrades skips Google's apt repo by default. Allow it:
+`echo 'Unattended-Upgrade::Origins-Pattern { "origin=Google LLC"; };' | sudo tee /etc/apt/apt.conf.d/51unattended-upgrades-chrome`.
 
 ### Skills — the shared workflow primitive
 
@@ -398,7 +402,7 @@ a second owner; a deliberate override must be labeled as one).
       compliant.
 - [ ] No dangling symlinks into this repo remain in `~/.claude/`, `~/.codex/`,
       `~/.pi/agent/`, or `~/.grok/` (a removed skill leaves one; delete it).
-- [ ] `crontab -l` includes the `reap-orphan-mcp.sh` line ("MCP servers load on demand").
+- [ ] `crontab -l` includes the `reap-orphan-mcp.sh` line ("MCP servers load on demand") and the `pnpm update -g --latest` line; on Linux, `/etc/apt/apt.conf.d/51unattended-upgrades-chrome` exists.
 - [ ] `~/.claude/rules/` is empty or absent (the script covers the
       `~/.claude/CLAUDE.md` symlink itself, not this directory)
 

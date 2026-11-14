@@ -33,7 +33,8 @@ runs with the agent's host permissions.
 
 - A browser that reaches anything beyond localhost drives the system Google Chrome
   (Playwright `channel: 'chrome'`, Hermes `AGENT_BROWSER_EXECUTABLE_PATH`), which
-  its updater keeps patched. Never point it at a bundled Chromium.
+  its updater keeps patched (on Linux, unattended-upgrades with the Google origin
+  allowed; see SETUP.md). Never point it at a bundled Chromium.
 - A bundled Chromium is for localhost tests only; it follows the project's
   Playwright version, bumped under the cooldown above.
 - A stale copy is dangerous only when launched: `playwright uninstall` (global
