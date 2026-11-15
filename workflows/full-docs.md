@@ -32,6 +32,4 @@ then the audit scope, and the parent pipeline mode only when composed.
    content lost with no surviving owner, and a claim wrong against the code.
    Otherwise apply only findings the orchestrator and reviewer both deem
    valuable. Reviewer seat: `model-selection.md` "Harness seats".
-5. **Enforce.** Add or tighten a docs-budget check in the repo's full check
-   command, with ceilings at the final size rounded up.
-6. Leave the resulting edits unstaged for the user's final review.
+5. Leave the resulting edits unstaged for the user's final review.
