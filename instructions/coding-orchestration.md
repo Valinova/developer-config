@@ -56,7 +56,7 @@ Hermes reaches the Claude seat selected under `model-selection.md` via `claude -
 
 When the user is in an interactive Claude Code session (terminal or IDE), Claude Code invokes Codex directly for cross-family review. This is Claude Code's own internal toolchain — Hermes is not involved.
 
-**When:** A key gate under `dispatch-bootstrap.md` "External calls" (the plan/scope review, the final `rev`), or a Sol implement pass (`--model gpt-6.1-sol`) the user named for that dispatch.
+**When:** A key gate under `dispatch-bootstrap.md` "External calls" (the plan/scope review, the final `rev`), or a Sol implement pass the user named for that dispatch.
 
 **How it works:**
 1. Claude Code (Opus under the Fable orchestrator) produces the plan or diff
@@ -98,7 +98,7 @@ orchestrator
 partitions, validates, deduplicates, audits, and synthesizes; the subagents own
 deep code review.
 
-Direct fixes are sequential Opus 5.5 implementation passes; Sol implements
+Direct fixes are sequential Opus implementation passes; Sol implements
 only when the user names it. Select effort under `model-selection.md`, and
 audit one pass before starting the next.
 
@@ -150,7 +150,7 @@ Enforcement is mechanical (why: rationale.md#dispatch-loop):
 
 - Subscription OAuth only for both CLIs. No `ANTHROPIC_API_KEY`/`OPENAI_API_KEY` in env for CLI sessions; no Doppler-injected Anthropic/OpenAI keys.
 - Interactive Claude Code and `claude -p` ride the Anthropic subscription. Hermes conversation does not: native `provider: anthropic` bills the API (extra usage), and `claude-subscription-directsdk-experimental` is not an automatic route (tried, not reliable). Claude farm-out stays `claude -p`.
-- The same subscription-over-metered rule seals **provider routing** on the harnesses sharing Pi's provider store (Pi, Hermes): a model goes through the provider that owns it — **DeepSeek only through `deepseek`, OpenAI models only through the `openai-codex` subscription** — unless the user explicitly names another route for that dispatch. A `provider/id` pair naming the model's vendor rather than an authenticated provider does not error; it falls through to OpenRouter and bills the metered key. Pi's exact IDs and the pre-dispatch resolution check live in `pi/model-defaults.md`.
+- The same subscription-over-metered rule seals **provider routing** on the harnesses sharing Pi's provider store (Pi, Hermes): a model goes through the provider that owns it — **DeepSeek only through `deepseek`, OpenAI models only through the `openai-codex` subscription** — unless the user explicitly names another route for that dispatch. A `provider/id` pair naming the model's vendor rather than an authenticated provider does not error; it falls through to OpenRouter and bills the metered key. Pi's pre-dispatch model ID resolution is in `pi/model-defaults.md`.
 - Claude seating: `model-selection.md` "Harness seats".
 - `claude -p` waiting, diagnostics, and termination follow the process lifecycle in `instructions/codex-delegation.md` "Raw `claude -p` process lifecycle".
 - `claude -p` reported `total_cost_usd` is API-equivalent accounting against quota, not real billing.

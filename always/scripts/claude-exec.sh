@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # claude-exec.sh — wrapper for delegating a bounded task to `claude -p`
-# (Opus 5.5) at a chosen effort, from a Claude Code orchestrator.
+# at a chosen effort, using the `opus` family alias by default.
 #
 # Why a `claude -p` lane, and what it keeps from codex-exec.sh: see
 # instructions/codex-delegation.md "Claude delegation". Registry:

@@ -9,10 +9,9 @@ Before dispatch, read
 "Harness seats" and "Subagent fan-out". Those sections
 own shared policy; this card is not a substitute for them.
 
-Pi-only concerns below: explicit slugs (Pi cannot fuzzy-resolve family
-names), dispatch mechanics, and delegated `pi -p` runs. Hermes farm contracts
-in `coding-orchestration.md` (`delegate_task`, cron, PR-burndown) do not apply
-to Pi.
+Pi-only concerns below: model ID resolution, dispatch mechanics, and
+delegated `pi -p` runs. Hermes farm contracts in `coding-orchestration.md`
+(`delegate_task`, cron, PR-burndown) do not apply to Pi.
 
 An explicit user instruction wins among valid combinations; hard constraints
 still apply.
@@ -21,40 +20,27 @@ still apply.
 
 - The session model is the machine's local config (`model-selection.md`
   "Harness seats"). Each `subagent` dispatch's model follows the same
-  two-family rule, translated through the ID map below.
+  two-family rule.
 - Native Anthropic on Pi bills the API: an `anthropic/…` `subagent` runs only
   when the user names it, and the subscription-only Opus rule in canonical
   "Harness seats" does not authorize it.
 
-## Exact Pi model IDs
+## Model ID resolution
 
-Every fresh `subagent` call needs `provider/id` — use this map, do not guess
-versioned slugs:
+Every fresh `subagent` call needs `provider/id`. Resolve the latest available
+member of the chosen family with Pi's authenticated `/model` picker or
+`pi --list-models`. Use the exact ID from the owning provider.
 
-| Family | Pi ID |
-|--------|-------|
-| **Grok 4.7** | `xai/grok-4.7` |
-| **Codex (Astra)** | `openai-codex/gpt-6-astra` |
-| **Codex (Sol)** | `openai-codex/gpt-6.1-sol` |
-| **Fable 5.1** | `anthropic/claude-fable-5-1` |
-| **DeepSeek V4.1 Flash** | `deepseek/deepseek-flash` |
-
-This is an ID map, not a roster or authorization to use a seat. For an
-explicitly authorized model absent here, resolve its exact ID in Pi's
-authenticated `/model` list before dispatch; do not guess a versioned slug.
-
-### Provider routing is sealed
-
-Which provider each model must go through, and why a wrong pair silently
-bills OpenRouter, is `instructions/coding-orchestration.md` "Auth doctrine (hard rules)". In Pi the prefix
-names an **authenticated Pi provider**, not the model's vendor:
-`openai/gpt-6-astra` is OpenRouter's slug, while the subscription route is
-`openai-codex/gpt-6-astra`; and `deepseek-v4-flash` does not exist in the
-`deepseek` provider, whose model is `deepseek-flash`. A mismatch surfaces as a
-mid-run 402, not a dispatch error. If a needed ID is absent from the table
-above, confirm the pair resolves inside the owning provider — Pi's
-authenticated `/model` list or `~/.pi/agent/models-store.json` — before
-dispatch.
+Use `xai` for Grok, `openai-codex` for Codex seats, `anthropic` for an
+explicitly authorized Claude model, and `deepseek` for DeepSeek Flash.
+`instructions/coding-orchestration.md` "Auth doctrine (hard rules)" owns
+provider routing. In Pi the prefix names an **authenticated Pi provider**, not
+the model's vendor: `openai/gpt-6-astra` is OpenRouter's slug, while the
+subscription route is `openai-codex/gpt-6-astra`; and `deepseek-v4-flash` does
+not exist in the `deepseek` provider, whose model is `deepseek-flash`. A wrong
+pair does not error at dispatch; it falls through to metered OpenRouter and
+surfaces as a mid-run 402. Confirm the pair resolves inside the owning
+provider (`/model` or `~/.pi/agent/models-store.json`) before dispatch.
 
 **Hard constraints, restated because a prohibition must not depend on a
 lookup:** never Haiku, never Sonnet, and Pi does not farm `claude -p`.
@@ -66,7 +52,8 @@ lookup:** never Haiku, never Sonnet, and Pi does not farm `claude -p`.
   `thinking` on dispatch). Agent profiles under `pi/agents/` own roles and
   tools only — not model defaults; bundled builtins are disabled. Resume keeps the existing
   session model.
-- Choose the seat and rung from canonical "Harness seats", then translate the model through the ID map above.
+- Choose the seat and rung from canonical "Harness seats", then resolve the ID
+  through the owning provider.
   Interactive session model/thinking is TUI state in
   `pi/settings.json` — expected to change; do not reconcile it.
 - Sub-agents can only use models Pi has authenticated (`/model`). If a pick
@@ -84,7 +71,7 @@ The Codex delegation pattern (`instructions/codex-delegation.md`) works for
 ~/.claude/scripts/pi-resume.sh <task-name> /tmp/pi-<task-name>-followup.md [same flags]
 ```
 
-Wrapper defaults: `deepseek` / `deepseek-flash` / thinking `high`; select each dispatch under `model-selection.md` and resolve Pi IDs through the map above. Registry: `~/.hermes/state/pi-sessions.jsonl` (separate file, created on first dispatch — it does not exist until then; Pi's own line shape: `start` carries `log_file`, not the Codex registry's `log_path`). Logs `/tmp/pi-<task>.log`, post-run summary `/tmp/pi-<task>.post-run.md`. Resume is cwd-keyed — run `pi-resume.sh` from the same repo as the dispatch.
+Wrapper defaults: `deepseek` / `deepseek-flash` / thinking `high`; select each dispatch under `model-selection.md` and resolve Pi IDs through the owning provider. Registry: `~/.hermes/state/pi-sessions.jsonl` (separate file, created on first dispatch — it does not exist until then; Pi's own line shape: `start` carries `log_file`, not the Codex registry's `log_path`). Logs `/tmp/pi-<task>.log`, post-run summary `/tmp/pi-<task>.post-run.md`. Resume is cwd-keyed — run `pi-resume.sh` from the same repo as the dispatch.
 
 **Waiting.** Same shape as Codex: dispatch `pi-exec.sh` alone in its own
 `run_in_background` call, then attach `pi-wait.sh <task> <timeout>` in a

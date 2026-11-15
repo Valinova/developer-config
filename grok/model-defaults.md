@@ -15,8 +15,9 @@ always wins among valid combinations.
 ## Native subagents
 
 - The session model is the machine's local config (`model-selection.md`
-  "Harness seats"). Pin `grok-4.7` on `spawn_subagent` when the parent might
-  not already be on it — never a silent older version.
+  "Harness seats"). Pass the latest Grok model ID shown in the live
+  `spawn_subagent` schema. If the schema only allows inheritance, verify the
+  parent model and role defaults before spawning.
 - `spawn_subagent` is Grok-only (`explore`, `plan`, `general-purpose`, plus any
   user-defined type). It cannot start a Claude or Codex child.
 
@@ -41,10 +42,11 @@ Follow canonical "Subagent fan-out"; browser-driving seats follow "Harness seats
 ## Grok as a leaf
 
 How another orchestrator (Claude Code via `pi-exec.sh`, Codex over ACP,
-Hermes) briefs a Grok 4.7 leaf. Grok is never a default seat: route to it
-only when the user names Grok for that dispatch.
+Hermes) briefs a Grok leaf. Grok is never a default seat: route to it
+only when the user names Grok for that dispatch. For ACP, resolve the latest
+Grok ID in the model picker and pass it as `--model`.
 
-**Grok 4.7 briefing (light):** prefer short briefs with a clear preference and
+**Grok briefing (light):** prefer short briefs with a clear preference and
 hard done criteria; long specs are fine when you already have them. Do not
 import Claude-side briefing habits onto Grok — brief it on its own terms
 (why: rationale.md#grok-briefing).

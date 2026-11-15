@@ -18,13 +18,18 @@ task's complexity picks the rung; complex work takes the higher side.
 
 | | Claude Code (and `claude -p` from anywhere) | Codex |
 |---|---|---|
-| Orchestrate | Opus 5.5 or Fable 5.1, the user's `/model` pick | GPT-6 Astra |
-| Mechanical (retrieval, recon, a tail with an exact spec) | Sonnet 5.5 @ `medium`–`high` | GPT-6.1 Sol @ `medium`–`high` |
-| Work (implement, research, docs fold, judged exploration) | Opus 5.5, fresh native `Agent` @ `medium`–`high` | Sol @ `high`–`xhigh`; Astra @ `medium`–`high` when long-horizon, cross-cutting, or a Sol pass failed the gate |
-| Browser walk (why: rationale.md#opus-browser-walks) | Opus 5.5 (Sonnet for a purely scripted walk) @ `medium` | — |
-| Review, contained | Sol @ `high`–`xhigh`, Codex wrappers | Opus 5.5 @ `high`, `claude -p` |
-| Review, complex or cross-cutting | Astra @ `high`–`xhigh` | Fable 5.1 @ `high` with nested Opus discovery |
+| Orchestrate | Opus or Fable, the user's `/model` pick | Astra |
+| Mechanical (retrieval, recon, a tail with an exact spec) | Sonnet @ `medium`–`high` | Sol @ `medium`–`high` |
+| Work (implement, research, docs fold, judged exploration) | Opus, fresh native `Agent` @ `medium`–`high` | Sol @ `high`–`xhigh`; Astra @ `medium`–`high` when long-horizon, cross-cutting, or a Sol pass failed the gate |
+| Browser walk (why: rationale.md#opus-browser-walks) | Opus (Sonnet for a purely scripted walk) @ `medium` | — |
+| Review, contained | Sol @ `high`–`xhigh`, Codex wrappers | Opus @ `high`, `claude -p` |
+| Review, complex or cross-cutting | Astra @ `high`–`xhigh` | Fable @ `high` with nested Opus discovery |
 
+- **Use the latest available model in the chosen family.** Pass the harness's
+  family alias where supported (Claude CLI `fable`, `opus`, `sonnet`). When a
+  dispatch requires an exact ID, resolve the current family member from that
+  harness's live schema or model catalog. Honor a valid version the user
+  explicitly names for the dispatch.
 - **Never the author's family.** The review row follows who wrote the work,
   after an implementer override the actual author. No third family unless
   the user names one.
@@ -61,11 +66,11 @@ non-interactive runs, the same block goes at the top of the final report.
 
 ## Family tendencies — a lens, not a checklist
 
-Opus 5.5 under-proves: asserts inferences as fact, calls a partial check a full
-read, checks a plan against its own requirements (System Card p.36). Astra
-over-builds: files, types, tests, research the brief did not ask for. Sol 6.1
-reshapes what it was told to keep: trims rationale, renames names and test
-titles, adds unasked assertions. As author, say in the summary how you
+Opus can under-prove: assert inferences as fact, call a partial check a full
+read, check a plan against its own requirements (Opus 5.5 System Card p.36).
+Astra can over-build: files, types, tests, research the brief did not ask for.
+Sol can reshape what it was told to keep: trim rationale, rename names and test
+titles, add unasked assertions. As author, say in the summary how you
 compensated (Opus: claims verified vs inferred; Astra, Sol: what went beyond
 the brief and why). As reviewer, lead with the author's tendency (Opus: what is
 missing; Astra: what to delete; Sol: prose, names, tests against the brief),

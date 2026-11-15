@@ -20,10 +20,10 @@ contracts.
   route. The plugin was tried as the session brain and was not reliable;
   do not put it back without an explicit ask. Farm-out Codex goes through the
   shared `~/.claude/scripts/codex-*.sh` wrappers (ChatGPT sub). Hermes
-  conversation, when it is Codex, is `provider: openai-codex` with picker slug
-  `gpt-6.1-sol-900k` — the suffix is stripped on the wire. Do not pin
-  `model.context_length` over it; the bare slug budgets the stale 272k
-  advertisement.
+  conversation, when it is Codex, uses `provider: openai-codex` and the current
+  Sol model from the picker. Choose its expanded-context entry when offered
+  (`-900k` is stripped on the wire). Leave `model.context_length` unset so
+  Hermes uses the picker entry's budget.
 
 ## Machine-local vs owned here
 
