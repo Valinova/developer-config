@@ -302,8 +302,8 @@ those owners. The exception is `local/skills/<name>`: gitignored, machine-owned
 skills that stay out of this public repo, linked by hand into the harnesses that
 want them; the checker reports those links as foreign, not drift.
 
-The shared set is `browser-test`, `clearcut-review`, `code-simplifier`, `com`, `comall`,
-`comment-audit`, `docs`, `no-use-effect`, and `simplicity-audit` — all nine linked into
+The shared set is `browser-test`, `ci-speed`, `clearcut-review`, `code-simplifier`, `com`, `comall`,
+`comment-audit`, `docs`, `no-use-effect`, and `simplicity-audit` — all ten linked into
 Claude, Codex, Pi, and Grok Build. Keep this list current when adding a shared
 skill: a skill nobody enumerates is a skill nobody links (`code-simplifier` sat
 unlinked in every harness for exactly that reason).
@@ -323,8 +323,8 @@ Workflows that carry consequential intent include `agents/openai.yaml` with
 but cannot activate from conversational similarity. That is every skill under
 `codex/skills/`, plus `clearcut-review`, `com`, `comall`, `comment-audit`, `docs`, and `simplicity-audit` from `always/skills/`. Standing policies such as `no-use-effect` ship an
 `agents/openai.yaml` carrying an `interface:` block and deliberately no
-`policy:` block, so they stay implicitly discoverable; `code-simplifier` and
-`browser-test` carry no `agents/` directory at all and are likewise discoverable.
+`policy:` block, so they stay implicitly discoverable; `code-simplifier`,
+`browser-test` and `ci-speed` carry no `agents/` directory at all and are likewise discoverable.
 
 ## Instruction hierarchy (who loads what)
 
