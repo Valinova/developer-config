@@ -83,13 +83,29 @@ A process per file hides everything a file leaves behind. To share workers:
    was winning it. Confirm by perturbing the old mode, then fix the test; say
    so in the PR.
 5. **Proof bar:** 20 clean shuffled runs per shard and 8 of the unsharded
-   suite, on the final code, then the first CI run. An unexplained failure is reported with its rate,
-   never retried away.
+   suite, on the final code, then the first CI run. An unexplained failure is
+   reported with its rate, never retried away.
 6. **Memory.** Sample peak resident memory summed over the Vitest process tree
    in both modes, and at fewer workers: sharing can match the old speed with
    fewer workers and less memory. Count worker processes too; Vitest replaces
    a worker when consecutive files need different environments, so the saving
    is smaller than files divided by workers suggests.
+
+## 4. Test problems the runs turn up
+
+Test levers go best after the repo's test audit, when it has one: fewer tests
+to move and fewer leftovers. Setup levers do not wait for it. This skill never
+runs that audit and never hunts for test problems; it handles only what its
+own runs surface, judged by the repo's test rules and `instructions/testing.md`:
+
+- **Blocks the lever, or is clear-cut and test-only:** fixed in the same PR,
+  one commit per fix, naming the failure it was seen causing (`principles.md`
+  §3).
+- **Needs a choice, touches production code, or is a class too wide for one
+  pass:** an issue when it passes `instructions/issues.md`, otherwise a line
+  in the report suggesting the test audit. Production changes never ride in a
+  speed PR; its numbers must belong to the lever.
+- **Never seen to cause anything:** the report only.
 
 ## Files
 
