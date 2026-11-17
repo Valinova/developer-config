@@ -1,5 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "cleanupPeriodDays": 90,
   "skillListingMaxDescChars": 200,
   "env": {
     "CLAUDE_CODE_PLUGIN_DIRS": "~/Development/developer-config/claude/mods/usage-meters:~/Development/developer-config/claude/mods/diagrams"
@@ -116,7 +117,10 @@
       "effortLevel": "medium"
     },
     "claude-opus-5-5": {
-      "effortLevel": "high"
+      "effortLevel": "medium"
+    },
+    "claude-fable-5-2": {
+      "effortLevel": "medium"
     }
   },
   "autoCompactWindow": 400000,
@@ -125,6 +129,7 @@
     "enabled": false,
     "mode": "hold"
   },
+  "autoMemoryEnabled": false,
   "skipDangerousModePermissionPrompt": true,
   "skipWorkflowUsageWarning": true,
   "preferredNotifChannel": "terminal_bell",
