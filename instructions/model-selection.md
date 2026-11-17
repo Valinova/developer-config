@@ -28,8 +28,11 @@ task's complexity picks the rung; complex work takes the higher side.
 - **Use the latest available model in the chosen family.** Pass the harness's
   family alias where supported (Claude CLI `fable`, `opus`, `sonnet`). When a
   dispatch requires an exact ID, resolve the current family member from that
-  harness's live schema or model catalog. Honor a valid version the user
-  explicitly names for the dispatch.
+  harness's live schema or model catalog (Codex: the newest `gpt-*-<family>`
+  slug in `~/.codex/models_cache.json`). Any pinned slug you read or touch
+  (script defaults, configs, tests) that is older than the catalog's gets
+  bumped in the same change. Honor a valid version the user explicitly names
+  for the dispatch.
 - **Never the author's family.** The review row follows who wrote the work,
   after an implementer override the actual author. No third family unless
   the user names one.

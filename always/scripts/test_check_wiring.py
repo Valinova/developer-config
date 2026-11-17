@@ -30,9 +30,9 @@ class MergeTests(unittest.TestCase):
 
     def test_invalid_config_fails_without_a_traceback(self):
         for text in (
-            '[agents]\ndefault_subagent_model = "gpt-6.1-sol"\n'
+            '[agents]\ndefault_subagent_model = "gpt-6.2-sol"\n'
             'default_subagent_reasoning_effort = "high"\ninvalid toml',
-            '[agents]\ndefault_subagent_model = "gpt-6.1-sol"\n'
+            '[agents]\ndefault_subagent_model = "gpt-6.2-sol"\n'
             'default_subagent_model = "other"\n',
         ):
             with self.subTest(text=text):
@@ -40,14 +40,14 @@ class MergeTests(unittest.TestCase):
 
     def test_equivalent_toml_syntax_is_accepted(self):
         self.assertFalse(self.audit(
-            CODEX_PERMISSIONS + "agents = { default_subagent_model = 'gpt-6.1-sol', "
+            CODEX_PERMISSIONS + "agents = { default_subagent_model = 'gpt-6.2-sol', "
             "default_subagent_reasoning_effort = 'high' }\n"
         ))
 
     def test_codex_command_review_cannot_silently_be_disabled(self):
         config = (
             CODEX_PERMISSIONS
-            + '[agents]\ndefault_subagent_model = "gpt-6.1-sol"\n'
+            + '[agents]\ndefault_subagent_model = "gpt-6.2-sol"\n'
             + 'default_subagent_reasoning_effort = "high"\n'
         )
         self.assertFalse(self.audit(config))

@@ -35,8 +35,8 @@ Use `xai` for Grok, `openai-codex` for Codex seats, `anthropic` for an
 explicitly authorized Claude model, and `deepseek` for DeepSeek Flash.
 `instructions/coding-orchestration.md` "Auth doctrine (hard rules)" owns
 provider routing. In Pi the prefix names an **authenticated Pi provider**, not
-the model's vendor: `openai/gpt-6-astra` is OpenRouter's slug, while the
-subscription route is `openai-codex/gpt-6-astra`; and `deepseek-v4-flash` does
+the model's vendor: `openai/gpt-6.2-astra` is OpenRouter's slug, while the
+subscription route is `openai-codex/gpt-6.2-astra`; and `deepseek-v4-flash` does
 not exist in the `deepseek` provider, whose model is `deepseek-flash`. A wrong
 pair does not error at dispatch; it falls through to metered OpenRouter and
 surfaces as a mid-run 402. Confirm the pair resolves inside the owning

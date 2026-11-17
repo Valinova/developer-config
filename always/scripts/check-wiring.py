@@ -202,8 +202,8 @@ def audit_merge(harness, root):
              config.get("approval_policy") == "on-request"),
             ('approvals_reviewer = "auto_review"',
              config.get("approvals_reviewer") == "auto_review"),
-            ('[agents] default_subagent_model = "gpt-6.1-sol"',
-             config_value(config, "agents", "default_subagent_model") == "gpt-6.1-sol"),
+            ('[agents] default_subagent_model = "gpt-6.2-sol"',
+             config_value(config, "agents", "default_subagent_model") == "gpt-6.2-sol"),
             ('[agents] default_subagent_reasoning_effort = "high"',
              config_value(config, "agents", "default_subagent_reasoning_effort") == "high"),
         ]
