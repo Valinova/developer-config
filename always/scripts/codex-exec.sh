@@ -28,7 +28,7 @@ set -euo pipefail
 TASK=""
 BRIEF=""
 MODE="background"
-MODEL="gpt-6.2-sol"
+MODEL="sol"
 EFFORT="high"
 SERVICE_TIER="default"
 
@@ -42,7 +42,8 @@ Arguments:
 
 Options:
   --foreground    Block until codex completes. Default is background dispatch.
-  --model SLUG    Model to run. Default: gpt-6.2-sol.
+  --model MODEL   sol | astra (approved IDs in lib/codex_registry.py) or an
+                  exact slug, passed verbatim. Default: sol.
   --effort LEVEL  Reasoning effort (none|low|medium|high|xhigh|max). Default: high.
   --service-tier TIER
                   Service tier for this run. Default: default.
@@ -111,6 +112,8 @@ source "$LIB_DIR/codex-registry.sh"
 # shellcheck source=lib/wrapper-common.sh
 source "$LIB_DIR/wrapper-common.sh"
 
+MODEL="$(resolve_codex_model "$MODEL")"
+
 mkdir -p "$(dirname "$CODEX_REGISTRY")"
 
 # ---- registry helpers ----
@@ -157,7 +160,7 @@ write_post_run_summary() {
 
 # Deterministic model overrides for delegated tasks. Model / effort / tier come
 # from flags (--model / --effort / --service-tier) — consumers pass what they need
-# per run, otherwise these defaults apply (gpt-6.2-sol / high / default). These are
+# per run, otherwise these defaults apply (sol / high / default). These are
 # real `-c` config overrides (strict-config validated), not guidance.
 CODEX_MODEL_OVERRIDES=(
   -c "model=${MODEL}"

@@ -21,6 +21,9 @@ import sys
 import tomllib
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent / "lib"))
+from codex_registry import CODEX_FAMILIES, resolve_model  # noqa: E402
+
 
 # Harness name, home-relative root, installation gate (Claude is required).
 HARNESSES = (
@@ -197,13 +200,19 @@ def audit_merge(harness, root):
     except tomllib.TOMLDecodeError:
         return [("MERGE", path, "valid TOML", "invalid TOML")]
     if harness == "Codex":
+        # Native projections of codex_registry.CODEX_MODELS: Codex cannot read
+        # the role names, so these hold exact IDs, re-merged on every upgrade.
+        # The primary's role is the user's pick; only its version is checked.
+        approved = sorted(resolve_model(family) for family in CODEX_FAMILIES)
+        sol = resolve_model("sol")
         checks = [
             ('approval_policy = "on-request"',
              config.get("approval_policy") == "on-request"),
             ('approvals_reviewer = "auto_review"',
              config.get("approvals_reviewer") == "auto_review"),
-            ('[agents] default_subagent_model = "gpt-6.2-sol"',
-             config_value(config, "agents", "default_subagent_model") == "gpt-6.2-sol"),
+            ("model = one of {}".format(approved), config.get("model") in approved),
+            ('[agents] default_subagent_model = "{}"'.format(sol),
+             config_value(config, "agents", "default_subagent_model") == sol),
             ('[agents] default_subagent_reasoning_effort = "high"',
              config_value(config, "agents", "default_subagent_reasoning_effort") == "high"),
         ]
@@ -219,6 +228,20 @@ def audit_merge(harness, root):
                       for key, expected in CONVEX_MCP.items())
     return [("MERGE", path, expected, "required value absent or different")
             for expected, passed in checks if not passed]
+
+
+def audit_catalog(root):
+    """Every approved Codex ID must be in the installed CLI's model catalog.
+    Presence is not entitlement; it stops an upgrade the CLI cannot run."""
+    path = root / "models_cache.json"
+    try:
+        slugs = {model["slug"] for model in json.loads(path.read_text())["models"]}
+    except (OSError, ValueError, KeyError, TypeError) as error:
+        return [("CATALOG", path, "readable catalog with models[].slug",
+                 "{}: {}".format(type(error).__name__, error))]
+    approved = [resolve_model(family) for family in CODEX_FAMILIES]
+    return [("CATALOG", path, model, "not in the installed catalog")
+            for model in approved if model not in slugs]
 
 
 def audit_settings(root, settings):
@@ -298,6 +321,8 @@ def main(home=None, repo=None):
         findings = audit_links(expected, managed, root, repo, harness)
         if harness in ("Codex", "Grok"):
             findings.extend(audit_merge(harness, root))
+        if harness == "Codex":
+            findings.extend(audit_catalog(root))
         if harness == "Claude":
             findings.extend(audit_settings(root, settings))
         if harness == "Pi":

@@ -13,6 +13,22 @@ jobs:
         run: bash always/scripts/check-private-terms.sh
       - name: Workflow-stub guard
         run: python3 always/scripts/check-workflow-stubs.py
+      - name: OpenAI model IDs live only in codex_registry.py
+        # Active scripts derive IDs from lib/codex_registry.py; tests may pin fixtures.
+        # The owner must match first, so a missing tree or broken pattern cannot pass.
+        # grep: 0 = a pin found (fail), 1 = none (pass), anything else = error (fail).
+        run: |
+          set +e
+          pattern='gpt-[0-9]+(\.[0-9]+)?-(sol|astra)'
+          grep -qE "$pattern" always/scripts/lib/codex_registry.py ||
+            { echo "::error::model-ID lint cannot see the owner's IDs"; exit 1; }
+          grep -rnIE --include='*.py' --include='*.sh' --exclude='test_*.py' \
+            --exclude='test-*.sh' --exclude=codex_registry.py "$pattern" always/scripts
+          case $? in
+            0) echo "::error::model ID outside always/scripts/lib/codex_registry.py"; exit 1 ;;
+            1) exit 0 ;;
+            *) echo "::error::model-ID lint could not scan"; exit 1 ;;
+          esac
   tests:
     runs-on: ubuntu-latest
     steps:

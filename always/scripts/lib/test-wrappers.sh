@@ -291,13 +291,17 @@ pass "exit before any event: failed close from worker and wrapper (4)"
 # ════════════════════════ codex-exec.sh / codex-resume.sh ════════════════════════
 XE="$SCRIPTS/codex-exec.sh"
 XR="$SCRIPTS/codex-resume.sh"
+# Expected IDs come from the mapping itself, never from the resolver under test.
+read -r SOL ASTRA < <(python3 -c 'import sys; sys.path.insert(0, sys.argv[1])
+from codex_registry import CODEX_MODELS as M; print(M["sol"], M["astra"])' "$LIB_DIR")
+argv_model() { grep '^model=' "$FAKE_DIR/codex.argv"; }
 echo "test: codex-exec.sh / codex-resume.sh"
 
 t="$ID-x1"
 run x1 bash "$XE" "$t" "$BRIEF" --foreground
 assert_eq "$RC" "0" "codex fg rc"
 assert_eq "$(cat "$FAKE_DIR/codex.argv")" "$(printf '%s\n' exec --sandbox workspace-write --dangerously-bypass-hook-trust \
-  -c model=gpt-6.2-sol -c model_reasoning_effort=high -c service_tier=default --json "do the thing")" "codex default argv"
+  -c model=$SOL -c model_reasoning_effort=high -c service_tier=default --json "do the thing")" "codex default argv"
 assert_eq "$(reg "$CODEX_REG" "$t")" "\
 ts=TS agent=codex source=claude-code task=$t event=start cwd=$REPO_TOP status=running log_path=/tmp/codex-$t.log
 ts=TS agent=codex source=claude-code task=$t event=session_captured status=running session_id=$CODEX_SID
@@ -315,7 +319,7 @@ assert_eq "$(cat "$FAKE_DIR/codex.argv")" "$(printf '%s\n' exec --sandbox worksp
 run x1-resume bash "$XR" "$t" "$BRIEF" --foreground --effort xhigh
 assert_eq "$RC" "0" "codex resume rc"
 assert_eq "$(cat "$FAKE_DIR/codex.argv")" "$(printf '%s\n' exec resume --dangerously-bypass-hook-trust \
-  -c model=gpt-6.2-sol -c model_reasoning_effort=xhigh -c service_tier=default --json "$CODEX_SID" "do the thing")" "codex resume argv"
+  -c model=$SOL -c model_reasoning_effort=xhigh -c service_tier=default --json "$CODEX_SID" "do the thing")" "codex resume argv"
 assert_eq "$(reg "$CODEX_REG" "$t" | tail -2)" "\
 ts=TS agent=codex source=claude-code task=$t event=resume_started status=running session_id=$CODEX_SID log_path=/tmp/codex-$t-resume.log reason=
 ts=TS agent=codex source=claude-code task=$t event=resume_closed status=closed session_id=$CODEX_SID log_path=/tmp/codex-$t-resume.log reason=" "codex resume lines"
@@ -323,6 +327,40 @@ check_post_run "/tmp/codex-$t.post-run.md" "$t" "codex-resume post-run summary" 
   "## Final agent_message" "CODEX DONE"
 grep -qx -- "- note: this is a RESUME run; original run log: /tmp/codex-$t.log" "/tmp/codex-$t.post-run.md" || fail "codex resume note"
 pass "--model/--effort/--service-tier reach codex; resume lines and post-run"
+
+# A selected role resolves through CODEX_MODELS on exec and resume; an exact
+# slug, a deliberate old pin included, still passes verbatim (m1 row above).
+run x1-astra bash "$XE" "$ID-xrole" "$BRIEF" --foreground --model astra
+assert_eq "$(argv_model)" "model=$ASTRA" "codex exec astra"
+run x1-astra-resume bash "$XR" "$t" "$BRIEF" --foreground --model astra
+assert_eq "$(argv_model)" "model=$ASTRA" "codex resume astra"
+run x1-oldpin-resume bash "$XR" "$t" "$BRIEF" --foreground --model gpt-5.6-sol
+assert_eq "$(argv_model)" "model=gpt-5.6-sol" "codex resume explicit old pin"
+pass "roles resolve on exec and resume; explicit slugs pass verbatim"
+
+# A role whose mapping is lost, blank or names the other family must stop the
+# wrapper before codex runs, for both roles, never reach codex as a literal.
+bad_lib() {  # bad_lib <name> <CODEX_MODELS literal>
+  mkdir -p "$T/badlib-$1"
+  sed "s/^CODEX_MODELS = .*/CODEX_MODELS = $2/" "$LIB_DIR/codex_registry.py" > "$T/badlib-$1/codex_registry.py"
+  echo "$T/badlib-$1/codex_registry.py"
+}
+no_dispatch() {  # no_dispatch <label> <lib> <wrapper> <task> <role|"" for default>
+  rm -f "$FAKE_DIR/codex.argv"
+  CODEX_REGISTRY_LIB="$2" run "$1" bash "$3" "$4" "$BRIEF" --foreground ${5:+--model "$5"}
+  [[ "$RC" -ne 0 && ! -e "$FAKE_DIR/codex.argv" ]] || fail "$1: codex dispatched (rc=$RC)"
+  assert_has "$ERR" "CODEX_MODELS['${5:-sol}']" "$1 names the role"
+}
+EMPTY=$(bad_lib empty "{}")
+NOASTRA=$(bad_lib noastra "{'sol': '$SOL'}")
+BLANK=$(bad_lib blank "{'sol': '', 'astra': '$ASTRA'}")
+WRONGFAM=$(bad_lib wrongfam "{'sol': '$SOL', 'astra': '$SOL'}")
+no_dispatch x-map-empty-default "$EMPTY" "$XE" "$ID-xnomap" ""
+no_dispatch x-map-empty-astra "$EMPTY" "$XE" "$ID-xnomap" astra
+no_dispatch x-map-noastra "$NOASTRA" "$XR" "$t" astra
+no_dispatch x-map-blank-sol "$BLANK" "$XR" "$t" ""
+no_dispatch x-map-wrongfam "$WRONGFAM" "$XE" "$ID-xnomap" astra
+pass "empty, missing, blank or wrong-family mappings fail before dispatch"
 
 FAKE_MODE=fail run x1-resume-fail bash "$XR" "$t" "$BRIEF" --foreground
 assert_eq "$RC" "1" "codex resume failure rc"

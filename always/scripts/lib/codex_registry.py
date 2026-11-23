@@ -11,7 +11,8 @@ the Hermes PR-burndown scripts still call codex_delegate.py.
 
 They had drifted on the three things they share: the registry line grammar, the
 thread-id / final-message extraction, and the dispatch-hygiene constants.
-This module owns all three. It lives in developer-config because that is the
+This module owns all three, plus CODEX_MODELS: the approved OpenAI model ID per
+Codex family, the one place a version lives. It lives in developer-config because that is the
 always-present home — the Claude wrappers must work on a machine with no Hermes
 install, so the dependency points only in this direction (Hermes → here).
 
@@ -29,6 +30,7 @@ CLI:
   codex_registry.py current-run    --task <name>
   codex_registry.py post-run       --task <name> --status <s> --log <p> ...
   codex_registry.py constants
+  codex_registry.py model          [sol|astra|SLUG]
 
 Registry path resolution: $CODEX_REGISTRY_PATH, else
 ~/.hermes/state/codex-sessions.jsonl. Values always travel via argv or the
@@ -69,6 +71,33 @@ DEFAULT_TIMEOUT_SEC = 5400
 HEALTH_CHECK_SEC = 45
 
 SOURCES = ("hermes", "claude-code")
+
+# ─── Codex model families ───
+
+#: The roles callers select. A role is resolved only through CODEX_MODELS, so a
+#: role whose mapping is lost fails instead of reaching codex as a literal.
+CODEX_FAMILIES = ("sol", "astra")
+#: Approved wire ID per family. Upgrading is a deliberate edit of this line once
+#: the installed Codex catalog lists the slug; check-wiring.py audits the catalog
+#: and ~/.codex/config.toml, Hermes model_drift_check.py audits its configs.
+CODEX_MODELS = {"sol": "gpt-6.2-sol", "astra": "gpt-6.2-astra"}
+
+
+class CodexModelError(RuntimeError):
+    """CODEX_MODELS has no valid ID for a family a caller selected."""
+
+
+def resolve_model(choice: str = "") -> str:
+    """A family (empty means Sol) -> its approved ID. Any other value is an
+    explicit per-call slug, old pins included, and passes through unchanged."""
+    family = choice or "sol"
+    if family not in CODEX_FAMILIES:
+        return choice
+    model = CODEX_MODELS.get(family)
+    if not isinstance(model, str) or not re.fullmatch(rf"gpt-\d+(?:\.\d+)?-{family}", model):
+        raise CodexModelError(
+            f"CODEX_MODELS[{family!r}] is {model!r}, not a gpt-<version>-{family} ID")
+    return model
 
 # ─── Log-stream parsing (canonical owners of these patterns) ───
 
@@ -302,6 +331,15 @@ def _cmd_append(args) -> int:
     return 0
 
 
+def _cmd_model(args) -> int:
+    try:
+        print(resolve_model(args.choice))
+    except CodexModelError as error:
+        print(f"codex_registry.py: {error}", file=sys.stderr)
+        return 1
+    return 0
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(prog="codex_registry.py")
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -339,6 +377,10 @@ def main(argv=None) -> int:
     p.add_argument("--note", default="")
     p.set_defaults(fn=lambda a: (write_post_run_summary(
         a.task, a.status, a.log, a.session_id, a.repo, a.out, a.title, a.note), 0)[1])
+
+    p = sub.add_parser("model")
+    p.add_argument("choice", nargs="?", default="")
+    p.set_defaults(fn=_cmd_model)
 
     p = sub.add_parser("constants")
     # Shell-quoted: the registry path may contain spaces and this is eval'd.

@@ -138,10 +138,10 @@ no second wrapper set; it invokes the same scripts (Hermes
 through its dispatch guard, `coding-orchestration.md` "Path 1").
 
 ```bash
-~/.claude/scripts/codex-exec.sh <task-name> /tmp/codex-<task-name>-brief.md [--model SLUG] [--effort LEVEL] [--service-tier TIER]  # dispatch (background default; --foreground for <~2min tasks)
+~/.claude/scripts/codex-exec.sh <task-name> /tmp/codex-<task-name>-brief.md [--model sol|astra|SLUG] [--effort LEVEL] [--service-tier TIER]  # dispatch (background default; --foreground for <~2min tasks)
 ~/.claude/scripts/codex-wait.sh <task-name> [timeout-seconds]                 # block until the task closes
 ~/.claude/scripts/codex-status.sh <task-name>                                 # read-only triage verdict: RUNNING / CLOSED / FAILED / STALE / UNKNOWN
-~/.claude/scripts/codex-resume.sh <task-name> /tmp/codex-<task-name>-followup.md [--model SLUG] [--effort LEVEL] [--service-tier TIER]  # follow-up with context loaded
+~/.claude/scripts/codex-resume.sh <task-name> /tmp/codex-<task-name>-followup.md [--model sol|astra|SLUG] [--effort LEVEL] [--service-tier TIER]  # follow-up with context loaded
 ```
 
 **Waiter recovery.** A session restart or the harness's low-memory guard
@@ -156,11 +156,11 @@ holds no process. `codex-status.sh` is the mandatory liveness check before
 concluding a run is dead: STALE means "look at the log tail", not "kill it".
 
 Model, effort, and service tier are passed **per run as flags**. Choose the
-family and rung under `model-selection.md` "Harness seats" and resolve the
-current model ID in the Codex model picker. The wrappers' fallback values
-apply when flags are omitted.
+family and rung under `model-selection.md` "Harness seats" and pass the
+family; the wrappers resolve it. The wrappers' fallback values apply when
+flags are omitted.
 
-- `--model SLUG` — passed through without roster validation.
+- `--model` — `sol` (default) or `astra` resolves to the approved ID owned by `CODEX_MODELS` in `always/scripts/lib/codex_registry.py`, failing before dispatch if that mapping is missing or malformed; any other value is an explicit per-call slug, passed through without validation.
 - `--effort LEVEL` — passed through verbatim without validation. The CLI decides wire support. Wrapper defaults are not a task's effort floor.
 - `--service-tier TIER` — default `default`; `priority` (the Fast 2x tier) is **user-opt-in only**: pass it only when the user has explicitly directed it for that run or session. Pipeline/command docs must never pin `priority` as their default tier. The wrapper never infers a tier from effort.
 

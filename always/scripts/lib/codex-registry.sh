@@ -15,6 +15,7 @@
 #   $CODEX_REGISTRY              registry path (honours $CODEX_REGISTRY_PATH)
 #   $CODEX_DEFAULT_TIMEOUT_SEC   90min legacy Hermes default (codex_exec.sh, codex_delegate.py)
 #   $CODEX_HEALTH_CHECK_SEC      45s no-JSON-event stall threshold
+#   resolve_codex_model [sol|astra|SLUG]   approved ID for a family (default sol); other slugs verbatim
 #   registry_append KEY VALUE ...          append one canonical line
 #   extract_session_id <log>               thread_id from a --json log
 #   extract_final_message <log>            last agent_message text
@@ -43,6 +44,10 @@ eval "$(python3 "$CODEX_REGISTRY_LIB" constants)"
 # Pin the resolved registry into the environment so every child process (and the
 # detached background workers) writes to the same file the parent read.
 export CODEX_REGISTRY_PATH="$CODEX_REGISTRY"
+
+resolve_codex_model() {
+  python3 "$CODEX_REGISTRY_LIB" model "${1:-}"
+}
 
 registry_append() {
   python3 "$CODEX_REGISTRY_LIB" append --source "$CODEX_SOURCE" "$@"

@@ -39,7 +39,7 @@ set -euo pipefail
 TASK=""
 BRIEF=""
 MODE="background"
-MODEL="gpt-6.2-sol"
+MODEL="sol"
 EFFORT="high"
 SERVICE_TIER="default"
 
@@ -58,7 +58,8 @@ Arguments:
 
 Options:
   --foreground              Block until codex completes.
-  --model SLUG              Model to run. Default: gpt-6.2-sol.
+  --model MODEL             sol | astra (approved IDs in lib/codex_registry.py) or an
+                            exact slug, passed verbatim. Default: sol.
   --effort LEVEL            Reasoning effort (none|low|medium|high|xhigh|max). Default: high.
   --service-tier TIER       Service tier for this resumed run. Default: default.
                             Pass "priority" for the Fast (2x) tier.
@@ -106,6 +107,8 @@ LIB_DIR="$(python3 -c 'import os,sys; print(os.path.dirname(os.path.realpath(sys
 source "$LIB_DIR/codex-registry.sh"
 # shellcheck source=lib/wrapper-common.sh
 source "$LIB_DIR/wrapper-common.sh"
+
+MODEL="$(resolve_codex_model "$MODEL")"
 
 if [[ ! -f "$CODEX_REGISTRY" ]]; then
   echo "codex-resume.sh: registry not found at $CODEX_REGISTRY" >&2
@@ -172,7 +175,7 @@ register_entry() {
 # Always redirect stdin from /dev/null for the same reason as codex-exec.sh.
 
 # Mirror codex-exec.sh: model / effort / tier come from flags (--model / --effort /
-# --service-tier), else these defaults (gpt-6.2-sol / high / default). Consumers that
+# --service-tier), else these defaults (sol / high / default). Consumers that
 # want a non-default tier should pass the same choice on resume. Real `-c` overrides.
 CODEX_MODEL_OVERRIDES=(
   -c "model=${MODEL}"
