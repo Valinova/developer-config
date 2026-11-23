@@ -29,7 +29,13 @@ task's complexity picks the rung; complex work takes the higher side.
   family alias where supported (Claude CLI `fable`, `opus`, `sonnet`). When a
   dispatch requires an exact ID, resolve the current family member from that
   harness's live schema or model catalog (Codex: the newest `gpt-*-<family>`
-  slug in `~/.codex/models_cache.json`). Any pinned slug you read or touch
+  slug in `~/.codex/models_cache.json`). A catalog is only as new as its CLI:
+  before the first cross-family dispatch of a session, compare the dispatched
+  CLI's version with the published latest (`codex --version` vs
+  `npm view @openai/codex version`; `claude --version` vs
+  `npm view @anthropic-ai/claude-code version`). If it is behind, say so in
+  the preamble with both versions and proceed on the installed one; never
+  update it yourself. Any pinned slug you read or touch
   (script defaults, configs, tests) that is older than the catalog's gets
   bumped in the same change. Honor a valid version the user explicitly names
   for the dispatch.
