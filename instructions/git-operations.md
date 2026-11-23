@@ -23,7 +23,7 @@ everything else rests on the ask-when-unclear rules in this file. `approval_poli
 in `always/settings.json`, not a Codex hook. Its docstring and
 `test_supervised_git_backstop.py` own the design — run the test after touching it.
 
-Blocked in every mode, including bypass: bare force-push (`--force-with-lease` passes), and the `permissions.deny` list, which holds only the unrecoverable (`rm -rf` of a root, force-push or `push --delete` of the default branch). `git stash`, `restore`, `checkout -- <path>`, `clean -f` and `worktree remove` follow "Direction and approval": done when I named them, otherwise ask first and name the recovery path, especially in bypass, where the hook's ask is inert; approved-task exceptions are under "Updating a branch".
+Blocked in every mode, including bypass: the unrecoverable only, in that hook's deny tier and `permissions.deny`, plus `always/scripts/rm`, which shadows `rm` in Claude's shells and owns the core paths it refuses. `bypass-bash-approve.py` answers Claude Code's remaining Bash prompts in bypass because those blocks hold, so never weaken one without the other. `git stash`, `restore`, `checkout -- <path>`, `clean -f` and `worktree remove` follow "Direction and approval": done when I named them, otherwise ask first and name the recovery path, especially in bypass, where the hook's ask is inert; approved-task exceptions are under "Updating a branch".
 
 ## Commits
 

@@ -17,9 +17,12 @@ in the repo (a comment at the site, or `AGENTS.md` for a recurring trap).
 ## Edit tracked files with the Edit tool, never an in-place shell rewrite
 
 A shell in-place rewrite of a tracked file (`sed -i`, `perl -pi`, `cp`/`mv`
-over it, a heredoc overwrite) trips a safety prompt a subagent cannot answer,
-so its pass stalls. Every implementer brief restates it (why:
-rationale.md#tracked-file-edits).
+over it, a heredoc script) is easily misread by Claude Code's removal check,
+which stalls a subagent wherever the bypass approval hook is not running. Every
+implementer brief restates it (why: rationale.md#tracked-file-edits).
+
+Delete with plain `rm` and literal paths. A "rm guard: blocked" is final: never
+reach the same target through a script, `find`, or another tool.
 
 ## Shell commands stay plain
 

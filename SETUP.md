@@ -73,9 +73,12 @@ listed Codex approvals/defaults, Grok compatibility/models/MCP, and Pi MCP entri
 preserve all unrelated configuration.
 
 The hook scripts — `always/scripts/supervised-git-backstop.py` (plus its test,
-`test_supervised_git_backstop.py`), `foreground-dispatch-guard.py` and `issue-bar-guard.py` — are NOT
-linked into `~/.claude/scripts/`: the `PreToolUse` hooks in `always/settings.json`
+`test_supervised_git_backstop.py`), `foreground-dispatch-guard.py`, `issue-bar-guard.py` and `bypass-bash-approve.py` — are NOT
+linked into `~/.claude/scripts/`: the hooks in `always/settings.json`
 invoke them by absolute repo path, so per-file links would be dead weight.
+`always/scripts/rm` must be linked and `~/.claude/scripts` must precede `/bin` on
+`PATH`: `bypass-bash-approve.py` checks only the link. In a fresh Claude Code
+session, `command -v rm` prints `~/.claude/scripts/rm`.
 `always/scripts/lib/` — the shared `wrapper-common`, `codex_registry` and `claude-registry`
 owners — is likewise not linked; the wrappers source it by repo path at
 runtime. `check-wiring.py`, `check-private-terms.sh` and `check-workflow-stubs.py` are likewise unlinked —

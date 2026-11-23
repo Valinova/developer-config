@@ -452,12 +452,14 @@ clock does not wait for that.
 
 ### tracked-file-edits
 
-The safety prompt comes from Claude Code itself, even under bypass; neither
-of our hooks is involved, and a multi-command chain of in-place rewrites is
-the likeliest trigger. On 2026-10-09 an hour was lost when a subagent's
-seen-red break, done with `sed -i` plus `cp` restores, stalled silently on
-that prompt until a human noticed. A recurrence graduates the rule to a
-PreToolUse deny per principles §11.
+The safety prompt is Claude Code's own dangerous-removal check, which bypass
+does not skip: it asks whenever it cannot parse a command the way the shell
+will, `rm` or not (quote-, backtick- and `$`-heavy heredocs), and when an `rm`
+target is the current directory. On 2026-10-09 an hour was lost when a
+subagent's seen-red break, done with `sed -i` plus `cp` restores, stalled
+silently on a prompt until a human noticed. Since 2026-11-23
+`bypass-bash-approve.py` answers it and the rm guard decides what may be
+deleted.
 
 ### plain-shell-commands
 
