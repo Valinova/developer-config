@@ -95,7 +95,7 @@ for cases, survives in ((BLOCKED, True), (ALLOWED, False)):
 home = pathlib.Path(tempfile.mkdtemp(prefix="rm-guard-test-", dir=base))
 try:
     build(home)
-    for path in ("/", "/usr", "/usr/bin", "/etc", str(REAL_HOME), str(REAL_HOME / ".claude/projects"),
+    for path in ("/", "/usr", "/usr/bin", "/etc", str(REAL_HOME), str(base),
                  str(REAL_HOME.parent), "/tmp"):
         result = sh(f'rm "{path}"', home)
         report(f"blocked with HOME overridden: {path}", "rm guard: blocked" in result.stderr, result.stderr)
