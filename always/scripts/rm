@@ -1,0 +1,75 @@
+#!/bin/sh
+# Shadows rm for Claude Code's shells. It sees targets after variables, globs,
+# `bash -c` and script files resolve, which no check on command text can.
+# Owner of the core-path list; supervised-git-backstop.py asks it through
+# --guard-check. Anything that does not resolve rm through PATH (rmtree,
+# /bin/rm, find -delete, sudo) bypasses it; the hook catches the typed forms.
+
+check=
+if [ "$1" = --guard-check ]; then
+  check=1
+  shift
+elif [ "$CLAUDECODE" != 1 ]; then
+  exec /bin/rm "$@"
+fi
+
+# A script may override HOME, so the account's real home is protected as well.
+eval "real_home=~$(id -un)"
+env_home=$(cd "${HOME:-/}" 2>/dev/null && pwd -P)
+real_home=$(cd "$real_home" 2>/dev/null && pwd -P)
+
+# Without a trailing slash rm removes a symlink itself, so only its parent resolves.
+canonical() {
+  case $1 in
+    */ | . | .. | */. | */..) (cd "$1" 2>/dev/null && pwd -P) ;;
+    */*) (cd "${1%/*}/" 2>/dev/null && printf '%s/%s\n' "$(pwd -P)" "${1##*/}") ;;
+    *) printf '%s/%s\n' "$(pwd -P)" "$1" ;;
+  esac | sed 's#^//*#/#'
+}
+
+in_home() {
+  [ -n "$1" ] && [ "$1" != / ] || return 1
+  case $1/ in "$2"/*) return 0 ;; esac
+  case $2 in
+    "$1"/.ssh/* | "$1"/.claude/projects | "$1"/.claude/projects/*) return 0 ;;
+    "$1"/Development/*/*) return 1 ;;
+    "$1"/Development/*) [ -d "$2" ] && [ ! -L "$2" ] ;;
+    "$1"/*/*) return 1 ;;
+    "$1"/.*) return 0 ;;
+    "$1"/*) [ -d "$2" ] && [ ! -L "$2" ] ;;
+    *) return 1 ;;
+  esac
+}
+
+core_path() {
+  case $1 in
+    /tmp/?* | /private/tmp/?* | /var/folders/?* | /private/var/folders/?*) return 1 ;;
+    */.[gG][iI][tT] | */.[gG][iI][tT]/objects | */.[gG][iI][tT]/refs) return 0 ;;
+    /System/*) return 0 ;;
+    /private/*/* | /Users/*/* | /home/*/* | /usr/*/* | /opt/*/* | /var/*/* | /Volumes/*/* | /mnt/*/*) ;;
+    /private/* | /Users/* | /home/* | /usr/* | /opt/* | /var/* | /Volumes/* | /mnt/*) return 0 ;;
+    /*/*) ;;
+    *) return 0 ;;
+  esac
+  in_home "$real_home" "$1" || in_home "$env_home" "$1"
+}
+
+options=1
+for arg in "$@"; do
+  if [ -n "$options" ]; then
+    case $arg in
+      --) options=; continue ;;
+      -*) continue ;;
+    esac
+  fi
+  path=$(canonical "$arg")
+  # An unresolvable parent holds nothing rm could reach.
+  [ -n "$path" ] || continue
+  if core_path "$path"; then
+    echo "rm guard: blocked, $path is a core path. Nothing was deleted. Do not retry another way; tell the user what you wanted to remove and why." >&2
+    [ -n "$check" ] || echo "$(date '+%Y-%m-%dT%H:%M:%S') $PWD: rm $*" 2>/dev/null >>"$HOME/.claude/rm-guard.log"
+    exit 1
+  fi
+done
+
+[ -n "$check" ] || exec /bin/rm "$@"

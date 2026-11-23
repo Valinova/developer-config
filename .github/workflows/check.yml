@@ -39,6 +39,7 @@ jobs:
       - run: python3 always/scripts/check-wiring.py --check
       - run: python3 always/scripts/test_check_wiring.py
       - run: python3 always/scripts/test_supervised_git_backstop.py
+      - run: python3 always/scripts/test_rm_guard.py
       - run: python3 always/scripts/test_grok_acp_exec.py
       - run: bash always/scripts/lib/test-codex-registry.sh
       - run: bash always/scripts/lib/test-wrappers.sh

@@ -4,9 +4,12 @@
 Two tiers, because they answer different questions:
 
   DENY tier (all modes, incl. bypassPermissions)
-      Bare force-push. A hook `deny` is a *block*, not a prompt, and
-      bypassPermissions only skips prompts — so this is the one rule here
-      that still bites in the mode long autonomous runs use.
+      What cannot be undone and is never wanted unattended: bare force-push
+      or deletion of a remote default branch, root rm, typed ways around the
+      rm guard (always/scripts/rm, which owns the core-path list), disk
+      erasure, and wholesale remote wipes. A hook `deny` is a *block*, not a
+      prompt, and bypassPermissions only skips prompts — so this tier still
+      bites in the mode long autonomous runs use.
       `--force-with-lease` passes: it is the form git-operations.md
       mandates, and settings `deny` rules can't express "--force but not
       --force-with-lease" (deny rules carry no allowlist exceptions).
@@ -17,11 +20,10 @@ Two tiers, because they answer different questions:
 
 Deliberately NOT covered (trimmed 2026-07-28): checkout / switch / worktree
 add / pull / merge / rebase / cherry-pick / reset / commit --amend /
-branch -d / -m, plain push, and recursive rm (agent judgement over the
-exact `rm -rf <root>` settings deny floor). All are recoverable or already on
-the `permissions.deny` floor, and all are things the user routinely directs —
-prompting on them taxed directed work without protecting anything. The
-governing rule is git-operations.md: explicit direction IS the approval,
+branch -d / -m, plain push, and recursive rm outside the rm guard's core
+paths. All are recoverable or disposable, and all are things the user
+routinely directs — prompting on them taxed directed work without protecting
+anything. The governing rule is git-operations.md: explicit direction IS the approval,
 so this hook covers only what stays dangerous even when directed.
 
 Matching is a regex over the raw command string — cruder than the native
@@ -31,7 +33,11 @@ acceptable for a backstop.
 """
 
 import json
+import os
+import pathlib
 import re
+import shlex
+import subprocess
 import sys
 
 SEGMENT_SPLIT = re.compile(r"[;&|]|\n")
@@ -55,6 +61,56 @@ FORCE_FORMS = re.compile(
     r"(?:^|\s)(?:--force(?!-with-lease)|-[A-Za-z]*f[A-Za-z]*)(?=\s|$)"
     r"|(?:^|\s)\+[^\s]+"
 )
+
+# Tools usually launched through a runner: `npx convex`, `doppler run -- supabase`.
+RUNNER = (
+    CMD_POSITION
+    + r"(?:(?:npx|pnpm|bunx|bun|yarn|npm|doppler|env|time|nohup|command)\b.*?\s)?(?:\S*/)?"
+)
+DENY_PATTERNS = [
+    (
+        r"^\s*git\s.*\bpush\b.*(?:\s(?:--delete|-d)\b.*\s|\s:)(?:refs/heads/)?(?:main|master)(?=\s|$)",
+        "Deleting the remote default branch is never allowed.",
+    ),
+    (
+        CMD_POSITION + r"rm\s+(?:-\S+\s+)+[\"']?(?:/|~|\$\{?HOME\}?|\.\.)/?\*?[\"']?(?=\s|$)",
+        "Never delete the filesystem root, the home directory or the parent directory.",
+    ),
+    (
+        CMD_POSITION + r"sudo\s(?:.*\s)?(?:\S*/)?rm(?=\s|$)",
+        "sudo rm skips the rm guard.",
+    ),
+    (
+        RUNNER + r"(?:sudo\s+)?diskutil\s+(?i:erase|reformat|partitiondisk|zerodisk|randomdisk|secureerase|apfs\s+(?:delete|erase))",
+        "Erasing a disk or volume is never allowed.",
+    ),
+    (
+        CMD_POSITION + r"(?:sudo\s+)?(?:dd\s(?:.*\s)?of=/dev/r?(?:disk|sd|nvme)|(?:mkfs|newfs)(?:[._]\w+)?\s)",
+        "Writing over a disk device is never allowed.",
+    ),
+    (RUNNER + r"gh\s+repo\s+delete\b", "Deleting a GitHub repository is never allowed."),
+    (
+        RUNNER + r"supabase(?:@\S+)?\s+db\s+reset\b.*\s--(?:linked|db-url)\b",
+        "Resetting a remote database is never allowed.",
+    ),
+    (
+        RUNNER + r"convex(?:@\S+)?\s+import\b(?=.*\s--replace)(?=.*\s--prod\b)",
+        "Replacing production Convex data is never allowed.",
+    ),
+]
+ABSOLUTE_RM = re.compile(
+    r"^\s*(?:\w+=\S*\s+)*(?:(?:command|time|nohup|env)\s+)*(?:/usr)?/bin/rm\s"
+)
+DENY_MATCHERS = [(re.compile(p), reason) for p, reason in DENY_PATTERNS]
+
+DENY_ADVICE = (
+    " Do not retry another way; if it is truly wanted, tell the user the exact "
+    "command to run outside the agent."
+)
+RM_GUARD = pathlib.Path(__file__).with_name("rm")
+FIND_DELETE = re.compile(CMD_POSITION + r"find\s.*\s-delete(?=\s|$)")
+# Any other find predicate narrows the match, so it is not a whole-directory delete.
+FIND_UNFILTERED = {"-delete", "-depth", "-d", "-x", "-xdev", "-print", "-mindepth", "-maxdepth", "-type"}
 
 ASK_PATTERNS = [
     (
@@ -132,6 +188,30 @@ def forced_push(command: str) -> bool:
     return False
 
 
+def core_find_delete(command: str, cwd: str) -> bool:
+    for segment in SEGMENT_SPLIT.split(command):
+        if not FIND_DELETE.search(segment):
+            continue
+        try:
+            tokens = shlex.split(segment)
+        except ValueError:
+            continue
+        args = tokens[next(i for i, t in enumerate(tokens) if t.split("/")[-1] == "find") + 1:]
+        split = next((i for i, t in enumerate(args) if t[0:1] in "-(!"), len(args))
+        roots, tests = args[:split], args[split:]
+        if any(t.startswith(("-", "(", "!")) and t not in FIND_UNFILTERED for t in tests):
+            continue
+        paths = [os.path.expanduser(os.path.expandvars(r)) for r in roots] or ["."]
+        check = subprocess.run(
+            [str(RM_GUARD), "--guard-check", "--", *paths],
+            cwd=cwd if os.path.isdir(cwd) else None,
+            capture_output=True,
+        )
+        if check.returncode != 0:
+            return True
+    return False
+
+
 def main() -> None:
     data = json.load(sys.stdin)
     tool_name, permission_mode, tool_input, grok = envelope(data)
@@ -149,6 +229,15 @@ def main() -> None:
             "session's push. Use --force-with-lease (git-operations.md).",
             grok=grok,
         )
+
+    for segment in SEGMENT_SPLIT.split(command):
+        for matcher, reason in DENY_MATCHERS:
+            if matcher.search(segment):
+                respond("deny", reason + DENY_ADVICE, grok=grok)
+        if ABSOLUTE_RM.search(segment):
+            respond("deny", "/bin/rm skips the rm guard; use plain `rm`, which it checks.", grok=grok)
+    if core_find_delete(command, data.get("cwd") or ""):
+        respond("deny", "find -delete on a core path is never allowed." + DENY_ADVICE, grok=grok)
 
     # Ask tier — supervised modes only. bypassPermissions is the user's opt-in
     # for autonomous runs; the harness ignores hook `ask` there anyway, and
