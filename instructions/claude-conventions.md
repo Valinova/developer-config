@@ -21,6 +21,16 @@ over it, a heredoc overwrite) trips a safety prompt a subagent cannot answer,
 so its pass stalls. Every implementer brief restates it (why:
 rationale.md#tracked-file-edits).
 
+## Shell commands stay plain
+
+One plain pipeline or a short `&&` chain per Bash call: no nested `$(…)`,
+`( … )` subshell, backticks, `<(…)`, or `||` fallback that runs a second
+pipeline. A command Claude Code cannot parse trips the same kind of prompt.
+Multi-step logic goes in a scratch script created with the Write tool; a
+deletion is always a plain, visible `rm <explicit path>`, never inside a
+script. A command that check denies is rewritten, never retried. Every brief
+restates it (why: rationale.md#plain-shell-commands).
+
 ## Report what you verified
 
 Say which claims you verified and which you inferred (`model-selection.md` "Family tendencies").
