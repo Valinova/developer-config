@@ -40,7 +40,8 @@ always/
   commands/       Slash-command / prompt entry points: shared/, claude/, pi/.
   skills/         Harness-neutral skills linked into Claude, Codex, Pi, and Grok
                   Build: ci-speed, clearcut-review, code-simplifier, com,
-                  comall, comment-audit, docs, no-use-effect, simplicity-audit.
+                  comall, comment-audit, docs, no-use-effect, security-audit,
+                  simplicity-audit.
   mcp/            On-demand MCP server definitions (Playwright).
   settings.json   User-global ~/.claude/settings.json.
 claude/skills/    Claude stubs over workflows/.

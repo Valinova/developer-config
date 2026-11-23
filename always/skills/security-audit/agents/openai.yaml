@@ -1,0 +1,7 @@
+interface:
+  display_name: "Security Audit"
+  short_description: "Audit a repository against an attacker with one low-trust credential"
+  default_prompt: "Use $security-audit to audit this repository and stop with the verified findings list for my cut."
+
+policy:
+  allow_implicit_invocation: false
