@@ -465,13 +465,15 @@ deleted.
 
 Claude Code's docs list a Bash command it cannot fully parse among the
 actions no mode auto-approves, bypass included: a removal could sit in the
-unread part, so no allow rule, allowing hook or sandbox setting clears it.
-The prompt denies itself after two minutes. The one suppression,
-`CLAUDE_CODE_EVEN_MORE_DANGEROUSLY_SKIP_PERMISSIONS=1`, also lets `rm -rf ~`
-run unasked, so it stays unset (owner decision, 2026-11-22). The docs do not
-say which constructs trigger the check, so the list is conservative. A
-script's contents are never inspected: keeping `rm` out of scripts is what
-keeps the guard and the deny rules meaningful. On 2026-11-22 a browser walker
+unread part, so no allow rule, PreToolUse allow or sandbox setting clears it.
+A `PermissionRequest` hook does (seen 2026-11-23), so in bypass
+`bypass-bash-approve.py` answers it; the rule stays for sessions and machines
+where that hook is not running, where the prompt denies itself after two
+minutes. `CLAUDE_CODE_EVEN_MORE_DANGEROUSLY_SKIP_PERMISSIONS=1` also lets
+`rm -rf ~` run unasked, so it stays unset (owner decision, 2026-11-22). The
+docs do not say which constructs trigger the check, so the list is
+conservative. The deny rules and the hook never read a script's contents; only
+the rm guard sees an `rm` inside one. On 2026-11-22 a browser walker
 stalled on a sign-in one-liner with a nested substitution and a subshell
 fallback.
 

@@ -21,9 +21,6 @@ over it, a heredoc script) is easily misread by Claude Code's removal check,
 which stalls a subagent wherever the bypass approval hook is not running. Every
 implementer brief restates it (why: rationale.md#tracked-file-edits).
 
-Delete with plain `rm` and literal paths. A "rm guard: blocked" is final: never
-reach the same target through a script, `find`, or another tool.
-
 ## Shell commands stay plain
 
 One plain pipeline or a short `&&` chain per Bash call: no nested `$(…)`,
@@ -31,8 +28,9 @@ One plain pipeline or a short `&&` chain per Bash call: no nested `$(…)`,
 pipeline. A command Claude Code cannot parse trips the same kind of prompt.
 Multi-step logic goes in a scratch script created with the Write tool; a
 deletion is always a plain, visible `rm <explicit path>`, never inside a
-script. A command that check denies is rewritten, never retried. Every brief
-restates it (why: rationale.md#plain-shell-commands).
+script. A command that check denies is rewritten, never retried; a "rm guard:
+blocked" is final, never reached another way. Every brief restates it (why:
+rationale.md#plain-shell-commands).
 
 ## Report what you verified
 
